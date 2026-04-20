@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 480 120" width="480" height="120">
+  <defs>
+    <linearGradient id="g2" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#34d399"/>
+      <stop offset="100%" stop-color="#10b981"/>
+    </linearGradient>
+  </defs>
+  <g transform="translate(8,16)">
+    <rect x="0" y="0" width="88" height="88" rx="20" fill="url(#g2)"/>
+    <g transform="translate(18,22) rotate(-8 26 22)" fill="#0f172a">
+      <path d="M2 22 L50 2 L38 44 L26 28 L14 32 Z" opacity="0.98"/>
+      <path d="M26 28 L38 44 L30 30 Z" fill="#0f172a" opacity="0.55"/>
+    </g>
+  </g>
+  <g transform="translate(116,82)" font-family="system-ui, -apple-system, 'Segoe UI', Inter, Arial, sans-serif" font-weight="800" letter-spacing="-2">
+    <text x="0" y="0" font-size="64" fill="#f1f5f9">Envoy</text>
+    <circle cx="258" cy="-58" r="6" fill="#34d399"/>
+  </g>
+</svg>

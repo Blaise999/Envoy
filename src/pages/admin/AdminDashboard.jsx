@@ -1,0 +1,2364 @@
+// src/pages/admin/AdminDashboard.jsx
+import React, {
+  useEffect,
+  useMemo,
+  useState,
+  useCallback,
+  useRef, // SUPPORT: needed for scroll-to-bottom in chat
+} from "react";
+import { Link, useNavigate } from "react-router-dom";
+import Logo from "../../assets/envoy.png";
+import {
+  adminShipments as AdminAPI,
+  adminUsers,
+  adminEmail,
+  adminMock,
+  adminAuth, // <-- make sure these exist in ../../utils/api
+  getAdminToken, // <-- make sure these exist in ../../utils/api
+} from "../../utils/api";
+// SUPPORT: import supabase client (pure frontend, no backend for chat)
+import { supabase } from "../../libs/supabaseClient";
+
+/* ---------------- mapper: API Shipment -> Admin row shape ---------------- */
+function mapDocToRow(s) {
+  const service = s.serviceType
+    ? s.serviceType === "freight"
+      ? "Freight"
+      : s.parcel?.level
+      ? s.parcel.level[0].toUpperCase() + s.parcel.level.slice(1)
+      : "Standard"
+    : "Standard";
+  const weight = Number(s.parcel?.weight || s.freight?.weight || 0);
+  const pieces = s.parcel ? 1 : s.freight?.pallets || 1;
+  return {
+    id: s._id,
+    date: s.createdAt || new Date().toISOString(),
+    tracking: s.trackingNumber || "—",
+    service,
+    status: s.status || "Created",
+    from: s.from || "—",
+    to: s.to || "—",
+    toName: s.to?.split(",")[0] || "",
+    recipientEmail: s.recipientEmail || "",
+    pieces,
+    weight,
+    cost: Number(s.price || 0),
+    eta: s.eta || "",
+    events: Array.isArray(s.timeline)
+      ? s.timeline
+          .map((ev) => ({
+            title: ev.status || "Update",
+            location: ev.note || "",
+            code: ev.status || "",
+            ts: ev.at || s.updatedAt || s.createdAt,
+          }))
+          .sort((a, b) => new Date(b.ts) - new Date(a.ts))
+      : [],
+    current: {
+      city: (s.lastLocation || "").split(",")[0] || "",
+      country:
+        (s.lastLocation || "").split(",").slice(1).join(",").trim() || "",
+      lat: 0,
+      lon: 0,
+    },
+  };
+}
+
+export default function AdminDashboard() {
+  const navigate = useNavigate();
+
+  /* ---------------- optional auth gate ---------------- */
+  const [ready, setReady] = useState(true);
+  const [authErr, setAuthErr] = useState("");
+
+  useEffect(() => {
+    // Only run if helpers are present in utils/api
+    if (typeof getAdminToken !== "function" || !adminAuth?.me) return;
+
+    const t = getAdminToken();
+    if (!t) {
+      setReady(false);
+      setAuthErr("No admin token found (storage).");
+      navigate("/admin/login", { replace: true });
+      return;
+    }
+
+    adminAuth
+      .me()
+      .then(() => {
+        setReady(true);
+      })
+      .catch((e) => {
+        setReady(false);
+        setAuthErr(
+          `Auth check failed: ${e?.status ?? "no-status"} ${
+            e?.message ?? ""
+          }`
+        );
+        navigate("/admin/login", { replace: true });
+      });
+  }, [navigate]);
+
+  if (!ready) {
+    return (
+      <div className="min-h-screen grid place-items-center p-6">
+        <div className="text-center">
+          <div className="text-sm text-slate-500">Checking admin session…</div>
+          {authErr && (
+            <div className="mt-2 text-xs text-emerald-500">{authErr}</div>
+          )}
+        </div>
+      </div>
+    );
+  }
+
+  /* ---------------- tabs ---------------- */
+  const TABS = ["Shipments", "Users", "Support", "Emails", "Settings"]; // SUPPORT: added "Support"
+  const [tab, setTab] = useState("Shipments");
+
+  /* ---------------- live data ---------------- */
+  const [shipments, setShipments] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [loadErr, setLoadErr] = useState("");
+
+  // Users (API-backed)
+  const [users, setUsers] = useState([]);
+  const [usersLoading, setUsersLoading] = useState(false);
+  const [usersErr, setUsersErr] = useState("");
+
+  // Emails/Settings (demo)
+  const [emailOutbox, setEmailOutbox] = useState([]);
+  const [settings, setSettings] = useState({
+    pickupWindows: ["09:00–13:00", "13:00–17:00", "17:00–20:00"],
+    defaultIncoterm: "DAP",
+    emailFrom: "ops@envoy.example",
+    smsEnabled: false,
+  });
+
+  /* ---------------- SUPPORT: Supabase chat state ---------------- */
+  const [supportConvos, setSupportConvos] = useState([]);
+  const [supportLoading, setSupportLoading] = useState(false);
+  const [supportErr, setSupportErr] = useState("");
+  const [supportSelected, setSupportSelected] = useState(null);
+  const [supportMessages, setSupportMessages] = useState([]);
+  const [supportReply, setSupportReply] = useState("");
+  const supportBottomRef = useRef(null);
+
+  function formatSupportLocation(conv) {
+    if (!conv) return "Unknown";
+    if (conv.city || conv.country) {
+      return `${conv.city ?? ""}${
+        conv.city && conv.country ? ", " : ""
+      }${conv.country ?? ""}`;
+    }
+    if (conv.country_code) return conv.country_code;
+    if (conv.ip) return conv.ip;
+    return "Unknown";
+  }
+
+  const loadSupportConvos = useCallback(async () => {
+    setSupportLoading(true);
+    setSupportErr("");
+    try {
+      const { data, error } = await supabase
+        .from("conversations")
+        .select(
+          "id, name, email, ip, city, region, country, country_code, last_message, first_page, created_at"
+        )
+        .order("created_at", { ascending: false })
+        .limit(50);
+
+      if (error) {
+        console.error("Error loading conversations:", error);
+        setSupportErr(
+          error.message || "Failed to load support conversations."
+        );
+        setSupportConvos([]);
+      } else {
+        setSupportConvos(data || []);
+      }
+    } catch (e) {
+      console.error(e);
+      setSupportErr(e?.message || "Failed to load support conversations.");
+    } finally {
+      setSupportLoading(false);
+    }
+  }, []);
+
+  // load conversations when entering Support tab
+  useEffect(() => {
+    if (tab === "Support") {
+      loadSupportConvos();
+    }
+  }, [tab, loadSupportConvos]);
+
+  // auto-scroll chat when messages change
+  useEffect(() => {
+    if (supportBottomRef.current) {
+      supportBottomRef.current.scrollIntoView({ behavior: "smooth" });
+    }
+  }, [supportMessages.length]);
+
+  // load + subscribe to messages when a conversation is selected
+  useEffect(() => {
+    if (!supportSelected?.id) {
+      setSupportMessages([]);
+      return;
+    }
+
+    let cancelled = false;
+
+    async function loadMessages() {
+      const { data, error } = await supabase
+        .from("ge_messages")
+        .select("*")
+        .eq("conversation_id", supportSelected.id)
+        .order("created_at", { ascending: true });
+
+      if (!cancelled) {
+        if (error) {
+          console.error("Error loading ge_messages:", error);
+          setSupportMessages([]);
+        } else {
+          setSupportMessages(data || []);
+        }
+      }
+    }
+
+    loadMessages();
+
+    const channel = supabase
+      .channel(`ge-admin-conversation-${supportSelected.id}`)
+      .on(
+        "postgres_changes",
+        {
+          event: "INSERT",
+          schema: "public",
+          table: "ge_messages",
+          filter: `conversation_id=eq.${supportSelected.id}`,
+        },
+        (payload) => {
+          const msg = payload.new;
+          setSupportMessages((prev) => [...prev, msg]);
+        }
+      )
+      .subscribe();
+
+    return () => {
+      cancelled = true;
+      supabase.removeChannel(channel);
+    };
+  }, [supportSelected?.id]);
+
+  async function handleSendSupportReply(e) {
+    e.preventDefault();
+    const text = supportReply.trim();
+    if (!text || !supportSelected?.id) return;
+
+    setSupportReply("");
+
+    const temp = {
+      id: `temp-${Date.now()}`,
+      sender: "admin",
+      text,
+      created_at: new Date().toISOString(),
+    };
+    setSupportMessages((prev) => [...prev, temp]);
+
+    try {
+      const { error } = await supabase.from("ge_messages").insert({
+        conversation_id: supportSelected.id,
+        sender: "admin",
+        text,
+      });
+      if (error) {
+        console.error("Send support reply error:", error);
+        toast(error.message || "Failed to send reply");
+      }
+
+      await supabase
+        .from("conversations")
+        .update({ last_message: text, status: "open" })
+        .eq("id", supportSelected.id);
+    } catch (err) {
+      console.error(err);
+      toast(err?.message || "Failed to send reply");
+    }
+  }
+
+  /* ---------------- fetch shipments from API ---------------- */
+  const loadShipments = useCallback(async () => {
+    setLoading(true);
+    setLoadErr("");
+    try {
+      const rows = await AdminAPI.list({ flat: 1 });
+      setShipments((rows || []).map(mapDocToRow));
+    } catch (e) {
+      const msg =
+        e?.data?.message || e?.message || "Failed to load shipments";
+      setLoadErr(msg);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    loadShipments();
+  }, [loadShipments]);
+
+  /* ---------------- fetch users from API ---------------- */
+  function mapUser(u) {
+    const hasFirst = !!u.firstName || !!u.lastName;
+    const [first, ...rest] = String(u.name || "").trim().split(" ");
+    const fallbackFirst = first || "";
+    const fallbackLast = rest.join(" ") || "";
+    return {
+      id: u._id || u.id,
+      email: u.email || "",
+      role: u.role || "user",
+      firstName: hasFirst ? u.firstName || "" : fallbackFirst,
+      lastName: hasFirst ? u.lastName || "" : fallbackLast,
+      company: u.company || "",
+      phone: u.phone || "",
+      address: u.address || "",
+      shipmentsCount: u.shipmentsCount || 0,
+      totalSpend: u.totalSpend || 0,
+      createdAt: u.createdAt,
+      lastLogin: u.lastLogin,
+    };
+  }
+
+  async function loadUsers() {
+    setUsersLoading(true);
+    setUsersErr("");
+    try {
+      const list = await adminUsers.list(); // GET /api/admin/users
+      setUsers((list || []).map(mapUser));
+    } catch (e) {
+      setUsersErr(
+        e?.data?.message || e?.message || "Failed to load users"
+      );
+    } finally {
+      setUsersLoading(false);
+    }
+  }
+
+  useEffect(() => {
+    loadUsers();
+  }, []);
+
+  /* ---------------- Shipments filters ---------------- */
+  const [q, setQ] = useState("");
+  const [fService, setFService] = useState("all");
+  const [fStatus, setFStatus] = useState("all");
+
+  const filteredShipments = useMemo(() => {
+    return shipments.filter((s) => {
+      if (fService !== "all" && s.service !== fService) return false;
+      if (fStatus !== "all" && s.status !== fStatus) return false;
+      if (q) {
+        const t = q.toLowerCase();
+        const blob = `${s.tracking} ${s.to} ${s.toName} ${s.from} ${
+          s.service
+        } ${s.recipientEmail}`.toLowerCase();
+        if (!blob.includes(t)) return false;
+      }
+      return true;
+    });
+  }, [shipments, fService, fStatus, q]);
+
+  /* ---------------- Modals & forms ---------------- */
+  const [editShipOpen, setEditShipOpen] = useState(false);
+  const [editShip, setEditShip] = useState(null);
+
+  const [eventOpen, setEventOpen] = useState(false);
+  const [eventForm, setEventForm] = useState({
+    title: "",
+    location: "",
+    code: "",
+    ts: "",
+  });
+
+  const [editUserOpen, setEditUserOpen] = useState(false);
+  const [editUser, setEditUser] = useState(null);
+
+  const [emailOpen, setEmailOpen] = useState(false);
+  const [emailForm, setEmailForm] = useState({
+    to: "",
+    subject: "Envoy shipment update",
+    body: "Hello,\n\nHere is an update regarding your shipment.\n\nRegards,\nEnvoy",
+  });
+  const [emailShipId, setEmailShipId] = useState(null); // >>> FIX: track which shipment to notify
+
+  // Inject Fake Data (per user)
+  const [injectOpen, setInjectOpen] = useState(false);
+  const [injectUser, setInjectUser] = useState(null);
+  const [injectForm, setInjectForm] = useState({
+    shipments: 10,
+    addresses: 2,
+    packages: 2,
+    payments: 1,
+    pickups: 1,
+    notes: "",
+  });
+
+  // Add Shipment (per user)
+  const [newShipOpen, setNewShipOpen] = useState(false);
+  const [newShip, setNewShip] = useState({
+    userId: "",
+    tracking: "",
+    service: "Standard",
+    status: "Created",
+    from: "",
+    to: "",
+    toName: "",
+    recipientEmail: "",
+    pieces: 1,
+    weight: 1,
+    cost: 0,
+    eta: "",
+  });
+
+  /* ---------------- Actions: Shipments ---------------- */
+  function openEditShipment(s) {
+    // >>> FIX: normalize placeholders so "—" doesn't end up saved
+    setEditShip({
+      ...s,
+      from: s.from === "—" ? "" : s.from,
+      to: s.to === "—" ? "" : s.to,
+    });
+    setEditShipOpen(true);
+  }
+
+  async function saveShipment(e) {
+    e.preventDefault();
+    try {
+      const patch = {};
+      if (editShip.status) patch.status = editShip.status;
+      const loc = [editShip.current?.city, editShip.current?.country]
+        .filter(Boolean)
+        .join(", ");
+      if (loc) patch.lastLocation = loc;
+      if (editShip.eta) patch.eta = editShip.eta;
+
+      // >>> FIX: persist origin/destination
+      if (editShip.from !== undefined) {
+        const val = String(editShip.from).trim();
+        if (val && val !== "—") {
+          patch.from = val; // backend key
+          patch.origin = val; // alias supported by controller
+        } else if (val === "") {
+          patch.from = ""; // allow clearing
+          patch.origin = "";
+        }
+      }
+      if (editShip.to !== undefined) {
+        const val = String(editShip.to).trim();
+        if (val && val !== "—") {
+          patch.to = val;
+          patch.destination = val; // alias supported by controller
+        } else if (val === "") {
+          patch.to = "";
+          patch.destination = "";
+        }
+      }
+
+      if (Object.keys(patch).length) {
+        await AdminAPI.update(editShip.id, patch);
+      }
+      setShipments((arr) =>
+        arr.map((s) =>
+          s.tracking === editShip.tracking ? cleanShip(editShip) : s
+        )
+      );
+      setEditShipOpen(false);
+      toast(`Shipment ${editShip.tracking} updated`);
+      loadShipments();
+    } catch (err) {
+      toast(
+        err?.data?.message || err?.message || "Failed to update shipment"
+      );
+    }
+  }
+
+  function cleanShip(s) {
+    return {
+      ...s,
+      cost: Number(s.cost) || 0,
+      weight: Number(s.weight) || 0,
+      pieces: Number(s.pieces) || 1,
+      events: Array.isArray(s.events) ? s.events : [],
+      current: s.current || { city: "", country: "", lat: 0, lon: 0 },
+    };
+  }
+
+  function deleteShipment(tracking) {
+    if (!confirm(`Delete shipment ${tracking}?`)) return;
+    setShipments((arr) => arr.filter((s) => s.tracking !== tracking));
+    toast(`Shipment ${tracking} deleted (UI only)`);
+  }
+
+  // Timeline events (UI-only demo)
+  function openAddEvent(s) {
+    setEditShip({ ...s });
+    setEventForm({
+      title: "",
+      location: "",
+      code: "",
+      ts: new Date().toISOString(),
+    });
+    setEventOpen(true);
+  }
+  function addEvent(e) {
+    e.preventDefault();
+    const copy = { ...editShip };
+    copy.events = [{ ...eventForm }, ...copy.events];
+    if (
+      eventForm.title.toLowerCase().includes("out for delivery")
+    )
+      copy.status = "Out for Delivery";
+    else if (eventForm.title.toLowerCase().includes("delivered"))
+      copy.status = "Delivered";
+    else if (eventForm.title.toLowerCase().includes("exception"))
+      copy.status = "Exception";
+    setShipments((arr) =>
+      arr.map((s) => (s.tracking === copy.tracking ? copy : s))
+    );
+    setEventOpen(false);
+    toast("Event added (UI)");
+  }
+  function removeEvent(s, idx) {
+    const copy = {
+      ...s,
+      events: s.events.filter((_, i) => i !== idx),
+    };
+    setShipments((arr) =>
+      arr.map((x) => (x.tracking === s.tracking ? copy : x))
+    );
+  }
+
+  /* ---------------- Email actions (backend-connected) ---------------- */
+  // >>> FIX: implement the missing handler used by the Actions column
+  function openEmailTo(s) {
+    setEmailShipId(s.id || s._id || null);
+    setEmailForm({
+      to: s.recipientEmail || "",
+      subject: `Update on shipment ${s.tracking}`,
+      body:
+        `Hello${s.toName ? " " + s.toName : ""},\n\n` +
+        `We have an update regarding your shipment (${s.tracking}).\n\n` +
+        `Thanks,\nEnvoy`,
+    });
+    setEmailOpen(true);
+  }
+
+  // >>> FIX: actually call the backend /api/admin/shipments/:id/notify
+  async function sendEmail() {
+    try {
+      if (!emailShipId)
+        throw new Error("No shipment selected for email.");
+      const payload = {
+        to: emailForm.to,
+        subject: emailForm.subject,
+        message: emailForm.body,
+      };
+
+      // Prefer AdminAPI.notify if available, else fall back to adminEmail
+      if (typeof AdminAPI?.notify === "function") {
+        await AdminAPI.notify(emailShipId, payload);
+      } else if (typeof adminEmail?.send === "function") {
+        // If your utils exposes a generic email client, keep this as a fallback
+        await adminEmail.send({
+          shipmentId: emailShipId,
+          ...payload,
+        });
+      } else {
+        throw new Error(
+          "No email API available (AdminAPI.notify or adminEmail.send missing)."
+        );
+      }
+
+      // Add to outbox UI
+      setEmailOutbox((arr) => [
+        {
+          id: `${Date.now()}-${Math.random()
+            .toString(36)
+            .slice(2)}`,
+          ts: new Date().toISOString(),
+          from: settings.emailFrom,
+          to: emailForm.to,
+          subject: emailForm.subject,
+        },
+        ...arr,
+      ]);
+      setEmailOpen(false);
+      toast("Email sent");
+    } catch (err) {
+      toast(
+        err?.data?.message || err?.message || "Failed to send email"
+      );
+    }
+  }
+
+  // Helper used by Actions column "Email" button
+  function openEmailToFromRow(s) {
+    openEmailTo(s);
+  }
+
+  /* ---------------- Add a real shipment to user's catalogue ---------------- */
+  function openNewShipmentForUser(u) {
+    setNewShip({
+      userId: u.id,
+      tracking: "",
+      service: "Standard",
+      status: "Created",
+      from: "",
+      to: "",
+      toName: `${u.firstName || ""} ${u.lastName || ""}`.trim(),
+      recipientEmail: u.email || "",
+      pieces: 1,
+      weight: 1,
+      cost: 0,
+      eta: "",
+    });
+    setNewShipOpen(true);
+  }
+  async function saveNewShipment(e) {
+    e.preventDefault();
+    try {
+      const payload = {
+        userId: newShip.userId,
+        trackingNumber: (newShip.tracking || "").trim(),
+        serviceType:
+          newShip.service.toLowerCase() === "freight"
+            ? "freight"
+            : "parcel",
+        parcel:
+          newShip.service.toLowerCase() === "freight"
+            ? undefined
+            : {
+                level: newShip.service.toLowerCase(), // "standard", "express", ...
+                weight: Number(newShip.weight || 0),
+              },
+        freight:
+          newShip.service.toLowerCase() !== "freight"
+            ? undefined
+            : {
+                pallets: Number(newShip.pieces || 1),
+                weight: Number(newShip.weight || 0),
+              },
+        status: newShip.status,
+        from: newShip.from,
+        to: newShip.to,
+        recipientEmail: newShip.recipientEmail,
+        price: Number(newShip.cost || 0),
+        eta: newShip.eta || undefined,
+      };
+      await AdminAPI.create(payload); // POST /api/admin/shipments
+      setNewShipOpen(false);
+      toast("Shipment added");
+      await loadShipments();
+    } catch (err) {
+      toast(
+        err?.data?.message || err?.message || "Failed to add shipment"
+      );
+    }
+  }
+
+  /* ---------------- UserDetails JSON editor ---------------- */
+  const [detailsOpen, setDetailsOpen] = useState(false);
+  const [detailsUser, setDetailsUser] = useState(null);
+  const [detailsJSON, setDetailsJSON] = useState("{\n}");
+  const [detailsErr, setDetailsErr] = useState("");
+  const [recomputeOnSave, setRecomputeOnSave] = useState(true);
+
+  async function openDetails(u) {
+    setDetailsUser(u);
+    setDetailsErr("");
+    try {
+      const doc = await adminUsers.getDetails(
+        u.id
+      ); // GET /api/admin/users/:id/details
+      setDetailsJSON(JSON.stringify(doc || {}, null, 2));
+      setDetailsOpen(true);
+    } catch (e) {
+      toast(
+        e?.data?.message || e?.message || "Failed to load details"
+      );
+    }
+  }
+
+  function prettyDetails() {
+    try {
+      const obj = JSON.parse(detailsJSON);
+      setDetailsJSON(JSON.stringify(obj, null, 2));
+      setDetailsErr("");
+    } catch (e) {
+      setDetailsErr(String(e.message || e));
+    }
+  }
+
+  async function saveDetails(e) {
+    e.preventDefault();
+    try {
+      const body = JSON.parse(detailsJSON);
+      await adminUsers.setDetails(detailsUser.id, body, {
+        recompute: recomputeOnSave ? 1 : 0,
+      }); // PUT /api/admin/users/:id/details
+      setDetailsOpen(false);
+      toast("UserDetails saved");
+      await loadUsers();
+    } catch (e) {
+      setDetailsErr(
+        e?.data?.message || e?.message || "Failed to save details"
+      );
+    }
+  }
+
+  /* ---------------- UI ---------------- */
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-emerald-50/60 via-white to-slate-50">
+      {/* Header */}
+      <header className="sticky top-0 z-40 bg-white/80 backdrop-blur border-b border-slate-200">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="h-14 flex items-center justify-between">
+            <Link to="/" className="flex items-center">
+              <img
+                src={Logo}
+                alt="Envoy"
+                className="h-10 w-auto object-contain"
+              />
+            </Link>
+            <div className="flex items-center gap-2">
+              <Tag color="red">Admin</Tag>
+              <button
+                className="px-3 py-1.5 rounded-xl border border-slate-200 text-sm font-medium hover:bg-white"
+                onClick={loadShipments}
+              >
+                Reload
+              </button>
+              <Link
+                to="/services/express?type=parcel#quote"
+                className="hidden sm:inline-flex items-center gap-2 px-3 py-1.5 rounded-xl bg-emerald-500 text-white text-sm font-semibold hover:bg-emerald-400 active:scale-[0.98]"
+              >
+                Create Shipment
+              </Link>
+              <Link
+                to="/dashboard"
+                className="px-3 py-1.5 rounded-xl border border-slate-200 text-sm font-medium hover:bg-white"
+              >
+                Customer View
+              </Link>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      {/* Subnav */}
+      <nav className="bg-white/80 backdrop-blur border-b border-slate-200">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 overflow-x-auto">
+          <div className="flex gap-2 py-2">
+            {TABS.map((t) => (
+              <button
+                key={t}
+                onClick={() => setTab(t)}
+                className={`px-3 py-2 rounded-lg text-sm font-medium ${
+                  tab === t ? "bg-emerald-500 text-white" : "hover:bg-white"
+                }`}
+              >
+                {t}
+              </button>
+            ))}
+          </div>
+        </div>
+      </nav>
+
+      {/* Content */}
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
+        {/* Shipments */}
+        {tab === "Shipments" && (
+          <section>
+            <SectionHeader title="Manage Shipments" />
+            <div className="grid md:grid-cols-5 gap-3">
+              <Input
+                label="Search"
+                value={q}
+                onChange={(e) => setQ(e.target.value)}
+                placeholder="Tracking, recipient, email, destination…"
+              />
+              <Select
+                label="Service"
+                value={fService}
+                onChange={(e) => setFService(e.target.value)}
+                options={[
+                  { v: "all", t: "All services" },
+                  { v: "Standard", t: "Standard" },
+                  { v: "Express", t: "Express" },
+                  { v: "Priority", t: "Priority" },
+                  { v: "Freight", t: "Freight" },
+                ]}
+              />
+              <Select
+                label="Status"
+                value={fStatus}
+                onChange={(e) => setFStatus(e.target.value)}
+                options={[
+                  { v: "all", t: "All statuses" },
+                  { v: "Created", t: "Created" },
+                  { v: "Picked Up", t: "Picked Up" },
+                  { v: "In Transit", t: "In Transit" },
+                  { v: "Out for Delivery", t: "Out for Delivery" },
+                  { v: "Delivered", t: "Delivered" },
+                  { v: "Exception", t: "Exception" },
+                ]}
+              />
+              <div className="grid grid-cols-2 gap-3">
+                <button
+                  className="btn-secondary"
+                  onClick={() => exportCSV(filteredShipments)}
+                >
+                  Export CSV
+                </button>
+                <button
+                  className="btn-secondary"
+                  onClick={() => toast("Bulk upload (todo)")}
+                >
+                  Bulk upload
+                </button>
+              </div>
+              <div className="flex items-end">
+                {loading && (
+                  <span className="text-sm text-slate-500">
+                    Loading…
+                  </span>
+                )}
+                {loadErr && (
+                  <span className="text-sm text-emerald-500">
+                    {loadErr}
+                  </span>
+                )}
+              </div>
+            </div>
+
+            <div className="mt-4 overflow-x-auto rounded-2xl border bg-white">
+              <table className="min-w-full text-sm">
+                <thead className="bg-white text-slate-700">
+                  <tr>
+                    <Th>Date</Th>
+                    <Th>Tracking</Th>
+                    <Th>Service</Th>
+                    <Th>Status</Th>
+                    <Th>Recipient</Th>
+                    <Th>Email</Th>
+                    <Th>Cost</Th>
+                    <Th>Actions</Th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y">
+                  {filteredShipments.map((s) => (
+                    <Tr key={s.id || s.tracking}>
+                      <Td>{fmtDate(s.date)}</Td>
+                      <Td>
+                        <div className="font-medium">
+                          {s.tracking}
+                        </div>
+                        <div className="text-xs text-slate-500">
+                          {s.from} → {s.to}
+                        </div>
+                      </Td>
+                      <Td>
+                        <Tag color="red">{s.service}</Tag>
+                      </Td>
+                      <Td>
+                        <StatusBadge status={s.status} />
+                      </Td>
+                      <Td>
+                        <div className="font-medium">
+                          {s.toName || "-"}
+                        </div>
+                        <div className="text-xs text-slate-500">
+                          {s.pieces} pc • {s.weight} kg
+                        </div>
+                      </Td>
+                      <Td className="text-xs">
+                        {s.recipientEmail || "—"}
+                      </Td>
+                      <Td>€{formatMoney(s.cost)}</Td>
+                      <Td>
+                        <div className="flex flex-wrap gap-2">
+                          <button
+                            className="btn-ghost"
+                            onClick={() => openEditShipment(s)}
+                          >
+                            <EditIcon /> Edit
+                          </button>
+                          <button
+                            className="btn-ghost"
+                            onClick={() => openAddEvent(s)}
+                          >
+                            <PlusIcon /> Event
+                          </button>
+                          <button
+                            className="btn-ghost"
+                            onClick={() => openEmailToFromRow(s)}
+                          >
+                            <MailIcon /> Email
+                          </button>
+                          <button
+                            className="btn-ghost text-emerald-500"
+                            onClick={() =>
+                              deleteShipment(s.tracking)
+                            }
+                          >
+                            <TrashIcon /> Delete
+                          </button>
+                        </div>
+                      </Td>
+                    </Tr>
+                  ))}
+                  {filteredShipments.length === 0 && (
+                    <tr>
+                      <td
+                        colSpan={8}
+                        className="px-4 py-10 text-center text-slate-500"
+                      >
+                        {loading
+                          ? "Loading…"
+                          : "No shipments match your filters."}
+                      </td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </section>
+        )}
+
+        {/* Users */}
+        {tab === "Users" && (
+          <section>
+            <SectionHeader
+              title="Manage Users"
+              action={
+                <button
+                  className="btn-secondary"
+                  onClick={loadUsers}
+                >
+                  Reload
+                </button>
+              }
+            />
+            {usersLoading && (
+              <div className="text-sm text-slate-500 mb-2">
+                Loading users…
+              </div>
+            )}
+            {usersErr && (
+              <div className="text-sm text-emerald-500 mb-2">
+                {usersErr}
+              </div>
+            )}
+
+            <div className="rounded-2xl border bg-white overflow-hidden">
+              <table className="min-w-full text-sm">
+                <thead className="bg-white text-slate-700">
+                  <tr>
+                    <Th>Name</Th>
+                    <Th>Email</Th>
+                    <Th>Role</Th>
+                    <Th>Created</Th>
+                    <Th>Last Login</Th>
+                    <Th>Shipments</Th>
+                    <Th>Spend</Th>
+                    <Th>Actions</Th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y">
+                  {users.map((u) => (
+                    <Tr key={u.id}>
+                      <Td>
+                        <div className="font-medium">
+                          {u.firstName} {u.lastName}
+                        </div>
+                        <div className="text-xs text-slate-500">
+                          {u.company || "—"}
+                        </div>
+                      </Td>
+                      <Td>{u.email}</Td>
+                      <Td>
+                        <Tag
+                          color={
+                            u.role === "admin" ? "red" : "slate"
+                          }
+                        >
+                          {u.role}
+                        </Tag>
+                      </Td>
+                      <Td>{fmtDate(u.createdAt)}</Td>
+                      <Td>{fmtDate(u.lastLogin)}</Td>
+                      <Td>{u.shipmentsCount}</Td>
+                      <Td>€{formatMoney(u.totalSpend)}</Td>
+                      <Td>
+                        <div className="flex flex-wrap gap-2">
+                          <button
+                            className="btn-ghost"
+                            onClick={() => openEditUser(u)}
+                          >
+                            <EditIcon /> Edit
+                          </button>
+
+                          {/* Details JSON editor for UserDetails */}
+                          <button
+                            className="btn-ghost"
+                            onClick={() => openDetails(u)}
+                          >
+                            <EditIcon /> Details
+                          </button>
+
+                          {/* Inject fake overlay data for this user */}
+                          <button
+                            className="btn-ghost"
+                            onClick={() => openInject(u)}
+                          >
+                            <PlusIcon /> Inject fake
+                          </button>
+
+                          {/* Add a shipment linked to this user */}
+                          <button
+                            className="btn-ghost"
+                            onClick={() =>
+                              openNewShipmentForUser(u)
+                            }
+                          >
+                            <PlusIcon /> Add shipment
+                          </button>
+                        </div>
+                      </Td>
+                    </Tr>
+                  ))}
+                  {users.length === 0 &&
+                    !usersLoading &&
+                    !usersErr && (
+                      <tr>
+                        <td
+                          colSpan={8}
+                          className="px-4 py-10 text-center text-slate-500"
+                        >
+                          No users found.
+                        </td>
+                      </tr>
+                    )}
+                </tbody>
+              </table>
+            </div>
+          </section>
+        )}
+
+        {/* SUPPORT: Live chat (Supabase only) */}
+        {tab === "Support" && (
+          <section>
+            <SectionHeader
+              title="Live Support (Envoy Widget)"
+              action={
+                <button
+                  className="btn-secondary"
+                  onClick={loadSupportConvos}
+                >
+                  Reload
+                </button>
+              }
+            />
+            <p className="mt-1 text-sm text-slate-500">
+              Conversations created from the Envoy floating support
+              widget. Replies you send here appear instantly in the
+              visitor&apos;s chat. All data is stored in Supabase
+              (<code>conversations</code>,{" "}
+              <code>ge_messages</code>) – no backend calls.
+            </p>
+
+            <div className="mt-4 grid gap-4 md:grid-cols-[minmax(0,1.3fr)_minmax(0,2fr)]">
+              {/* LEFT: conversation list */}
+              <div className="rounded-2xl border bg-white overflow-hidden flex flex-col">
+                <div className="flex items-center justify-between px-4 py-3 border-b bg-white">
+                  <div className="text-sm font-semibold">
+                    Conversations
+                  </div>
+                  {supportLoading && (
+                    <span className="text-xs text-slate-500">
+                      Loading…
+                    </span>
+                  )}
+                </div>
+                {supportErr && (
+                  <div className="px-4 py-2 text-xs text-emerald-500">
+                    {supportErr}
+                  </div>
+                )}
+                <div className="flex-1 overflow-y-auto">
+                  {supportConvos.length === 0 &&
+                    !supportLoading &&
+                    !supportErr && (
+                      <div className="px-4 py-8 text-sm text-slate-500">
+                        No support conversations yet. When visitors use
+                        the widget, threads will appear here.
+                      </div>
+                    )}
+
+                  {supportConvos.map((c) => {
+                    const isActive =
+                      supportSelected?.id === c.id;
+                    return (
+                      <button
+                        key={c.id}
+                        type="button"
+                        onClick={() => setSupportSelected(c)}
+                        className={`w-full text-left px-4 py-3 border-b text-sm ${
+                          isActive
+                            ? "bg-emerald-500/10 border-emerald-500/20"
+                            : "hover:bg-white"
+                        }`}
+                      >
+                        <div className="flex items-center justify-between gap-2">
+                          <div className="font-semibold text-slate-900">
+                            {c.name || c.email || "Visitor"}
+                          </div>
+                          <div className="text-[11px] text-slate-500">
+                            {fmtDate(c.created_at)}
+                          </div>
+                        </div>
+                        <div className="mt-0.5 text-[11px] text-slate-500">
+                          {formatSupportLocation(c)}
+                          {c.ip && (
+                            <span className="text-slate-500">
+                              {" "}
+                              • {c.ip}
+                            </span>
+                          )}
+                        </div>
+                        {c.last_message && (
+                          <div className="mt-1 text-[11px] text-slate-700 line-clamp-2">
+                            “{c.last_message}”
+                          </div>
+                        )}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* RIGHT: conversation thread */}
+              <div className="rounded-2xl border bg-white flex flex-col min-h-[320px]">
+                {supportSelected ? (
+                  <>
+                    <div className="px-4 py-3 border-b bg-white">
+                      <div className="flex items-center justify-between gap-2">
+                        <div>
+                          <div className="text-sm font-semibold">
+                            {supportSelected.name ||
+                              supportSelected.email ||
+                              "Visitor"}
+                          </div>
+                          <div className="text-[11px] text-slate-500">
+                            {formatSupportLocation(
+                              supportSelected
+                            )}
+                            {supportSelected.ip && (
+                              <span className="text-slate-500">
+                                {" "}
+                                • {supportSelected.ip}
+                              </span>
+                            )}
+                          </div>
+                        </div>
+                        <div className="text-[11px] text-slate-500 text-right">
+                          Started{" "}
+                          {fmtDate(supportSelected.created_at)}
+                          <br />
+                          {new Date(
+                            supportSelected.created_at
+                          ).toLocaleTimeString()}
+                        </div>
+                      </div>
+                      {supportSelected.first_page && (
+                        <div className="mt-1 text-[11px] text-slate-500">
+                          First page:{" "}
+                          <a
+                            href={supportSelected.first_page}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="underline"
+                          >
+                            {supportSelected.first_page}
+                          </a>
+                        </div>
+                      )}
+                      {supportSelected.email && (
+                        <div className="mt-1 text-[11px] text-slate-500">
+                          Email:{" "}
+                          <span className="font-medium">
+                            {supportSelected.email}
+                          </span>
+                        </div>
+                      )}
+                    </div>
+
+                    <div className="flex-1 overflow-y-auto px-4 py-3 space-y-2 bg-white">
+                      {supportMessages.length === 0 && (
+                        <div className="text-sm text-slate-500">
+                          No messages in this conversation yet.
+                        </div>
+                      )}
+
+                      {supportMessages.map((m) => (
+                        <div
+                          key={m.id}
+                          className={`flex ${
+                            m.sender === "admin"
+                              ? "justify-end"
+                              : "justify-start"
+                          }`}
+                        >
+                          <div
+                            className={`max-w-[75%] rounded-2xl px-3 py-2 text-sm ${
+                              m.sender === "admin"
+                                ? "bg-emerald-500 text-white"
+                                : "bg-white border border-slate-200 text-slate-900"
+                            }`}
+                          >
+                            <div className="mb-1 text-[10px] font-semibold uppercase tracking-[0.16em] opacity-70">
+                              {m.sender === "admin"
+                                ? "You"
+                                : "Visitor"}
+                            </div>
+                            <div className="whitespace-pre-wrap text-[13px]">
+                              {m.text}
+                            </div>
+                            <div className="mt-1 text-[10px] opacity-60">
+                              {new Date(
+                                m.created_at
+                              ).toLocaleTimeString()}
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                      <div ref={supportBottomRef} />
+                    </div>
+
+                    <form
+                      className="border-t px-3 py-2 flex gap-2 bg-white"
+                      onSubmit={handleSendSupportReply}
+                    >
+                      <input
+                        className="flex-1 rounded-xl border px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-emerald-500/30"
+                        placeholder="Type your reply…"
+                        value={supportReply}
+                        onChange={(e) =>
+                          setSupportReply(e.target.value)
+                        }
+                      />
+                      <button
+                        type="submit"
+                        className="btn-primary"
+                      >
+                        Send
+                      </button>
+                    </form>
+                  </>
+                ) : (
+                  <div className="flex-1 grid place-items-center px-6 py-8 text-sm text-slate-500">
+                    Select a conversation on the left to view the
+                    thread and reply.
+                  </div>
+                )}
+              </div>
+            </div>
+          </section>
+        )}
+
+        {/* Emails (demo) */}
+        {tab === "Emails" && (
+          <section>
+            <SectionHeader title="Email Outbox (demo)" />
+            <div className="rounded-2xl border bg-white overflow-hidden">
+              <table className="min-w-full text-sm">
+                <thead className="bg-white">
+                  <tr>
+                    <Th>Time</Th>
+                    <Th>From</Th>
+                    <Th>To</Th>
+                    <Th>Subject</Th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y">
+                  {emailOutbox.map((m) => (
+                    <Tr key={m.id}>
+                      <Td>
+                        {new Date(m.ts).toLocaleString()}
+                      </Td>
+                      <Td>{m.from}</Td>
+                      <Td>{m.to}</Td>
+                      <Td>{m.subject}</Td>
+                    </Tr>
+                  ))}
+                  {emailOutbox.length === 0 && (
+                    <tr>
+                      <td
+                        colSpan={4}
+                        className="px-4 py-10 text-center text-slate-500"
+                      >
+                        No emails yet.
+                      </td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </section>
+        )}
+
+        {/* Settings (demo) */}
+        {tab === "Settings" && (
+          <section>
+            <SectionHeader title="Operations Settings" />
+            <form
+              className="grid md:grid-cols-2 gap-4"
+              onSubmit={(e) => {
+                e.preventDefault();
+                toast("Settings saved (demo)");
+              }}
+            >
+              <Input
+                label="Default Incoterm"
+                value={settings.defaultIncoterm}
+                onChange={(e) =>
+                  setSettings((s) => ({
+                    ...s,
+                    defaultIncoterm: e.target.value,
+                  }))
+                }
+              />
+              <Input
+                label="Email From"
+                value={settings.emailFrom}
+                onChange={(e) =>
+                  setSettings((s) => ({
+                    ...s,
+                    emailFrom: e.target.value,
+                  }))
+                }
+              />
+              <Textarea
+                label="Pickup windows (comma separated)"
+                value={settings.pickupWindows.join(", ")}
+                onChange={(e) =>
+                  setSettings((s) => ({
+                    ...s,
+                    pickupWindows: e.target.value
+                      .split(",")
+                      .map((x) => x.trim())
+                      .filter(Boolean),
+                  }))
+                }
+              />
+              <label className="flex items-center gap-2 text-sm">
+                <input
+                  type="checkbox"
+                  checked={settings.smsEnabled}
+                  onChange={(e) =>
+                    setSettings((s) => ({
+                      ...s,
+                      smsEnabled: e.target.checked,
+                    }))
+                  }
+                />
+                Enable SMS (demo)
+              </label>
+              <div className="md:col-span-2">
+                <button className="btn-primary">Save</button>
+              </div>
+            </form>
+          </section>
+        )}
+      </main>
+
+      {/* ===== Modals ===== */}
+      {editShipOpen && editShip && (
+        <Modal
+          title={`Edit ${editShip.tracking}`}
+          onClose={() => setEditShipOpen(false)}
+        >
+          <form
+            className="grid sm:grid-cols-2 gap-3"
+            onSubmit={saveShipment}
+          >
+            <Input
+              label="Service"
+              value={editShip.service}
+              onChange={(e) =>
+                setEditShip({
+                  ...editShip,
+                  service: e.target.value,
+                })
+              }
+            />
+            <Select
+              label="Status"
+              value={editShip.status}
+              onChange={(e) =>
+                setEditShip({
+                  ...editShip,
+                  status: e.target.value,
+                })
+              }
+              options={[
+                "Created",
+                "Picked Up",
+                "In Transit",
+                "Out for Delivery",
+                "Delivered",
+                "Exception",
+              ].map((x) => ({ v: x, t: x }))}
+            />
+            <Input
+              label="From"
+              value={editShip.from}
+              onChange={(e) =>
+                setEditShip({
+                  ...editShip,
+                  from: e.target.value,
+                })
+              }
+            />
+            <Input
+              label="To"
+              value={editShip.to}
+              onChange={(e) =>
+                setEditShip({
+                  ...editShip,
+                  to: e.target.value,
+                })
+              }
+            />
+            <Input
+              label="Recipient name"
+              value={editShip.toName || ""}
+              onChange={(e) =>
+                setEditShip({
+                  ...editShip,
+                  toName: e.target.value,
+                })
+              }
+            />
+            <Input
+              label="Recipient email"
+              type="email"
+              value={editShip.recipientEmail || ""}
+              onChange={(e) =>
+                setEditShip({
+                  ...editShip,
+                  recipientEmail: e.target.value,
+                })
+              }
+            />
+            <Input
+              label="Pieces"
+              type="number"
+              value={editShip.pieces}
+              onChange={(e) =>
+                setEditShip({
+                  ...editShip,
+                  pieces: e.target.value,
+                })
+              }
+            />
+            <Input
+              label="Weight (kg)"
+              type="number"
+              step="0.1"
+              value={editShip.weight}
+              onChange={(e) =>
+                setEditShip({
+                  ...editShip,
+                  weight: e.target.value,
+                })
+              }
+            />
+            <Input
+              label="Cost (EUR)"
+              type="number"
+              step="0.01"
+              value={editShip.cost}
+              onChange={(e) =>
+                setEditShip({
+                  ...editShip,
+                  cost: e.target.value,
+                })
+              }
+            />
+
+            {/* ETA editor */}
+            <Input
+              label="ETA (estimated delivery)"
+              type="datetime-local"
+              value={toLocalDT(editShip.eta)}
+              onChange={(e) =>
+                setEditShip({
+                  ...editShip,
+                  eta: fromLocalDT(e.target.value),
+                })
+              }
+            />
+
+            <div className="sm:col-span-2 grid sm:grid-cols-2 gap-3">
+              <Input
+                label="Current city"
+                value={editShip.current?.city || ""}
+                onChange={(e) =>
+                  setEditShip({
+                    ...editShip,
+                    current: {
+                      ...(editShip.current || {}),
+                      city: e.target.value,
+                    },
+                  })
+                }
+              />
+              <Input
+                label="Current country"
+                value={editShip.current?.country || ""}
+                onChange={(e) =>
+                  setEditShip({
+                    ...editShip,
+                    current: {
+                      ...(editShip.current || {}),
+                      country: e.target.value,
+                    },
+                  })
+                }
+              />
+            </div>
+            <div className="sm:col-span-2 grid sm:grid-cols-2 gap-3">
+              <Input
+                label="Current lat"
+                type="number"
+                step="0.0001"
+                value={editShip.current?.lat ?? 0}
+                onChange={(e) =>
+                  setEditShip({
+                    ...editShip,
+                    current: {
+                      ...(editShip.current || {}),
+                      lat: parseFloat(e.target.value),
+                    },
+                  })
+                }
+              />
+              <Input
+                label="Current lon"
+                type="number"
+                step="0.0001"
+                value={editShip.current?.lon ?? 0}
+                onChange={(e) =>
+                  setEditShip({
+                    ...editShip,
+                    current: {
+                      ...(editShip.current || {}),
+                      lon: parseFloat(e.target.value),
+                    },
+                  })
+                }
+              />
+            </div>
+
+            <div className="sm:col-span-2 mt-1">
+              <div className="text-xs text-slate-500 mb-2">
+                Timeline events
+              </div>
+              <ul className="space-y-2">
+                {editShip.events?.map((ev, i) => (
+                  <li
+                    key={i}
+                    className="flex items-center justify-between rounded border p-2"
+                  >
+                    <div className="text-xs">
+                      <div className="font-medium">
+                        {ev.title}
+                      </div>
+                      <div className="text-slate-500">
+                        {ev.location} •{" "}
+                        {new Date(ev.ts).toLocaleString()}{" "}
+                        {ev.code && `• ${ev.code}`}
+                      </div>
+                    </div>
+                    <button
+                      type="button"
+                      className="btn-ghost text-emerald-500"
+                      onClick={() => removeEvent(editShip, i)}
+                    >
+                      <TrashIcon /> Remove
+                    </button>
+                  </li>
+                ))}
+                {(!editShip.events ||
+                  editShip.events.length === 0) && (
+                  <li className="text-xs text-slate-500">
+                    No events yet.
+                  </li>
+                )}
+              </ul>
+            </div>
+
+            <div className="sm:col-span-2 flex justify-end gap-2">
+              <button
+                type="button"
+                className="btn-ghost"
+                onClick={() => setEditShipOpen(false)}
+              >
+                Cancel
+              </button>
+              <button type="submit" className="btn-primary">
+                Save
+              </button>
+            </div>
+          </form>
+        </Modal>
+      )}
+
+      {eventOpen && (
+        <Modal
+          title={`Add event — ${editShip?.tracking}`}
+          onClose={() => setEventOpen(false)}
+        >
+          <form className="grid gap-3" onSubmit={addEvent}>
+            <Input
+              label="Title"
+              value={eventForm.title}
+              onChange={(e) =>
+                setEventForm({
+                  ...eventForm,
+                  title: e.target.value,
+                })
+              }
+              placeholder="Arrived at sorting facility"
+            />
+            <Input
+              label="Location"
+              value={eventForm.location}
+              onChange={(e) =>
+                setEventForm({
+                  ...eventForm,
+                  location: e.target.value,
+                })
+              }
+              placeholder="Kano, NG"
+            />
+            <div className="grid grid-cols-2 gap-3">
+              <Input
+                label="Code (optional)"
+                value={eventForm.code}
+                onChange={(e) =>
+                  setEventForm({
+                    ...eventForm,
+                    code: e.target.value,
+                  })
+                }
+                placeholder="ARR / DEP / OFD…"
+              />
+              <Input
+                label="Timestamp"
+                type="datetime-local"
+                value={toLocalDT(eventForm.ts)}
+                onChange={(e) =>
+                  setEventForm({
+                    ...eventForm,
+                    ts: fromLocalDT(e.target.value),
+                  })
+                }
+              />
+            </div>
+            <div className="flex justify-end gap-2">
+              <button
+                type="button"
+                className="btn-ghost"
+                onClick={() => setEventOpen(false)}
+              >
+                Cancel
+              </button>
+              <button className="btn-primary">Add</button>
+            </div>
+          </form>
+        </Modal>
+      )}
+
+      {editUserOpen && editUser && (
+        <Modal
+          title={`Edit user — ${editUser.email}`}
+          onClose={() => setEditUserOpen(false)}
+        >
+          <form
+            className="grid sm:grid-cols-2 gap-3"
+            onSubmit={saveUser}
+          >
+            <Input
+              label="First name"
+              value={editUser.firstName}
+              onChange={(e) =>
+                setEditUser({
+                  ...editUser,
+                  firstName: e.target.value,
+                })
+              }
+            />
+            <Input
+              label="Last name"
+              value={editUser.lastName}
+              onChange={(e) =>
+                setEditUser({
+                  ...editUser,
+                  lastName: e.target.value,
+                })
+              }
+            />
+            <Input
+              label="Email"
+              type="email"
+              value={editUser.email}
+              onChange={(e) =>
+                setEditUser({
+                  ...editUser,
+                  email: e.target.value,
+                })
+              }
+            />
+            <Input
+              label="Company"
+              value={editUser.company || ""}
+              onChange={(e) =>
+                setEditUser({
+                  ...editUser,
+                  company: e.target.value,
+                })
+              }
+            />
+            <Input
+              label="Phone"
+              value={editUser.phone || ""}
+              onChange={(e) =>
+                setEditUser({
+                  ...editUser,
+                  phone: e.target.value,
+                })
+              }
+            />
+            <Select
+              label="Role"
+              value={editUser.role}
+              onChange={(e) =>
+                setEditUser({
+                  ...editUser,
+                  role: e.target.value,
+                })
+              }
+              options={["user", "admin"].map((x) => ({
+                v: x,
+                t: x,
+              }))}
+            />
+            {/* Aggregates */}
+            <Input
+              label="Shipments count"
+              type="number"
+              value={editUser.shipmentsCount}
+              onChange={(e) =>
+                setEditUser({
+                  ...editUser,
+                  shipmentsCount: e.target.value,
+                })
+              }
+            />
+            <Input
+              label="Total spend (EUR)"
+              type="number"
+              step="0.01"
+              value={editUser.totalSpend}
+              onChange={(e) =>
+                setEditUser({
+                  ...editUser,
+                  totalSpend: e.target.value,
+                })
+              }
+            />
+            <div className="sm:col-span-2">
+              <Textarea
+                label="Address"
+                value={editUser.address || ""}
+                onChange={(e) =>
+                  setEditUser({
+                    ...editUser,
+                    address: e.target.value,
+                  })
+                }
+              />
+            </div>
+            <div className="sm:col-span-2 flex justify-end gap-2">
+              <button
+                type="button"
+                className="btn-ghost"
+                onClick={() => setEditUserOpen(false)}
+              >
+                Cancel
+              </button>
+              <button className="btn-primary">Save</button>
+            </div>
+          </form>
+        </Modal>
+      )}
+
+      {/* Add Shipment modal */}
+      {newShipOpen && (
+        <Modal
+          title="Add shipment to user"
+          onClose={() => setNewShipOpen(false)}
+        >
+          <form
+            className="grid sm:grid-cols-2 gap-3"
+            onSubmit={saveNewShipment}
+          >
+            <Select
+              label="User"
+              value={newShip.userId}
+              onChange={(e) =>
+                setNewShip({
+                  ...newShip,
+                  userId: e.target.value,
+                })
+              }
+              options={[
+                { v: "", t: "Select user…" },
+                ...users.map((u) => ({
+                  v: u.id,
+                  t: `${u.firstName || ""} ${
+                    u.lastName || ""
+                  } — ${u.email}`,
+                })),
+              ]}
+            />
+            <Input
+              label="Tracking (optional)"
+              value={newShip.tracking}
+              onChange={(e) =>
+                setNewShip({
+                  ...newShip,
+                  tracking: e.target.value,
+                })
+              }
+            />
+            <Select
+              label="Service"
+              value={newShip.service}
+              onChange={(e) =>
+                setNewShip({
+                  ...newShip,
+                  service: e.target.value,
+                })
+              }
+              options={["Standard", "Express", "Priority", "Freight"].map(
+                (x) => ({ v: x, t: x })
+              )}
+            />
+            <Select
+              label="Status"
+              value={newShip.status}
+              onChange={(e) =>
+                setNewShip({
+                  ...newShip,
+                  status: e.target.value,
+                })
+              }
+              options={[
+                "Created",
+                "Picked Up",
+                "In Transit",
+                "Out for Delivery",
+                "Delivered",
+                "Exception",
+              ].map((x) => ({ v: x, t: x }))}
+            />
+            <Input
+              label="From"
+              value={newShip.from}
+              onChange={(e) =>
+                setNewShip({
+                  ...newShip,
+                  from: e.target.value,
+                })
+              }
+            />
+            <Input
+              label="To"
+              value={newShip.to}
+              onChange={(e) =>
+                setNewShip({
+                  ...newShip,
+                  to: e.target.value,
+                })
+              }
+            />
+            <Input
+              label="Recipient name"
+              value={newShip.toName}
+              onChange={(e) =>
+                setNewShip({
+                  ...newShip,
+                  toName: e.target.value,
+                })
+              }
+            />
+            <Input
+              label="Recipient email"
+              type="email"
+              value={newShip.recipientEmail}
+              onChange={(e) =>
+                setNewShip({
+                  ...newShip,
+                  recipientEmail: e.target.value,
+                })
+              }
+            />
+            <Input
+              label="Pieces"
+              type="number"
+              value={newShip.pieces}
+              onChange={(e) =>
+                setNewShip({
+                  ...newShip,
+                  pieces: Number(e.target.value),
+                })
+              }
+            />
+            <Input
+              label="Weight (kg)"
+              type="number"
+              step="0.1"
+              value={newShip.weight}
+              onChange={(e) =>
+                setNewShip({
+                  ...newShip,
+                  weight: Number(e.target.value),
+                })
+              }
+            />
+            <Input
+              label="Cost (EUR)"
+              type="number"
+              step="0.01"
+              value={newShip.cost}
+              onChange={(e) =>
+                setNewShip({
+                  ...newShip,
+                  cost: Number(e.target.value),
+                })
+              }
+            />
+            <Input
+              label="ETA (optional)"
+              type="datetime-local"
+              value={toLocalDT(newShip.eta)}
+              onChange={(e) =>
+                setNewShip({
+                  ...newShip,
+                  eta: fromLocalDT(e.target.value),
+                })
+              }
+            />
+            <div className="sm:col-span-2 flex justify-end gap-2">
+              <button
+                type="button"
+                className="btn-ghost"
+                onClick={() => setNewShipOpen(false)}
+              >
+                Cancel
+              </button>
+              <button className="btn-primary">Add shipment</button>
+            </div>
+          </form>
+        </Modal>
+      )}
+
+      {emailOpen && (
+        <Modal
+          title="Send email"
+          onClose={() => setEmailOpen(false)}
+        >
+          <form
+            className="grid gap-3"
+            onSubmit={(e) => {
+              e.preventDefault();
+              sendEmail();
+            }}
+          >
+            <Input label="From" value={settings.emailFrom} readOnly />
+            <Input
+              label="To"
+              type="email"
+              required
+              value={emailForm.to}
+              onChange={(e) =>
+                setEmailForm({
+                  ...emailForm,
+                  to: e.target.value,
+                })
+              }
+            />
+            <Input
+              label="Subject"
+              required
+              value={emailForm.subject}
+              onChange={(e) =>
+                setEmailForm({
+                  ...emailForm,
+                  subject: e.target.value,
+                })
+              }
+            />
+            <Textarea
+              label="Body"
+              required
+              value={emailForm.body}
+              onChange={(e) =>
+                setEmailForm({
+                  ...emailForm,
+                  body: e.target.value,
+                })
+              }
+            />
+            <div className="flex justify-end gap-2">
+              <button
+                type="button"
+                className="btn-ghost"
+                onClick={() => setEmailOpen(false)}
+              >
+                Cancel
+              </button>
+              <button className="btn-primary">Send</button>
+            </div>
+          </form>
+        </Modal>
+      )}
+    </div>
+  );
+}
+
+/* ======================= UI primitives & utils ======================= */
+function SectionHeader({ title, action }) {
+  return (
+    <div className="flex items-center justify-between">
+      <h2 className="text-xl sm:text-2xl font-bold tracking-tight">
+        {title}
+      </h2>
+      {action}
+    </div>
+  );
+}
+function Input({ label, ...rest }) {
+  return (
+    <label className="block">
+      {label && (
+        <span className="block text-sm text-slate-500">
+          {label}
+        </span>
+      )}
+      <input
+        {...rest}
+        className="mt-1 w-full rounded-lg border px-3 py-2 outline-none focus:ring-2 focus:ring-emerald-500/30"
+      />
+    </label>
+  );
+}
+function Textarea({ label, ...rest }) {
+  return (
+    <label className="block">
+      {label && (
+        <span className="block text-sm text-slate-500">
+          {label}
+        </span>
+      )}
+      <textarea
+        {...rest}
+        className="mt-1 w-full rounded-lg border px-3 py-2 outline-none focus:ring-2 focus:ring-emerald-500/30 min-h-[110px]"
+      />
+    </label>
+  );
+}
+function Select({ label, options = [], ...rest }) {
+  const opts = options.map((o) =>
+    typeof o === "string" ? { v: o, t: o } : o
+  );
+  return (
+    <label className="block">
+      {label && (
+        <span className="block text-sm text-slate-500">
+          {label}
+        </span>
+      )}
+      <select
+        {...rest}
+        className="mt-1 w-full rounded-lg border px-3 py-2 outline-none focus:ring-2 focus:ring-emerald-500/30"
+      >
+        {opts.map((o) => (
+          <option key={o.v} value={o.v}>
+            {o.t}
+          </option>
+        ))}
+      </select>
+    </label>
+  );
+}
+function Tag({ children, color = "slate" }) {
+  const styles =
+    color === "red"
+      ? "bg-emerald-500/10 text-emerald-400 ring-emerald-500/30"
+      : "bg-slate-100 text-slate-700 ring-slate-800";
+  return (
+    <span
+      className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ring-1 ring-inset ${styles}`}
+    >
+      {children}
+    </span>
+  );
+}
+function StatusBadge({ status }) {
+  const map = {
+    Created: "bg-slate-100 text-slate-700 ring-slate-800",
+    "Picked Up": "bg-sky-50 text-sky-700 ring-sky-200",
+    "In Transit": "bg-emerald-50 text-emerald-700 ring-emerald-200",
+    "Out for Delivery":
+      "bg-amber-50 text-amber-800 ring-amber-200",
+    Delivered:
+      "bg-emerald-50 text-emerald-700 ring-emerald-200",
+    Exception: "bg-emerald-500/10 text-emerald-400 ring-emerald-500/30",
+  };
+  return (
+    <span
+      className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ring-1 ring-inset ${
+        map[status] ||
+        "bg-slate-100 text-slate-700 ring-slate-800"
+      }`}
+    >
+      {status}
+    </span>
+  );
+}
+function Th({ children }) {
+  return (
+    <th className="text-left px-4 py-3 font-semibold">
+      {children}
+    </th>
+  );
+}
+function Tr({ children }) {
+  return <tr className="odd:bg-white even:bg-white">{children}</tr>;
+}
+function Td({ children }) {
+  return <td className="px-4 py-3 align-top">{children}</td>;
+}
+function Modal({ title, onClose, children }) {
+  return (
+    <div
+      className="fixed inset-0 z-50 grid place-items-center bg-emerald-500/40 p-4"
+      onClick={onClose}
+    >
+      <div
+        className="w-full max-w-2xl rounded-2xl bg-white p-6 shadow-xl max-h-[85vh] overflow-hidden"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div className="flex items-center justify-between">
+          <h3 className="text-lg font-semibold">{title}</h3>
+          <button className="btn-ghost" onClick={onClose}>
+            Close
+          </button>
+        </div>
+        {/* make the content scrollable so long forms don't get cut off */}
+        <div className="mt-4 overflow-y-auto max-h-[70vh] pr-1">
+          {children}
+        </div>
+      </div>
+    </div>
+  );
+}
+function exportCSV(rows) {
+  const headers = [
+    "Date",
+    "Tracking",
+    "Service",
+    "Status",
+    "From",
+    "To",
+    "Recipient",
+    "RecipientEmail",
+    "Pieces",
+    "Weight(kg)",
+    "Cost(EUR)",
+  ];
+  const body = rows.map((s) => [
+    s.date,
+    s.tracking,
+    s.service,
+    s.status,
+    s.from,
+    s.to,
+    s.toName || "",
+    s.recipientEmail || "",
+    s.pieces,
+    s.weight,
+    round2(s.cost),
+  ]);
+  const csv = [headers, ...body]
+    .map((r) => r.map(csvCell).join(","))
+    .join("\n");
+  const blob = new Blob([csv], {
+    type: "text/csv;charset=utf-8;",
+  });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = `admin_shipments_${Date.now()}.csv`;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+function csvCell(v) {
+  if (v == null) return "";
+  const s = String(v);
+  if (s.includes(",") || s.includes('"') || s.includes("\n"))
+    return `"${s.replace(/"/g, '""')}"`;
+  return s;
+}
+function formatMoney(n) {
+  return (Number(n) || 0).toLocaleString(undefined, {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  });
+}
+function round2(n) {
+  return Math.round((Number(n) || 0) * 100) / 100;
+}
+function fmtDate(iso) {
+  try {
+    return new Date(iso).toLocaleDateString(undefined, {
+      year: "numeric",
+      month: "short",
+      day: "numeric",
+    });
+  } catch {
+    return iso;
+  }
+}
+function toLocalDT(iso) {
+  if (!iso) return "";
+  const d = new Date(iso);
+  if (isNaN(d.getTime())) return "";
+  const off = d.getTimezoneOffset();
+  const local = new Date(d.getTime() - off * 60000);
+  return local.toISOString().slice(0, 16); // "YYYY-MM-DDTHH:mm"
+}
+function fromLocalDT(localStr) {
+  if (!localStr) return "";
+  const d = new Date(localStr);
+  if (isNaN(d.getTime())) return "";
+  const off = d.getTimezoneOffset();
+  return new Date(d.getTime() + off * 60000).toISOString();
+}
+function toast(msg) {
+  const div = document.createElement("div");
+  div.textContent = msg;
+  div.className =
+    "fixed z-[100] bottom-4 left-1/2 -translate-x-1/2 px-4 py-2 rounded-xl bg-emerald-500 text-white text-sm shadow";
+  document.body.appendChild(div);
+  setTimeout(() => div.remove(), 2400);
+}
+
+/* ======================= Icons ======================= */
+function EditIcon() {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      className="w-4 h-4"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.8"
+    >
+      <path d="M3 21l3-1 11-11-2-2L4 18l-1 3z" />
+      <path d="M14 4l2 2" />
+    </svg>
+  );
+}
+function TrashIcon() {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      className="w-4 h-4"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.8"
+    >
+      <path d="M3 6h18" />
+      <path d="M8 6V4h8v2" />
+      <rect x="6" y="6" width="12" height="14" rx="2" />
+    </svg>
+  );
+}
+function PlusIcon() {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      className="w-4 h-4"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.8"
+    >
+      <path d="M12 5v14M5 12h14" />
+    </svg>
+  );
+}
+function MailIcon() {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      className="w-4 h-4"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.8"
+    >
+      <path d="M4 6h16v12H4z" />
+      <path d="M22 6l-10 7L2 6" />
+    </svg>
+  );
+}
+function UserIcon() {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      className="w-4 h-4"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.8"
+    >
+      <circle cx="12" cy="7" r="4" />
+      <path d="M5.5 21a6.5 6.5 0 0 1 13 0" />
+    </svg>
+  );
+}
+function EyeIcon() {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      className="w-4 h-4"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.8"
+    >
+      <path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7S1 12 1 12z" />
+      <circle cx="12" cy="12" r="3" />
+    </svg>
+  );
+}
