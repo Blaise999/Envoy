@@ -64,6 +64,20 @@ export default function BillingPage() {
     if (!d) navigate("/services/express", { replace: true });
   }, [navigate]);
 
+  // ---- Pre-warm backend (Render free-tier cold start can take 30-60s) ----
+  // Fires silently when checkout mounts; by the time the user hits Confirm,
+  // the backend is awake and the POST won't time out.
+  useEffect(() => {
+    const base =
+      (typeof import.meta !== "undefined" && import.meta.env?.VITE_API_BASE) || "/api";
+    const url = `${base.replace(/\/$/, "")}/health`;
+    const controller = new AbortController();
+    const t = setTimeout(() => controller.abort(), 60000);
+    fetch(url, { signal: controller.signal, cache: "no-store" })
+      .catch(() => {}) // swallow — just waking the dyno
+      .finally(() => clearTimeout(t));
+  }, []);
+
   const q = toSummary(draft) || {};
 
   // 👇 pull contact fields (either top-level or inside draft.contact)
@@ -227,13 +241,27 @@ export default function BillingPage() {
           };
 
     try {
-      const TIMEOUT_MS = 12000;
-      const created = await Promise.race([
-        shipments.create(payload),
-        new Promise((_, rej) =>
-          setTimeout(() => rej(new Error("Request timed out. Please try again.")), TIMEOUT_MS)
-        ),
-      ]);
+      // Render free-tier cold starts can take 30-60s after idle.
+      // Give it real headroom, and retry once if the first attempt times out.
+      const TIMEOUT_MS = 60000;
+
+      const attempt = () =>
+        Promise.race([
+          shipments.create(payload),
+          new Promise((_, rej) =>
+            setTimeout(() => rej(new Error("Request timed out. Please try again.")), TIMEOUT_MS)
+          ),
+        ]);
+
+      let created;
+      try {
+        created = await attempt();
+      } catch (firstErr) {
+        // One retry — in case Render was still waking up on the first call
+        console.warn("First create attempt failed, retrying once:", firstErr?.message);
+        await new Promise((r) => setTimeout(r, 1500));
+        created = await attempt();
+      }
 
       // build receipt that carries contacts + photos (offline friendly)
       const receipt = {
