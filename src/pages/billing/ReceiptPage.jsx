@@ -427,6 +427,8 @@ function prettyMethod(m) {
       return "Bank transfer";
     case "cod":
       return "Pay on delivery";
+    case "payInPerson":
+      return "Pay in person";
     default:
       return m || "—";
   }

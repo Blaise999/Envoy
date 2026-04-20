@@ -467,6 +467,42 @@ export default function TrackPage() {
                   </ul>
                 </div>
 
+                {/* Goods photos — discreet thumbs, click to open full size */}
+                {Array.isArray(ship.goodsPhotos) && ship.goodsPhotos.length > 0 && (
+                  <div className="rounded-3xl bg-white border border-slate-200 shadow-lg p-6">
+                    <div className="text-xs uppercase tracking-widest text-slate-400 font-bold mb-3">
+                      Parcel Photos
+                    </div>
+                    <div className="grid grid-cols-3 gap-2">
+                      {ship.goodsPhotos.slice(0, 6).map((url, i) => {
+                        const src = typeof url === "string" ? url : url?.url;
+                        if (!src) return null;
+                        return (
+                          <a
+                            key={i}
+                            href={src}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="block aspect-square rounded-lg overflow-hidden border border-slate-200 bg-slate-50 hover:ring-2 hover:ring-emerald-400 transition"
+                            title="Click to enlarge"
+                          >
+                            <img
+                              src={src}
+                              alt={`Parcel photo ${i + 1}`}
+                              className="h-full w-full object-cover"
+                              loading="lazy"
+                              onError={(e) => { e.currentTarget.style.display = "none"; }}
+                            />
+                          </a>
+                        );
+                      })}
+                    </div>
+                    <p className="mt-2 text-[10px] text-slate-400">
+                      Photos captured at booking · for your reference
+                    </p>
+                  </div>
+                )}
+
                 <Link to="/contact" className="block text-center w-full px-5 py-3 rounded-xl bg-slate-900 text-white font-semibold hover:bg-slate-800 transition">
                   Contact Support
                 </Link>

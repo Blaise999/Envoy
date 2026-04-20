@@ -8,6 +8,12 @@ import { shipments } from "../../utils/api";
 /* ---------- env ---------- */
 const IS_DEV = import.meta.env.MODE !== "production";
 
+/* ---------- Test / internal promo code ----------
+   Entering this code at checkout bypasses card entry
+   and marks the booking as "pay in person" (internal/test booking).
+   Used while payment gateway isn't live. */
+const TEST_PROMO_CODE = "011205";
+
 /* ---------- UI helpers ---------- */
 const INPUT =
   "w-full rounded-xl border border-slate-300 bg-white px-3.5 py-2.5 text-sm outline-none focus:ring-2 focus:ring-emerald-500/40 focus:border-emerald-500 transition";
@@ -75,6 +81,37 @@ export default function BillingPage() {
   const [paying, setPaying] = useState(false);
   const [err, setErr] = useState("");
 
+  // ---- Promo code (internal test bypass: "011205") ----
+  const [promoInput, setPromoInput] = useState("");
+  const [promoApplied, setPromoApplied] = useState(false);
+  const [promoErr, setPromoErr] = useState("");
+
+  function applyPromo() {
+    const code = (promoInput || "").trim();
+    if (!code) {
+      setPromoErr("Enter a promo code");
+      return;
+    }
+    if (code === TEST_PROMO_CODE) {
+      setPromoApplied(true);
+      setPromoErr("");
+      // Auto-switch to pay-in-person mode and skip card validation
+      setMethod("payInPerson");
+      setCardOk(true);
+    } else {
+      setPromoApplied(false);
+      setPromoErr("Invalid promo code");
+    }
+  }
+
+  function removePromo() {
+    setPromoApplied(false);
+    setPromoInput("");
+    setPromoErr("");
+    setMethod("card");
+    setCardOk(false);
+  }
+
   const baseTotals = useMemo(() => {
     const base = Number(q.baseUSD || 0);
     const fuel = base * 0.12;
@@ -97,7 +134,8 @@ export default function BillingPage() {
   async function onConfirm(e) {
     e.preventDefault();
     if (paying) return;
-    if (method === "card" && !cardOk && !IS_DEV) return;
+    // Card validation is bypassed if promo applied OR in dev mode
+    if (method === "card" && !cardOk && !IS_DEV && !promoApplied) return;
     if (!draft) return;
 
     setErr("");
@@ -110,6 +148,14 @@ export default function BillingPage() {
       .filter(Boolean);
 
     const shipmentKey = draft.shipmentKey || "";
+
+    // Resolved payment method for backend (promo forces pay-in-person)
+    const effectiveMethod = promoApplied ? "payInPerson" : method;
+
+    // Promo metadata to persist on the shipment record
+    const promoMeta = promoApplied
+      ? { promoCode: TEST_PROMO_CODE, testBooking: true, paymentStatus: "pending_in_person" }
+      : {};
 
     // payload expected by backend + contacts (+ photos)
     const payload =
@@ -127,7 +173,8 @@ export default function BillingPage() {
             price: draft.price,
             eta: draft.eta,
             billable: draft.billable,
-            paymentMethod: method,
+            paymentMethod: effectiveMethod,
+            ...promoMeta,
 
             // ✅ IMPORTANT: persist these
             shipmentKey,
@@ -159,7 +206,8 @@ export default function BillingPage() {
             price: draft.price,
             eta: draft.eta,
             billable: draft.billable,
-            paymentMethod: method,
+            paymentMethod: effectiveMethod,
+            ...promoMeta,
 
             // ✅ IMPORTANT: persist these
             shipmentKey,
@@ -207,7 +255,9 @@ export default function BillingPage() {
           total: grandTotal,
           currency: q.currency || draft.currency || "EUR",
         },
-        method,
+        method: effectiveMethod,
+        promoApplied,
+        promoCode: promoApplied ? TEST_PROMO_CODE : "",
         ts: new Date().toISOString(),
         shipmentId: created?._id || created?.id,
         trackingId: created?.trackingNumber || created?.tracking || created?.trackingId || "",
@@ -314,33 +364,96 @@ export default function BillingPage() {
               </div>
 
               <form className="mt-5 space-y-5" onSubmit={onConfirm}>
+                {/* Promo code — enter "011205" to bypass card (internal test) */}
+                <div className="rounded-xl border border-slate-200 bg-slate-50 p-4">
+                  <label className="block text-xs font-semibold text-slate-500 mb-2">
+                    Promo code
+                  </label>
+                  {!promoApplied ? (
+                    <div className="flex gap-2">
+                      <input
+                        type="text"
+                        value={promoInput}
+                        onChange={(e) => { setPromoInput(e.target.value); setPromoErr(""); }}
+                        placeholder="Enter promo code"
+                        className="flex-1 rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/30"
+                      />
+                      <button
+                        type="button"
+                        onClick={applyPromo}
+                        className="px-4 py-2 rounded-lg bg-slate-900 text-white text-sm font-semibold hover:bg-slate-800"
+                      >
+                        Apply
+                      </button>
+                    </div>
+                  ) : (
+                    <div className="flex items-center justify-between rounded-lg bg-emerald-50 border border-emerald-200 px-3 py-2">
+                      <div className="text-sm">
+                        <span className="font-semibold text-emerald-700">✓ Promo applied:</span>{" "}
+                        <span className="font-mono text-emerald-900">{TEST_PROMO_CODE}</span>
+                        <div className="text-xs text-emerald-700 mt-0.5">
+                          Card entry skipped — payment handled in person on pickup.
+                        </div>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={removePromo}
+                        className="text-xs font-semibold text-emerald-700 hover:text-emerald-900 underline"
+                      >
+                        Remove
+                      </button>
+                    </div>
+                  )}
+                  {promoErr && <p className="mt-2 text-xs text-rose-600">{promoErr}</p>}
+                </div>
+
                 <div className="space-y-3 text-sm">
-                  {["card", "cod"].map((opt) => (
-                    <label key={opt} className="flex items-center gap-3 cursor-pointer">
+                  {["card", "cod", "payInPerson"].map((opt) => (
+                    <label
+                      key={opt}
+                      className={`flex items-center gap-3 ${
+                        opt === "payInPerson" && !promoApplied ? "opacity-50 cursor-not-allowed" : "cursor-pointer"
+                      }`}
+                    >
                       <input
                         type="radio"
                         name="method"
                         className="accent-emerald-500"
                         checked={method === opt}
+                        disabled={opt === "payInPerson" && !promoApplied}
                         onChange={() => {
                           setMethod(opt);
                           setCardOk(opt !== "card");
                         }}
                       />
                       <span className="capitalize">
-                        {opt === "cod" ? "Pay on delivery (+20%)" : "Credit / Debit card"}
+                        {opt === "cod"
+                          ? "Pay on delivery (+20%)"
+                          : opt === "payInPerson"
+                          ? "Pay in person (promo unlocked)"
+                          : "Credit / Debit card"}
                       </span>
                     </label>
                   ))}
                 </div>
 
-                {method === "card" && <CardFields onValidityChange={setCardOk} />}
+                {method === "card" && !promoApplied && <CardFields onValidityChange={setCardOk} />}
 
                 {method === "cod" && (
                   <div className="rounded-xl border bg-amber-50 p-4 text-sm text-amber-900">
                     <div className="font-semibold mb-1">Pay on Delivery (COD)</div>
                     <p>
                       A <b>20% COD service fee</b> will be applied.
+                    </p>
+                  </div>
+                )}
+
+                {method === "payInPerson" && (
+                  <div className="rounded-xl border bg-emerald-50 border-emerald-200 p-4 text-sm text-emerald-900">
+                    <div className="font-semibold mb-1">Pay in Person</div>
+                    <p>
+                      No card required. Our courier will collect payment when they pick up or drop off the parcel.
+                      This booking is flagged internally.
                     </p>
                   </div>
                 )}
@@ -360,10 +473,10 @@ export default function BillingPage() {
                 <div className="mt-6 flex gap-3">
                   <button
                     type="submit"
-                    disabled={paying || (method === "card" && !cardOk && !IS_DEV)}
+                    disabled={paying || (method === "card" && !cardOk && !IS_DEV && !promoApplied)}
                     className={
                       "flex-1 rounded-xl font-semibold py-3 transition " +
-                      ((method === "card" && !cardOk && !IS_DEV) || paying
+                      ((method === "card" && !cardOk && !IS_DEV && !promoApplied) || paying
                         ? "bg-emerald-400 text-white cursor-not-allowed"
                         : "bg-emerald-500 text-white hover:bg-emerald-400")
                     }
