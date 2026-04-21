@@ -293,8 +293,8 @@ export default function TrackPage() {
             </form>
 
             <div className="mt-6 flex flex-wrap items-center justify-center gap-2 text-xs text-slate-500">
-              <span>Try a demo ID:</span>
-              {["EV9876543210", "EV2210034518", "EV4420889134"].map((t) => (
+              <span>Input above:</span>
+              {[].map((t) => (
                 <button
                   key={t}
                   onClick={() => {
