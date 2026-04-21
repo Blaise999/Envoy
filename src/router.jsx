@@ -37,6 +37,8 @@ import PrivacyPage from "./pages/legal/PrivacyPage.jsx";
 import TermsPage from "./pages/legal/TermsPage.jsx";
 import SecurityPage from "./pages/legal/SecurityPage.jsx";
 
+import DiagnosticPage from "./pages/DiagnosticPage.jsx";
+
 import { getAdminToken } from "./utils/api.js";
 
 function AdminGuard({ children }) {
@@ -77,6 +79,7 @@ export default function Router() {
       </Route>
       <Route path="/admin/login" element={<AdminLogin />} />
       <Route path="/admin/dashboard" element={<AdminGuard><AdminDashboard /></AdminGuard>} />
+      <Route path="/diagnostic" element={<DiagnosticPage />} />
       <Route path="*" element={<NotFound />} />
     </Routes>
   );

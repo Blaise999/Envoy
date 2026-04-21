@@ -310,7 +310,14 @@ export default function BillingPage() {
       navigate(`/receipt/${receipt.id}`, { replace: true, state: { receipt } });
     } catch (e) {
       console.error("Create shipment failed:", e);
-      setErr(e?.message || "Could not create shipment. Please try again.");
+      const isNetwork = e?.kind === "network" || /Failed to fetch|NetworkError|timed out/i.test(e?.message || "");
+      setErr(
+        isNetwork
+          ? `Can't reach the server right now. The backend at ${
+              (typeof import.meta !== "undefined" && import.meta.env?.VITE_API_BASE) || "/api"
+            } didn't respond. Check that the Render service is Live and that MongoDB Atlas allows 0.0.0.0/0 in Network Access. Open DevTools → Console for the exact failure.`
+          : (e?.message || "Could not create shipment. Please try again.")
+      );
     } finally {
       setPaying(false);
     }

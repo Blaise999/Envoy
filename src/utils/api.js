@@ -8,7 +8,11 @@ const API_BASE =
   (typeof window !== "undefined" && window.__API_BASE__) ||
   "/api"; // backend mounted at /api
 export function getApiBase() { return API_BASE; }
-if (typeof window !== "undefined") window.__GE_API_BASE__ = API_BASE;
+if (typeof window !== "undefined") {
+  window.__GE_API_BASE__ = API_BASE;
+  // eslint-disable-next-line no-console
+  console.log("[API] base =", API_BASE);
+}
 
 // ---------- Token storage (simple localStorage helpers) ----------
 const USER_TOKEN_KEY = "envoy_user_token";
@@ -74,17 +78,47 @@ async function request(
   path,
   { method = "GET", body, headers = {}, token, signal } = {}
 ) {
-  const res = await fetch(`${API_BASE}${path}`, {
-    method,
-    headers: {
-      "Content-Type": "application/json",
-      ...authHeader(token),
-      ...headers,
-    },
-    body: body ? JSON.stringify(body) : undefined,
-    signal,
-  });
+  const url = `${API_BASE}${path}`;
+  const startedAt = Date.now();
 
+  // 🔎 Outgoing log — makes it obvious in the console what's being hit
+  console.log(`[API ->] ${method} ${url}`, body ? { body } : "");
+
+  let res;
+  try {
+    res = await fetch(url, {
+      method,
+      headers: {
+        "Content-Type": "application/json",
+        ...authHeader(token),
+        ...headers,
+      },
+      body: body ? JSON.stringify(body) : undefined,
+      signal,
+    });
+  } catch (networkErr) {
+    // Fetch threw before getting any response — usually one of:
+    //  • CORS preflight blocked
+    //  • Server unreachable (DNS/TCP timeout / service down)
+    //  • SSL handshake fail
+    //  • Request aborted
+    const ms = Date.now() - startedAt;
+    console.error(
+      `[API X] ${method} ${url} — network failure after ${ms}ms:`,
+      networkErr?.name,
+      networkErr?.message
+    );
+    const err = new Error(
+      `Can't reach the server. This is a network/CORS/server-down issue, not a code bug. ` +
+      `Tried ${method} ${url}. Raw: ${networkErr?.message || networkErr}`
+    );
+    err.cause = networkErr;
+    err.kind = "network";
+    err.url = url;
+    throw err;
+  }
+
+  const ms = Date.now() - startedAt;
   const text = await res.text();
   let data;
   try {
@@ -92,6 +126,11 @@ async function request(
   } catch {
     data = { message: text || "" };
   }
+
+  console.log(
+    `[API <-] ${method} ${url} — ${res.status} in ${ms}ms`,
+    data
+  );
 
   if (!res.ok) {
     const msg =
