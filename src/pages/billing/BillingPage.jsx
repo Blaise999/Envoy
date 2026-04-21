@@ -155,11 +155,30 @@ export default function BillingPage() {
     setErr("");
     setPaying(true);
 
-    // ✅ normalize goods photos so backend always gets clean arrays
+    // ✅ Flatten goods photos to a pure string[] of URLs.
+    // Handles every shape: strings, {url}, nested arrays, JSON-encoded strings,
+    // util.inspect dumps, everything. Anything that isn't an http(s) URL gets dropped.
+    function extractUrls(v, out = []) {
+      if (!v) return out;
+      if (Array.isArray(v)) { v.forEach((x) => extractUrls(x, out)); return out; }
+      if (typeof v === "string") {
+        const s = v.trim();
+        if (/^https?:\/\//i.test(s)) { out.push(s); return out; }
+        // regex-rescue any URLs from stringified dumps
+        const matches = s.match(/https?:\/\/[^\s'"<>\\)]+/g) || [];
+        matches.forEach((u) => out.push(u));
+        return out;
+      }
+      if (typeof v === "object") {
+        if (typeof v.url === "string") out.push(v.url);
+        else if (typeof v.href === "string") out.push(v.href);
+      }
+      return out;
+    }
+    const rawPhotos = draft.goodsPhotos || draft.goodsPhotosMeta || [];
+    const goodsPhotos = Array.from(new Set(extractUrls(rawPhotos)))
+      .filter((u) => /^https?:\/\//i.test(u));
     const goodsPhotosMeta = Array.isArray(draft.goodsPhotos) ? draft.goodsPhotos : [];
-    const goodsPhotos = goodsPhotosMeta
-      .map((p) => (typeof p === "string" ? p : p?.url))
-      .filter(Boolean);
 
     const shipmentKey = draft.shipmentKey || "";
 
