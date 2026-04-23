@@ -25,29 +25,29 @@ export default function NewsPage() {
           <button key={t} className={`px-4 py-2 rounded-full text-sm font-semibold transition ${i === 0 ? "bg-slate-900 text-white" : "bg-slate-100 text-slate-700 hover:bg-slate-200"}`}>{t}</button>
         ))}
       </div>
-      <article className="mb-12 rounded-3xl overflow-hidden border border-slate-200 bg-gradient-to-br from-emerald-50 to-teal-50">
+      <article className="mb-12 rounded-3xl overflow-hidden border border-slate-200 bg-gradient-to-br from-blue-50 to-blue-50">
         <div className="p-8 sm:p-12">
           <div className="flex items-center gap-3 text-xs">
-            <span className="inline-block px-2 py-1 rounded-full bg-emerald-500 text-white font-bold uppercase tracking-widest">Featured · {featured.tag}</span>
+            <span className="inline-block px-2 py-1 rounded-full bg-blue-500 text-white font-bold uppercase tracking-widest">Featured · {featured.tag}</span>
             <span className="text-slate-500">{featured.date} · {featured.read}</span>
           </div>
           <h2 className="mt-4 text-3xl sm:text-4xl lg:text-5xl font-black tracking-tight leading-tight">{featured.title}</h2>
           <p className="mt-4 text-lg text-slate-600 leading-relaxed max-w-3xl">{featured.blurb}</p>
-          <a href="#" className="mt-6 inline-flex items-center gap-2 text-emerald-700 font-bold hover:text-emerald-800">Read the full post →</a>
+          <a href="#" className="mt-6 inline-flex items-center gap-2 text-blue-700 font-bold hover:text-blue-800">Read the full post →</a>
         </div>
       </article>
       <div className="grid md:grid-cols-2 gap-5">
         {posts.map((p) => (
-          <article key={p.title} className="p-6 sm:p-7 rounded-2xl border border-slate-200 bg-white hover:shadow-lg hover:border-emerald-200 transition">
+          <article key={p.title} className="p-6 sm:p-7 rounded-2xl border border-slate-200 bg-white hover:shadow-lg hover:border-blue-200 transition">
             <div className="flex items-center gap-3 text-xs">
-              <span className="inline-block px-2 py-1 rounded-full bg-emerald-50 text-emerald-700 font-semibold">{p.tag}</span>
+              <span className="inline-block px-2 py-1 rounded-full bg-blue-50 text-blue-700 font-semibold">{p.tag}</span>
               <span className="text-slate-500">{p.date}</span>
               <span className="text-slate-400">·</span>
               <span className="text-slate-500">{p.read}</span>
             </div>
             <h3 className="mt-3 text-xl font-bold">{p.title}</h3>
             <p className="mt-2 text-slate-600">{p.blurb}</p>
-            <a href="#" className="mt-4 inline-block text-emerald-600 font-semibold hover:text-emerald-700">Read more →</a>
+            <a href="#" className="mt-4 inline-block text-blue-600 font-semibold hover:text-blue-700">Read more →</a>
           </article>
         ))}
       </div>
@@ -58,13 +58,13 @@ export default function NewsPage() {
             <p className="mt-3 text-slate-300">A monthly email. Product updates, logistics nerdery, the occasional customer story. No marketing fluff.</p>
           </div>
           <form onSubmit={(e) => e.preventDefault()} className="flex gap-2">
-            <input type="email" placeholder="you@work.com" className="flex-1 px-4 py-3 rounded-xl bg-white/10 border border-white/20 text-white placeholder:text-slate-400 outline-none focus:border-emerald-400" />
-            <button className="px-5 py-3 rounded-xl bg-emerald-500 font-semibold hover:bg-emerald-400 transition">Subscribe</button>
+            <input type="email" placeholder="you@work.com" className="flex-1 px-4 py-3 rounded-xl bg-white/10 border border-white/20 text-white placeholder:text-slate-400 outline-none focus:border-blue-400" />
+            <button className="px-5 py-3 rounded-xl bg-blue-500 font-semibold hover:bg-blue-400 transition">Subscribe</button>
           </form>
         </div>
       </div>
       <div className="mt-10 p-6 rounded-2xl bg-slate-50 text-center">
-        <p className="text-slate-600">Press inquiries: <a href="mailto:press@shipenvoy.com" className="text-emerald-600 font-semibold">press@shipenvoy.com</a></p>
+        <p className="text-slate-600">Press inquiries: <a href="mailto:press@shipenvoy.com" className="text-blue-600 font-semibold">press@shipenvoy.com</a></p>
       </div>
     </PageShell>
   );

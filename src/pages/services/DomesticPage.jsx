@@ -105,24 +105,24 @@ export default function DomesticPage() {
             </nav>
             <div className="hidden md:flex items-center gap-3">
               <Link to="/auth/login" className="px-3 py-1.5 text-sm rounded-lg hover:bg-slate-100">Log in</Link>
-              <Link to="/auth/register" className="px-3 py-1.5 text-sm rounded-lg bg-emerald-500 text-white hover:bg-emerald-400">Register</Link>
-              <Link to="/create" className="px-3 py-1.5 text-sm rounded-lg bg-emerald-500 text-white hover:bg-emerald-400">Create Shipment</Link>
+              <Link to="/auth/register" className="px-3 py-1.5 text-sm rounded-lg bg-blue-500 text-white hover:bg-blue-400">Register</Link>
+              <Link to="/create" className="px-3 py-1.5 text-sm rounded-lg bg-blue-500 text-white hover:bg-blue-400">Create Shipment</Link>
             </div>
           </div>
         </div>
       </header>
       {/* HERO */}
       <section className="relative overflow-hidden">
-        <div className="absolute -top-24 -right-24 h-72 w-72 rounded-full bg-emerald-500/30 blur-3xl pointer-events-none" />
+        <div className="absolute -top-24 -right-24 h-72 w-72 rounded-full bg-blue-500/30 blur-3xl pointer-events-none" />
         <div className="absolute -bottom-24 -left-24 h-80 w-80 rounded-full bg-amber-200/40 blur-3xl pointer-events-none" />
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-14 sm:py-20">
           <div className="grid lg:grid-cols-2 gap-10 items-center">
             <div>
-              <span className="inline-flex items-center gap-2 text-xs font-semibold px-3 py-1 rounded-full bg-emerald-500/10 text-emerald-400 ring-1 ring-emerald-500/30">
+              <span className="inline-flex items-center gap-2 text-xs font-semibold px-3 py-1 rounded-full bg-blue-500/10 text-blue-400 ring-1 ring-blue-500/30">
                 Domestic network • 7 days a week
               </span>
               <h1 className="mt-4 text-4xl sm:text-5xl font-black leading-tight tracking-tight">
-                Fast, reliable <span className="text-emerald-500">Domestic Shipping</span>
+                Fast, reliable <span className="text-blue-500">Domestic Shipping</span>
               </h1>
               <p className="mt-3 text-slate-500 max-w-xl">
                 Same-day in the city, next-day nationwide. Door pickup, real-time
@@ -133,7 +133,7 @@ export default function DomesticPage() {
               <div className="mt-6 flex flex-wrap gap-3">
                 <Link
                   to="/services/express?type=parcel#quote"
-                  className="px-4 py-2 rounded-xl bg-emerald-500 text-white text-sm font-semibold hover:bg-emerald-400 active:scale-[0.98]"
+                  className="px-4 py-2 rounded-xl bg-blue-500 text-white text-sm font-semibold hover:bg-blue-400 active:scale-[0.98]"
                 >
                   Calculate rates
                 </Link>
@@ -163,7 +163,7 @@ export default function DomesticPage() {
 
             {/* Fancy card cluster (no images needed) */}
             <div className="relative">
-              <div className="group p-6 rounded-3xl bg-gradient-to-br from-emerald-500 to-emerald-400 text-white shadow-2xl">
+              <div className="group p-6 rounded-3xl bg-gradient-to-br from-blue-500 to-blue-400 text-white shadow-2xl">
                 <div className="flex items-center justify-between">
                   <h3 className="text-lg font-semibold">Today’s same-day routes</h3>
                   <span className="text-xs bg-white/15 px-2 py-1 rounded-lg ring-1 ring-white/20">
@@ -195,7 +195,7 @@ export default function DomesticPage() {
                     </div>
                     <Link
                       to="/track?ref=EV987654321"
-                      className="ml-auto text-sm font-semibold text-emerald-400 hover:underline"
+                      className="ml-auto text-sm font-semibold text-blue-400 hover:underline"
                     >
                       Track →
                     </Link>
@@ -208,7 +208,7 @@ export default function DomesticPage() {
                 <div className="text-xs text-slate-500">Average on-time</div>
                 <div className="text-2xl font-extrabold">98.3%</div>
                 <div className="mt-2 h-1.5 rounded-full bg-slate-100 overflow-hidden">
-                  <div className="h-full w-[83%] bg-emerald-500" />
+                  <div className="h-full w-[83%] bg-blue-500" />
                 </div>
                 <div className="mt-2 text-[11px] text-slate-500">Last 30 days</div>
               </div>
@@ -229,7 +229,7 @@ export default function DomesticPage() {
                 key={f.title}
                 className="group rounded-2xl border border-slate-200 bg-white p-5 shadow-sm hover:shadow-md hover:border-slate-300 transition"
               >
-                <div className="w-10 h-10 rounded-xl bg-emerald-500/10 text-emerald-400 grid place-items-center">
+                <div className="w-10 h-10 rounded-xl bg-blue-500/10 text-blue-400 grid place-items-center">
                   {f.icon}
                 </div>
                 <h3 className="mt-3 font-semibold">{f.title}</h3>
@@ -255,11 +255,11 @@ export default function DomesticPage() {
               <article
                 key={t.name}
                 className={`relative rounded-2xl border p-5 bg-white shadow-sm ${
-                  t.featured ? "ring-2 ring-emerald-500 border-emerald-500/30" : "border-slate-200"
+                  t.featured ? "ring-2 ring-blue-500 border-blue-500/30" : "border-slate-200"
                 }`}
               >
                 {t.featured && (
-                  <span className="absolute -top-3 right-4 text-[11px] px-2 py-1 rounded-full bg-emerald-500 text-white">
+                  <span className="absolute -top-3 right-4 text-[11px] px-2 py-1 rounded-full bg-blue-500 text-white">
                     Most popular
                   </span>
                 )}
@@ -277,7 +277,7 @@ export default function DomesticPage() {
                   to={t.href}
                   className={`mt-4 inline-flex items-center gap-2 px-3 py-2 rounded-xl text-sm font-semibold ${
                     t.featured
-                      ? "bg-emerald-500 text-white hover:bg-emerald-400"
+                      ? "bg-blue-500 text-white hover:bg-blue-400"
                       : "bg-white border hover:bg-white"
                   }`}
                 >
@@ -295,7 +295,7 @@ export default function DomesticPage() {
           <h2 className="text-2xl sm:text-3xl font-bold tracking-tight">How it works</h2>
 
           <ol className="relative mt-8 space-y-6">
-            <div className="pointer-events-none absolute left-5 top-0 bottom-0 w-px bg-gradient-to-b from-emerald-400 via-slate-800 to-transparent" />
+            <div className="pointer-events-none absolute left-5 top-0 bottom-0 w-px bg-gradient-to-b from-blue-400 via-slate-800 to-transparent" />
             {[
               ["Create label", "Enter addresses, choose Domestic, pick same-day or next-day."],
               ["Pickup or drop-off", "Schedule a window or use a nearby counter."],
@@ -303,8 +303,8 @@ export default function DomesticPage() {
               ["Delivered", "Proof of delivery with name, time, and signature."],
             ].map(([title, desc], i) => (
               <li key={title} className="relative pl-14">
-                <span className="absolute left-0 top-0 grid place-items-center h-10 w-10 rounded-full bg-white ring-2 ring-emerald-500/30 shadow-sm">
-                  <span className="h-8 w-8 rounded-full bg-gradient-to-br from-emerald-500 to-emerald-500 text-white text-sm font-bold grid place-items-center">
+                <span className="absolute left-0 top-0 grid place-items-center h-10 w-10 rounded-full bg-white ring-2 ring-blue-500/30 shadow-sm">
+                  <span className="h-8 w-8 rounded-full bg-gradient-to-br from-blue-500 to-blue-500 text-white text-sm font-bold grid place-items-center">
                     {i + 1}
                   </span>
                 </span>
@@ -326,7 +326,7 @@ export default function DomesticPage() {
               <h2 className="text-2xl sm:text-3xl font-bold tracking-tight">Domestic FAQ</h2>
               <p className="mt-2 text-slate-500">
                 Quick answers to the most common questions. Need more help?{" "}
-                <Link to="/contact" className="text-emerald-400 font-semibold hover:underline">
+                <Link to="/contact" className="text-blue-400 font-semibold hover:underline">
                   Contact support
                 </Link>
                 .
@@ -340,7 +340,7 @@ export default function DomesticPage() {
                       className="w-full flex items-start gap-3 text-left"
                       onClick={() => setFaqOpen((o) => (o === idx ? null : idx))}
                     >
-                      <span className="mt-1 h-6 w-6 grid place-items-center rounded-full bg-emerald-500/10 text-emerald-400 ring-1 ring-emerald-500/20">
+                      <span className="mt-1 h-6 w-6 grid place-items-center rounded-full bg-blue-500/10 text-blue-400 ring-1 ring-blue-500/20">
                         ?
                       </span>
                       <div className="flex-1">
@@ -364,7 +364,7 @@ export default function DomesticPage() {
       </section>
 
       {/* CTA BAND */}
-      <section className="py-12 sm:py-16 bg-gradient-to-br from-emerald-500 to-emerald-400 text-white">
+      <section className="py-12 sm:py-16 bg-gradient-to-br from-blue-500 to-blue-400 text-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 grid md:grid-cols-2 gap-8 items-center">
           <div>
             <h2 className="text-2xl sm:text-3xl font-bold tracking-tight">

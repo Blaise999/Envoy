@@ -25,7 +25,7 @@ export default function EcommercePage() {
       </header>
 
       {/* ===== Hero ===== */}
-      <section className="bg-gradient-to-br from-emerald-500 to-emerald-400 text-white">
+      <section className="bg-gradient-to-br from-blue-500 to-blue-400 text-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 sm:py-20">
           <div className="grid lg:grid-cols-2 gap-10 items-center">
             <div>
@@ -155,12 +155,12 @@ export default function EcommercePage() {
       </section>
 
       {/* ===== CTA ===== */}
-      <section className="py-16 bg-emerald-500 text-white text-center">
+      <section className="py-16 bg-blue-500 text-white text-center">
         <div className="max-w-2xl mx-auto px-4">
           <h2 className="text-3xl font-bold">Make delivery your growth lever</h2>
-          <p className="mt-3 text-emerald-500/20">See instant parcel pricing or learn about freight for bulky shipments.</p>
+          <p className="mt-3 text-blue-500/20">See instant parcel pricing or learn about freight for bulky shipments.</p>
           <div className="mt-6 flex flex-wrap gap-3 justify-center">
-            <a href="/services/express?type=parcel#quote" className="px-6 py-3 rounded-xl bg-white text-emerald-400 font-semibold hover:bg-slate-100">
+            <a href="/services/express?type=parcel#quote" className="px-6 py-3 rounded-xl bg-white text-blue-400 font-semibold hover:bg-slate-100">
               Get Parcel Rates
             </a>
             <a href="/services/freight" className="px-6 py-3 rounded-xl ring-1 ring-inset ring-white/70 font-semibold hover:bg-white/10">
@@ -177,7 +177,7 @@ export default function EcommercePage() {
 function Feature({ icon, title, text }) {
   return (
     <div className="p-5 rounded-2xl border border-slate-200 bg-white hover:shadow-sm transition">
-      <div className="w-10 h-10 rounded-xl bg-emerald-500/10 text-emerald-400 grid place-items-center">{icon}</div>
+      <div className="w-10 h-10 rounded-xl bg-blue-500/10 text-blue-400 grid place-items-center">{icon}</div>
       <h3 className="mt-3 font-semibold">{title}</h3>
       <p className="mt-1 text-sm text-slate-500">{text}</p>
     </div>
@@ -186,9 +186,9 @@ function Feature({ icon, title, text }) {
 function Step({ index, title, text }) {
   return (
     <div className="group relative overflow-hidden p-6 rounded-2xl border border-slate-200 bg-white shadow-sm hover:shadow-md transition">
-      <div className="pointer-events-none absolute -right-4 -bottom-6 text-7xl font-black text-emerald-500/25">{index}</div>
+      <div className="pointer-events-none absolute -right-4 -bottom-6 text-7xl font-black text-blue-500/25">{index}</div>
       <div className="relative z-10">
-        <div className="w-10 h-10 rounded-xl bg-emerald-500/10 text-emerald-400 grid place-items-center"><BoxIcon /></div>
+        <div className="w-10 h-10 rounded-xl bg-blue-500/10 text-blue-400 grid place-items-center"><BoxIcon /></div>
         <h3 className="mt-4 font-semibold text-lg">{title}</h3>
         <p className="mt-1 text-sm text-slate-500">{text}</p>
       </div>
@@ -213,7 +213,7 @@ function LogoPill({ name }) {
 function KpiCard({ value, label, note }) {
   return (
     <div className="p-5 rounded-2xl border border-slate-200 bg-white text-center">
-      <div className="text-3xl font-black text-emerald-400">{value}</div>
+      <div className="text-3xl font-black text-blue-400">{value}</div>
       <div className="mt-1 font-semibold">{label}</div>
       <div className="mt-1 text-xs text-slate-500">{note}</div>
     </div>

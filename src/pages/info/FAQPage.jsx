@@ -70,7 +70,7 @@ export default function FAQPage() {
       {filtered.length === 0 && (
         <div className="p-10 text-center rounded-2xl bg-slate-50 border border-slate-200">
           <div className="font-bold text-lg">No matching questions.</div>
-          <div className="mt-2 text-slate-600">Try different keywords, or <Link to="/contact" className="text-emerald-600 font-semibold">ask us directly</Link>.</div>
+          <div className="mt-2 text-slate-600">Try different keywords, or <Link to="/contact" className="text-blue-600 font-semibold">ask us directly</Link>.</div>
         </div>
       )}
       <div className="space-y-14">
@@ -79,7 +79,7 @@ export default function FAQPage() {
             <h2 className="text-2xl sm:text-3xl font-black mb-5">{s.h}</h2>
             <div className="space-y-3">
               {s.items.map((f) => (
-                <details key={f.q} className="group rounded-2xl border border-slate-200 bg-white p-5 sm:p-6 hover:border-emerald-300 transition">
+                <details key={f.q} className="group rounded-2xl border border-slate-200 bg-white p-5 sm:p-6 hover:border-blue-300 transition">
                   <summary className="list-none cursor-pointer flex items-center justify-between font-semibold text-slate-900 gap-4">
                     <span>{f.q}</span>
                     <svg className="w-5 h-5 text-slate-400 group-open:rotate-180 transition shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M6 9l6 6 6-6" strokeLinecap="round" strokeLinejoin="round" /></svg>
@@ -94,7 +94,7 @@ export default function FAQPage() {
       <div className="mt-20 p-10 rounded-3xl bg-gradient-to-br from-slate-900 to-slate-800 text-white text-center">
         <h3 className="text-2xl sm:text-3xl font-black">Still can't find what you need?</h3>
         <p className="mt-3 text-slate-300">Write us at hello@shipenvoy.com or call +44 20 3500 0000. Real humans, any hour.</p>
-        <Link to="/contact" className="mt-6 inline-block px-6 py-3 rounded-full bg-emerald-500 font-semibold hover:bg-emerald-400 transition">Contact support</Link>
+        <Link to="/contact" className="mt-6 inline-block px-6 py-3 rounded-full bg-blue-500 font-semibold hover:bg-blue-400 transition">Contact support</Link>
       </div>
     </PageShell>
   );

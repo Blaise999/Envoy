@@ -113,7 +113,7 @@ export default function RegisterPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-emerald-500 to-emerald-300 flex items-center justify-center px-4">
+    <div className="min-h-screen bg-gradient-to-br from-blue-500 to-blue-300 flex items-center justify-center px-4">
       <div className="w-full max-w-md bg-white rounded-2xl shadow-xl p-8">
         <div className="flex justify-center mb-6">
           <img src={Logo} alt="Envoy" className="h-12 w-auto" />
@@ -123,8 +123,8 @@ export default function RegisterPage() {
           <>
             <h1 className="text-2xl font-bold text-slate-900">Create your account</h1>
             <p className="mt-1 text-sm text-slate-500">Sign up to get started with Envoy.</p>
-            {err && <div className="mt-4 text-sm text-emerald-400 bg-emerald-500/10 border px-3 py-2">{err}</div>}
-            {note && !err && <div className="mt-4 text-sm text-green-700 bg-green-50 border px-3 py-2">{note}</div>}
+            {err && <div className="mt-4 text-sm text-blue-400 bg-blue-500/10 border px-3 py-2">{err}</div>}
+            {note && !err && <div className="mt-4 text-sm text-blue-700 bg-blue-50 border px-3 py-2">{note}</div>}
 
             <form className="mt-6 space-y-4" onSubmit={handleRegister}>
               {/* Account details */}
@@ -132,7 +132,7 @@ export default function RegisterPage() {
                 <label className="block text-sm font-medium text-slate-700">Full name</label>
                 <input
                   type="text" value={fullName} onChange={(e)=>setFullName(e.target.value)}
-                  className="mt-1 w-full px-3 py-2 rounded-lg border border-slate-300 focus:ring-2 focus:ring-emerald-500 text-sm"
+                  className="mt-1 w-full px-3 py-2 rounded-lg border border-slate-300 focus:ring-2 focus:ring-blue-500 text-sm"
                   placeholder="Jane Doe" autoComplete="name"
                 />
               </div>
@@ -143,7 +143,7 @@ export default function RegisterPage() {
                   <select
                     value={accountType}
                     onChange={(e)=>setAccountType(e.target.value)}
-                    className="mt-1 w-full px-3 py-2 rounded-lg border border-slate-300 focus:ring-2 focus:ring-emerald-500 text-sm"
+                    className="mt-1 w-full px-3 py-2 rounded-lg border border-slate-300 focus:ring-2 focus:ring-blue-500 text-sm"
                   >
                     <option value="individual">Individual</option>
                     <option value="business">Business</option>
@@ -153,7 +153,7 @@ export default function RegisterPage() {
                   <label className="block text-sm font-medium text-slate-700">Company (optional)</label>
                   <input
                     type="text" value={company} onChange={(e)=>setCompany(e.target.value)}
-                    className="mt-1 w-full px-3 py-2 rounded-lg border border-slate-300 focus:ring-2 focus:ring-emerald-500 text-sm"
+                    className="mt-1 w-full px-3 py-2 rounded-lg border border-slate-300 focus:ring-2 focus:ring-blue-500 text-sm"
                     placeholder="Envoy Ltd."
                     autoComplete="organization"
                   />
@@ -164,7 +164,7 @@ export default function RegisterPage() {
                 <label className="block text-sm font-medium text-slate-700">Email</label>
                 <input
                   type="email" value={email} onChange={(e)=>setEmail(e.target.value)}
-                  className="mt-1 w-full px-3 py-2 rounded-lg border border-slate-300 focus:ring-2 focus:ring-emerald-500 text-sm"
+                  className="mt-1 w-full px-3 py-2 rounded-lg border border-slate-300 focus:ring-2 focus:ring-blue-500 text-sm"
                   placeholder="you@example.com" autoComplete="email"
                 />
               </div>
@@ -173,7 +173,7 @@ export default function RegisterPage() {
                 <label className="block text-sm font-medium text-slate-700">Phone (optional)</label>
                 <input
                   type="tel" value={phone} onChange={(e)=>setPhone(e.target.value)}
-                  className="mt-1 w-full px-3 py-2 rounded-lg border border-slate-300 focus:ring-2 focus:ring-emerald-500 text-sm"
+                  className="mt-1 w-full px-3 py-2 rounded-lg border border-slate-300 focus:ring-2 focus:ring-blue-500 text-sm"
                   placeholder="	+44 20 xxxx xxxx" autoComplete="tel"
                 />
               </div>
@@ -188,7 +188,7 @@ export default function RegisterPage() {
                 <label className="block text-sm font-medium text-slate-700">Address line 1</label>
                 <input
                   type="text" value={address1} onChange={(e)=>setAddress1(e.target.value)}
-                  className="mt-1 w-full px-3 py-2 rounded-lg border border-slate-300 focus:ring-2 focus:ring-emerald-500 text-sm"
+                  className="mt-1 w-full px-3 py-2 rounded-lg border border-slate-300 focus:ring-2 focus:ring-blue-500 text-sm"
                   placeholder="Street address" autoComplete="address-line1"
                 />
               </div>
@@ -197,7 +197,7 @@ export default function RegisterPage() {
                 <label className="block text-sm font-medium text-slate-700">Address line 2 (optional)</label>
                 <input
                   type="text" value={address2} onChange={(e)=>setAddress2(e.target.value)}
-                  className="mt-1 w-full px-3 py-2 rounded-lg border border-slate-300 focus:ring-2 focus:ring-emerald-500 text-sm"
+                  className="mt-1 w-full px-3 py-2 rounded-lg border border-slate-300 focus:ring-2 focus:ring-blue-500 text-sm"
                   placeholder="Apartment, suite, unit" autoComplete="address-line2"
                 />
               </div>
@@ -207,7 +207,7 @@ export default function RegisterPage() {
                   <label className="block text-sm font-medium text-slate-700">City</label>
                   <input
                     type="text" value={city} onChange={(e)=>setCity(e.target.value)}
-                    className="mt-1 w-full px-3 py-2 rounded-lg border border-slate-300 focus:ring-2 focus:ring-emerald-500 text-sm"
+                    className="mt-1 w-full px-3 py-2 rounded-lg border border-slate-300 focus:ring-2 focus:ring-blue-500 text-sm"
                     placeholder="Brussels" autoComplete="address-level2"
                   />
                 </div>
@@ -215,7 +215,7 @@ export default function RegisterPage() {
                   <label className="block text-sm font-medium text-slate-700">State/Region</label>
                   <input
                     type="text" value={stateRegion} onChange={(e)=>setStateRegion(e.target.value)}
-                    className="mt-1 w-full px-3 py-2 rounded-lg border border-slate-300 focus:ring-2 focus:ring-emerald-500 text-sm"
+                    className="mt-1 w-full px-3 py-2 rounded-lg border border-slate-300 focus:ring-2 focus:ring-blue-500 text-sm"
                     placeholder="Brussels" autoComplete="address-level1"
                   />
                 </div>
@@ -226,7 +226,7 @@ export default function RegisterPage() {
                   <label className="block text-sm font-medium text-slate-700">Postal code</label>
                   <input
                     type="text" value={postalCode} onChange={(e)=>setPostalCode(e.target.value)}
-                    className="mt-1 w-full px-3 py-2 rounded-lg border border-slate-300 focus:ring-2 focus:ring-emerald-500 text-sm"
+                    className="mt-1 w-full px-3 py-2 rounded-lg border border-slate-300 focus:ring-2 focus:ring-blue-500 text-sm"
                     placeholder="100001" autoComplete="postal-code"
                   />
                 </div>
@@ -234,7 +234,7 @@ export default function RegisterPage() {
                   <label className="block text-sm font-medium text-slate-700">Country</label>
                   <select
                     value={country} onChange={(e)=>setCountry(e.target.value)}
-                    className="mt-1 w-full px-3 py-2 rounded-lg border border-slate-300 focus:ring-2 focus:ring-emerald-500 text-sm"
+                    className="mt-1 w-full px-3 py-2 rounded-lg border border-slate-300 focus:ring-2 focus:ring-blue-500 text-sm"
                     autoComplete="country-name"
                   >
                     <option>Belgium</option>
@@ -256,7 +256,7 @@ export default function RegisterPage() {
                 <label className="block text-sm font-medium text-slate-700">Password</label>
                 <input
                   type="password" value={password} onChange={(e)=>setPassword(e.target.value)}
-                  className="mt-1 w-full px-3 py-2 rounded-lg border border-slate-300 focus:ring-2 focus:ring-emerald-500 text-sm"
+                  className="mt-1 w-full px-3 py-2 rounded-lg border border-slate-300 focus:ring-2 focus:ring-blue-500 text-sm"
                   placeholder="At least 8 characters" autoComplete="new-password"
                 />
               </div>
@@ -265,7 +265,7 @@ export default function RegisterPage() {
                 <label className="block text-sm font-medium text-slate-700">Confirm password</label>
                 <input
                   type="password" value={confirm} onChange={(e)=>setConfirm(e.target.value)}
-                  className="mt-1 w-full px-3 py-2 rounded-lg border border-slate-300 focus:ring-2 focus:ring-emerald-500 text-sm"
+                  className="mt-1 w-full px-3 py-2 rounded-lg border border-slate-300 focus:ring-2 focus:ring-blue-500 text-sm"
                   placeholder="Repeat password" autoComplete="new-password"
                 />
               </div>
@@ -279,7 +279,7 @@ export default function RegisterPage() {
                 <label className="block text-sm font-medium text-slate-700">How did you hear about us? (optional)</label>
                 <select
                   value={referral} onChange={(e)=>setReferral(e.target.value)}
-                  className="mt-1 w-full px-3 py-2 rounded-lg border border-slate-300 focus:ring-2 focus:ring-emerald-500 text-sm"
+                  className="mt-1 w-full px-3 py-2 rounded-lg border border-slate-300 focus:ring-2 focus:ring-blue-500 text-sm"
                 >
                   <option value="">Select…</option>
                   <option>Friend / Family</option>
@@ -314,8 +314,8 @@ export default function RegisterPage() {
                   />
                   <span>
                     I agree to the{" "}
-                    <Link to="/legal/terms" className="text-emerald-500 hover:underline">Terms</Link> and{" "}
-                    <Link to="/legal/privacy" className="text-emerald-500 hover:underline">Privacy Policy</Link>.
+                    <Link to="/legal/terms" className="text-blue-500 hover:underline">Terms</Link> and{" "}
+                    <Link to="/legal/privacy" className="text-blue-500 hover:underline">Privacy Policy</Link>.
                   </span>
                 </label>
               </div>
@@ -324,7 +324,7 @@ export default function RegisterPage() {
                 type="submit"
                 disabled={loading || !canSubmit}
                 className={`w-full mt-2 text-white font-semibold py-2.5 rounded-lg transition ${
-                  loading || !canSubmit ? "bg-emerald-400 cursor-not-allowed" : "bg-emerald-500 hover:bg-emerald-400"
+                  loading || !canSubmit ? "bg-blue-400 cursor-not-allowed" : "bg-blue-500 hover:bg-blue-400"
                 }`}
               >
                 {loading ? "Creating account…" : "Create account"}
@@ -333,7 +333,7 @@ export default function RegisterPage() {
 
             <p className="text-center text-sm text-slate-500 mt-4">
               Already registered?{" "}
-              <Link to="/auth/login" className="text-emerald-500 font-medium hover:underline">Log in</Link>
+              <Link to="/auth/login" className="text-blue-500 font-medium hover:underline">Log in</Link>
             </p>
           </>
         )}
@@ -342,15 +342,15 @@ export default function RegisterPage() {
           <>
             <h1 className="text-2xl font-bold text-slate-900">Verify your account</h1>
             <p className="mt-1 text-sm text-slate-500">Enter the 6-digit code sent to <b>{email}</b>.</p>
-            {err && <div className="mt-4 text-sm text-emerald-400 bg-emerald-500/10 border px-3 py-2">{err}</div>}
-            {note && !err && <div className="mt-4 text-sm text-green-700 bg-green-50 border px-3 py-2">{note}</div>}
+            {err && <div className="mt-4 text-sm text-blue-400 bg-blue-500/10 border px-3 py-2">{err}</div>}
+            {note && !err && <div className="mt-4 text-sm text-blue-700 bg-blue-50 border px-3 py-2">{note}</div>}
 
             <div className="mt-6 space-y-4">
               <div>
                 <label className="block text-sm font-medium text-slate-700">Verification code</label>
                 <input
                   inputMode="numeric" value={otp} onChange={(e)=>setOtp(e.target.value.replace(/\D/g,"").slice(0,6))}
-                  className="mt-1 w-full px-3 py-2 rounded-lg border border-slate-300 focus:ring-2 focus:ring-emerald-500 text-sm"
+                  className="mt-1 w-full px-3 py-2 rounded-lg border border-slate-300 focus:ring-2 focus:ring-blue-500 text-sm"
                   placeholder="Enter 6-digit code"
                 />
               </div>
@@ -360,7 +360,7 @@ export default function RegisterPage() {
                   onClick={handleVerifyOTP}
                   disabled={verifying || otp.length !== 6}
                   className={`flex-1 px-4 py-2 rounded-lg text-white font-semibold transition ${
-                    verifying || otp.length !== 6 ? "bg-emerald-400 cursor-not-allowed" : "bg-emerald-500 hover:bg-emerald-400"
+                    verifying || otp.length !== 6 ? "bg-blue-400 cursor-not-allowed" : "bg-blue-500 hover:bg-blue-400"
                   }`}
                 >
                   {verifying ? "Verifying…" : "Verify"}
@@ -369,7 +369,7 @@ export default function RegisterPage() {
                   onClick={handleResend}
                   disabled={sendingOtp}
                   className={`px-4 py-2 rounded-lg font-semibold transition ${
-                    sendingOtp ? "bg-slate-100 cursor-not-allowed" : "bg-slate-100 text-white hover:bg-emerald-500"
+                    sendingOtp ? "bg-slate-100 cursor-not-allowed" : "bg-slate-100 text-white hover:bg-blue-500"
                   }`}
                 >
                   {sendingOtp ? "Sending…" : "Resend"}

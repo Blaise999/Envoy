@@ -16,7 +16,7 @@ const TEST_PROMO_CODE = "011205";
 
 /* ---------- UI helpers ---------- */
 const INPUT =
-  "w-full rounded-xl border border-slate-300 bg-white px-3.5 py-2.5 text-sm outline-none focus:ring-2 focus:ring-emerald-500/40 focus:border-emerald-500 transition";
+  "w-full rounded-xl border border-slate-300 bg-white px-3.5 py-2.5 text-sm outline-none focus:ring-2 focus:ring-blue-500/40 focus:border-blue-500 transition";
 const LABEL = "block text-xs font-semibold text-slate-500 mb-1.5";
 
 /* ---------- map draft -> summary ---------- */
@@ -430,7 +430,7 @@ export default function BillingPage() {
                         value={promoInput}
                         onChange={(e) => { setPromoInput(e.target.value); setPromoErr(""); }}
                         placeholder="Enter promo code"
-                        className="flex-1 rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/30"
+                        className="flex-1 rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/30"
                       />
                       <button
                         type="button"
@@ -441,18 +441,18 @@ export default function BillingPage() {
                       </button>
                     </div>
                   ) : (
-                    <div className="flex items-center justify-between rounded-lg bg-emerald-50 border border-emerald-200 px-3 py-2">
+                    <div className="flex items-center justify-between rounded-lg bg-blue-50 border border-blue-200 px-3 py-2">
                       <div className="text-sm">
-                        <span className="font-semibold text-emerald-700">✓ Promo applied:</span>{" "}
-                        <span className="font-mono text-emerald-900">{TEST_PROMO_CODE}</span>
-                        <div className="text-xs text-emerald-700 mt-0.5">
+                        <span className="font-semibold text-blue-700">✓ Promo applied:</span>{" "}
+                        <span className="font-mono text-blue-900">{TEST_PROMO_CODE}</span>
+                        <div className="text-xs text-blue-700 mt-0.5">
                           Card entry skipped — payment handled in person on pickup.
                         </div>
                       </div>
                       <button
                         type="button"
                         onClick={removePromo}
-                        className="text-xs font-semibold text-emerald-700 hover:text-emerald-900 underline"
+                        className="text-xs font-semibold text-blue-700 hover:text-blue-900 underline"
                       >
                         Remove
                       </button>
@@ -472,7 +472,7 @@ export default function BillingPage() {
                       <input
                         type="radio"
                         name="method"
-                        className="accent-emerald-500"
+                        className="accent-blue-500"
                         checked={method === opt}
                         disabled={opt === "payInPerson" && !promoApplied}
                         onChange={() => {
@@ -503,7 +503,7 @@ export default function BillingPage() {
                 )}
 
                 {method === "payInPerson" && (
-                  <div className="rounded-xl border bg-emerald-50 border-emerald-200 p-4 text-sm text-emerald-900">
+                  <div className="rounded-xl border bg-blue-50 border-blue-200 p-4 text-sm text-blue-900">
                     <div className="font-semibold mb-1">Pay in Person</div>
                     <p>
                       No card required. Our courier will collect payment when they pick up or drop off the parcel.
@@ -515,14 +515,14 @@ export default function BillingPage() {
                 <label className="mt-1 flex items-center gap-2 text-sm">
                   <input
                     type="checkbox"
-                    className="accent-emerald-500"
+                    className="accent-blue-500"
                     checked={insure}
                     onChange={(e) => setInsure(e.target.checked)}
                   />
                   Add shipment insurance (1% of base, min $1.50)
                 </label>
 
-                {err && <div className="text-sm text-emerald-400 bg-emerald-500/10 border px-3 py-2">{err}</div>}
+                {err && <div className="text-sm text-blue-400 bg-blue-500/10 border px-3 py-2">{err}</div>}
 
                 <div className="mt-6 flex gap-3">
                   <button
@@ -531,8 +531,8 @@ export default function BillingPage() {
                     className={
                       "flex-1 rounded-xl font-semibold py-3 transition " +
                       ((method === "card" && !cardOk && !IS_DEV && !promoApplied) || paying
-                        ? "bg-emerald-400 text-white cursor-not-allowed"
-                        : "bg-emerald-500 text-white hover:bg-emerald-400")
+                        ? "bg-blue-400 text-white cursor-not-allowed"
+                        : "bg-blue-500 text-white hover:bg-blue-400")
                     }
                   >
                     {paying ? "Processing…" : "Confirm & Book"}
@@ -639,7 +639,7 @@ function CardFields({ onValidityChange }) {
             inputMode="numeric"
             autoComplete="cc-number"
             placeholder="1234 5678 9012 3456"
-            className={INPUT + (number && !isNumberValid ? " ring-1 ring-emerald-500" : "") + " pr-28"}
+            className={INPUT + (number && !isNumberValid ? " ring-1 ring-blue-500" : "") + " pr-28"}
             value={number}
             onChange={(e) => setNumber(formatCardNumber(e.target.value))}
           />
@@ -652,7 +652,7 @@ function CardFields({ onValidityChange }) {
             </svg>
           </div>
         </div>
-        {!isNumberValid && number.length > 0 && <p className="mt-1 text-xs text-emerald-500">Enter a valid card number.</p>}
+        {!isNumberValid && number.length > 0 && <p className="mt-1 text-xs text-blue-500">Enter a valid card number.</p>}
       </div>
 
       {/* expiry + cvc row */}
@@ -663,11 +663,11 @@ function CardFields({ onValidityChange }) {
             inputMode="numeric"
             autoComplete="cc-exp"
             placeholder="MM/YY"
-            className={INPUT + (expiry && !isExpiryValid ? " ring-1 ring-emerald-500" : "")}
+            className={INPUT + (expiry && !isExpiryValid ? " ring-1 ring-blue-500" : "")}
             value={expiry}
             onChange={(e) => setExpiry(formatExpiry(e.target.value))}
           />
-          {!isExpiryValid && expiry.length > 0 && <p className="mt-1 text-xs text-emerald-500">Use a valid future date.</p>}
+          {!isExpiryValid && expiry.length > 0 && <p className="mt-1 text-xs text-blue-500">Use a valid future date.</p>}
         </div>
         <div>
           <label className={LABEL}>CVV</label>
@@ -675,11 +675,11 @@ function CardFields({ onValidityChange }) {
             inputMode="numeric"
             autoComplete="cc-csc"
             placeholder={brand === "amex" ? "4 digits" : "3 digits"}
-            className={INPUT + (cvc && !isCvcValid ? " ring-1 ring-emerald-500" : "")}
+            className={INPUT + (cvc && !isCvcValid ? " ring-1 ring-blue-500" : "")}
             value={cvc}
             onChange={(e) => setCvc(formatCvc(e.target.value, brand))}
           />
-          {!isCvcValid && cvc.length > 0 && <p className="mt-1 text-xs text-emerald-500">Invalid CVC.</p>}
+          {!isCvcValid && cvc.length > 0 && <p className="mt-1 text-xs text-blue-500">Invalid CVC.</p>}
         </div>
       </div>
 

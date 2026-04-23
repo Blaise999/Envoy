@@ -56,7 +56,7 @@ export default function PrivacyPage() {
 
         <section>
           <h2 className="text-2xl font-bold text-slate-900">5. Your rights</h2>
-          <p className="mt-3">Under GDPR, UK GDPR, and CCPA you have the right to access, correct, or delete your personal data, to restrict or object to certain processing, and to port your data to another service. To exercise any of these, email <a href="mailto:privacy@shipenvoy.com" className="text-emerald-600 font-semibold">privacy@shipenvoy.com</a>. We respond within 30 days.</p>
+          <p className="mt-3">Under GDPR, UK GDPR, and CCPA you have the right to access, correct, or delete your personal data, to restrict or object to certain processing, and to port your data to another service. To exercise any of these, email <a href="mailto:privacy@shipenvoy.com" className="text-blue-600 font-semibold">privacy@shipenvoy.com</a>. We respond within 30 days.</p>
         </section>
 
         <section>
@@ -71,7 +71,7 @@ export default function PrivacyPage() {
 
         <section>
           <h2 className="text-2xl font-bold text-slate-900">8. Security</h2>
-          <p className="mt-3">TLS 1.3 in transit. AES-256 at rest. Mandatory MFA for employees. Hardware security keys for production access. More detail on our <a href="/security" className="text-emerald-600 font-semibold">Security page</a>.</p>
+          <p className="mt-3">TLS 1.3 in transit. AES-256 at rest. Mandatory MFA for employees. Hardware security keys for production access. More detail on our <a href="/security" className="text-blue-600 font-semibold">Security page</a>.</p>
         </section>
 
         <section>
@@ -81,7 +81,7 @@ export default function PrivacyPage() {
 
         <section>
           <h2 className="text-2xl font-bold text-slate-900">10. Contact</h2>
-          <p className="mt-3">Our Data Protection Officer can be reached at <a href="mailto:dpo@shipenvoy.com" className="text-emerald-600 font-semibold">dpo@shipenvoy.com</a>. You also have the right to lodge a complaint with your local supervisory authority (ICO in the UK, CNIL in France, etc.).</p>
+          <p className="mt-3">Our Data Protection Officer can be reached at <a href="mailto:dpo@shipenvoy.com" className="text-blue-600 font-semibold">dpo@shipenvoy.com</a>. You also have the right to lodge a complaint with your local supervisory authority (ICO in the UK, CNIL in France, etc.).</p>
         </section>
       </div>
     </PageShell>

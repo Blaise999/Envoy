@@ -28,7 +28,7 @@ export default function WarehousingPage() {
       </header>
 
       {/* ===== Hero ===== */}
-      <section className="relative overflow-hidden bg-gradient-to-br from-emerald-500 to-emerald-400 text-white">
+      <section className="relative overflow-hidden bg-gradient-to-br from-blue-500 to-blue-400 text-white">
         <div className="absolute inset-0 opacity-20 bg-[radial-gradient(circle_at_top_left,white,transparent_70%)]" />
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 sm:py-20">
           <div className="grid lg:grid-cols-2 gap-10 items-center">
@@ -39,7 +39,7 @@ export default function WarehousingPage() {
               <h1 className="mt-4 text-4xl sm:text-5xl font-black leading-tight">
                 Warehousing that scales with your demand.
               </h1>
-              <p className="mt-4 text-emerald-500/20 max-w-prose">
+              <p className="mt-4 text-blue-500/20 max-w-prose">
                 From inbound receiving to pick/pack/ship and returns processing—Envoy
                 provides modern facilities, accurate SLAs, and real-time visibility.
               </p>
@@ -216,16 +216,16 @@ export default function WarehousingPage() {
       </section>
 
       {/* ===== CTA ===== */}
-      <section className="relative overflow-hidden py-16 bg-gradient-to-r from-emerald-400 to-emerald-500 text-white text-center">
+      <section className="relative overflow-hidden py-16 bg-gradient-to-r from-blue-400 to-blue-500 text-white text-center">
         <div className="absolute inset-0 opacity-20 bg-[radial-gradient(circle_at_bottom_right,white,transparent_70%)]" />
         <div className="relative max-w-2xl mx-auto px-4">
           <h2 className="text-3xl font-extrabold">Ready to level up fulfilment?</h2>
-          <p className="mt-3 text-emerald-500/20">
+          <p className="mt-3 text-blue-500/20">
             Talk to our team about sites, SLAs, and onboarding timelines.
           </p>
           <a
             href="/services/express?type=parcel#quote"
-            className="mt-6 inline-block px-8 py-3 rounded-xl bg-white text-emerald-400 font-bold shadow hover:scale-105 transition"
+            className="mt-6 inline-block px-8 py-3 rounded-xl bg-white text-blue-400 font-bold shadow hover:scale-105 transition"
           >
             Get Shipping Rates
           </a>
@@ -240,7 +240,7 @@ export default function WarehousingPage() {
 function Feature({ icon, title, text }) {
   return (
     <div className="p-5 rounded-2xl border border-slate-200 bg-white hover:shadow-md transition">
-      <div className="w-10 h-10 rounded-xl bg-emerald-500/10 text-emerald-400 grid place-items-center">{icon}</div>
+      <div className="w-10 h-10 rounded-xl bg-blue-500/10 text-blue-400 grid place-items-center">{icon}</div>
       <h3 className="mt-3 font-semibold">{title}</h3>
       <p className="mt-1 text-sm text-slate-500">{text}</p>
     </div>
@@ -281,7 +281,7 @@ function SquareImg({ src, alt }) {
 function Step({ index, title, text }) {
   return (
     <div className="relative bg-white p-6 rounded-2xl border shadow-sm hover:shadow-md transition">
-      <div className="absolute -top-4 left-6 w-8 h-8 flex items-center justify-center rounded-full bg-emerald-500 text-white font-bold">
+      <div className="absolute -top-4 left-6 w-8 h-8 flex items-center justify-center rounded-full bg-blue-500 text-white font-bold">
         {index}
       </div>
       <h3 className="mt-6 font-semibold">{title}</h3>

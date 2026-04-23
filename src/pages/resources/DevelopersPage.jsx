@@ -11,7 +11,7 @@ export default function DevelopersPage() {
       <div className="rounded-2xl overflow-hidden border border-slate-200 bg-slate-950 text-slate-100 mb-12">
         <div className="flex items-center justify-between px-4 py-2 bg-slate-900 border-b border-slate-800">
           <span className="text-xs font-mono text-slate-400">POST /v1/shipments</span>
-          <span className="text-xs font-mono text-emerald-400">201 Created</span>
+          <span className="text-xs font-mono text-blue-400">201 Created</span>
         </div>
         <pre className="p-5 text-xs sm:text-sm overflow-x-auto">
 {`curl -X POST https://api.shipenvoy.com/v1/shipments \\
@@ -44,7 +44,7 @@ export default function DevelopersPage() {
       </div>
 
       <div className="flex flex-wrap gap-3">
-        <Link to="/docs" className="px-5 py-3 rounded-xl bg-emerald-500 text-white font-semibold hover:bg-emerald-400 transition">Read the docs</Link>
+        <Link to="/docs" className="px-5 py-3 rounded-xl bg-blue-500 text-white font-semibold hover:bg-blue-400 transition">Read the docs</Link>
         <Link to="/status" className="px-5 py-3 rounded-xl bg-white border border-slate-200 font-semibold hover:bg-slate-50 transition">API status</Link>
         <a href="https://github.com" className="px-5 py-3 rounded-xl bg-slate-900 text-white font-semibold hover:bg-slate-800 transition">GitHub →</a>
       </div>

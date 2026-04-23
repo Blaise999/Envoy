@@ -67,7 +67,7 @@ export default function SitemapPage() {
             <ul className="space-y-2">
               {s.links.map(([label, to]) => (
                 <li key={to}>
-                  <Link to={to} className="text-slate-700 hover:text-emerald-600">{label}</Link>
+                  <Link to={to} className="text-slate-700 hover:text-blue-600">{label}</Link>
                 </li>
               ))}
             </ul>

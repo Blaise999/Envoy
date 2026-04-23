@@ -173,7 +173,7 @@ export function ChatWidget() {
           md:right-8 md:bottom-10 
           z-40
           flex h-12 w-12 items-center justify-center 
-          rounded-full shadow-lg bg-emerald-500 text-white
+          rounded-full shadow-lg bg-blue-500 text-white
         "
       >
         {open ? <X size={20} /> : <MessageCircle size={22} />}

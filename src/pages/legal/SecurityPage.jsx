@@ -13,7 +13,7 @@ export default function SecurityPage() {
     <PageShell title="Security at Envoy" subtitle="How we protect your shipments, your account, and everything in between.">
       <div className="mb-14 p-8 sm:p-10 rounded-3xl bg-gradient-to-br from-slate-900 to-slate-800 text-white">
         <div className="flex items-start gap-4">
-          <div className="w-14 h-14 rounded-2xl bg-emerald-500 grid place-items-center shrink-0">
+          <div className="w-14 h-14 rounded-2xl bg-blue-500 grid place-items-center shrink-0">
             <svg viewBox="0 0 24 24" className="w-8 h-8 text-white" fill="none" stroke="currentColor" strokeWidth="2">
               <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" strokeLinecap="round" strokeLinejoin="round" />
             </svg>
@@ -54,9 +54,9 @@ export default function SecurityPage() {
             ["Review your sessions", "Settings → Security → Active sessions. If you see a session you don't recognise, revoke it and change your password."],
             ["Invite teammates properly", "Use the Team Members page, not a shared login. Everyone gets their own account with role-based permissions."],
           ].map(([h, d]) => (
-            <div key={h} className="p-5 rounded-xl bg-emerald-50 border border-emerald-100">
-              <div className="font-bold text-emerald-900">{h}</div>
-              <div className="mt-1 text-sm text-emerald-800">{d}</div>
+            <div key={h} className="p-5 rounded-xl bg-blue-50 border border-blue-100">
+              <div className="font-bold text-blue-900">{h}</div>
+              <div className="mt-1 text-sm text-blue-800">{d}</div>
             </div>
           ))}
         </div>
@@ -65,8 +65,8 @@ export default function SecurityPage() {
         <h3 className="text-2xl font-black">Found a security issue?</h3>
         <p className="mt-3 text-slate-300">Please tell us. We pay bounties for real vulnerabilities, and we don't sue researchers who act in good faith.</p>
         <div className="mt-5 space-y-2 text-sm">
-          <div><span className="text-slate-400">Email:</span> <a href="mailto:security@shipenvoy.com" className="text-emerald-400 font-semibold">security@shipenvoy.com</a></div>
-          <div><span className="text-slate-400">PGP key:</span> <a href="#" className="text-emerald-400 font-semibold">Fingerprint 4A2B 8F3C 1D9E 7F6A · keys.openpgp.org</a></div>
+          <div><span className="text-slate-400">Email:</span> <a href="mailto:security@shipenvoy.com" className="text-blue-400 font-semibold">security@shipenvoy.com</a></div>
+          <div><span className="text-slate-400">PGP key:</span> <a href="#" className="text-blue-400 font-semibold">Fingerprint 4A2B 8F3C 1D9E 7F6A · keys.openpgp.org</a></div>
           <div><span className="text-slate-400">Scope:</span> anything under shipenvoy.com, api.shipenvoy.com, and our iOS/Android apps.</div>
         </div>
       </div>

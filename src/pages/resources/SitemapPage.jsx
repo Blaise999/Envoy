@@ -19,7 +19,7 @@ export default function SitemapPage() {
             <ul className="space-y-2.5 text-sm">
               {g.links.map(([l, to]) => (
                 <li key={to}>
-                  <Link to={to} className="text-slate-600 hover:text-emerald-600 transition">
+                  <Link to={to} className="text-slate-600 hover:text-blue-600 transition">
                     {l}
                   </Link>
                 </li>
@@ -31,7 +31,7 @@ export default function SitemapPage() {
       <div className="mt-16 p-8 rounded-3xl bg-slate-50 border border-slate-100">
         <h3 className="font-black text-xl">Can't find what you're looking for?</h3>
         <p className="mt-2 text-slate-600">Drop us a line and we'll point you the right way.</p>
-        <Link to="/contact" className="mt-4 inline-block px-5 py-2.5 rounded-full bg-emerald-500 text-white font-semibold hover:bg-emerald-400 transition">
+        <Link to="/contact" className="mt-4 inline-block px-5 py-2.5 rounded-full bg-blue-500 text-white font-semibold hover:bg-blue-400 transition">
           Contact us
         </Link>
       </div>

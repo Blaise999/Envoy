@@ -57,7 +57,7 @@ export default function AdminLogin() {
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(16,185,129,0.2),transparent_60%)]" />
         <div className="relative z-10">
           <Link to="/" className="inline-flex items-center gap-2">
-            <div className="w-10 h-10 rounded-xl bg-emerald-500 grid place-items-center">
+            <div className="w-10 h-10 rounded-xl bg-blue-500 grid place-items-center">
               <svg viewBox="0 0 24 24" className="w-6 h-6 text-white" fill="currentColor">
                 <path d="M2 10l20-7-7 20-3-9z" />
               </svg>
@@ -65,7 +65,7 @@ export default function AdminLogin() {
             <span className="text-2xl font-black">Envoy</span>
           </Link>
           <div className="mt-12 max-w-md">
-            <div className="text-xs font-bold uppercase tracking-widest text-emerald-400">Operations Console</div>
+            <div className="text-xs font-bold uppercase tracking-widest text-blue-400">Operations Console</div>
             <h1 className="mt-3 text-4xl font-black tracking-tight leading-tight">
               Every shipment. Every scan. One window.
             </h1>
@@ -99,7 +99,7 @@ export default function AdminLogin() {
                 autoComplete="username"
                 value={form.email}
                 onChange={(e) => setForm((s) => ({ ...s, email: e.target.value }))}
-                className="w-full rounded-xl border border-slate-200 px-4 py-3 outline-none focus:border-emerald-400 focus:ring-4 focus:ring-emerald-500/10 transition"
+                className="w-full rounded-xl border border-slate-200 px-4 py-3 outline-none focus:border-blue-400 focus:ring-4 focus:ring-blue-500/10 transition"
                 placeholder="you@shipenvoy.com"
               />
             </div>
@@ -112,7 +112,7 @@ export default function AdminLogin() {
                   autoComplete="current-password"
                   value={form.password}
                   onChange={(e) => setForm((s) => ({ ...s, password: e.target.value }))}
-                  className="w-full rounded-xl border border-slate-200 px-4 py-3 pr-12 outline-none focus:border-emerald-400 focus:ring-4 focus:ring-emerald-500/10 transition"
+                  className="w-full rounded-xl border border-slate-200 px-4 py-3 pr-12 outline-none focus:border-blue-400 focus:ring-4 focus:ring-blue-500/10 transition"
                   placeholder="••••••••"
                 />
                 <button
@@ -137,7 +137,7 @@ export default function AdminLogin() {
               type="submit"
               disabled={loading}
               className={`w-full rounded-xl px-4 py-3 font-semibold text-white transition shadow-md ${
-                loading ? "bg-slate-400 cursor-not-allowed" : "bg-emerald-500 hover:bg-emerald-400 active:scale-[0.98]"
+                loading ? "bg-slate-400 cursor-not-allowed" : "bg-blue-500 hover:bg-blue-400 active:scale-[0.98]"
               }`}
             >
               {loading ? "Signing in…" : "Sign in"}
@@ -145,7 +145,7 @@ export default function AdminLogin() {
           </form>
 
           <div className="mt-8 pt-6 border-t border-slate-100 text-center text-sm text-slate-500">
-            Not Envoy staff? <Link to="/auth/login" className="text-emerald-600 font-semibold hover:text-emerald-700">Customer sign-in</Link>
+            Not Envoy staff? <Link to="/auth/login" className="text-blue-600 font-semibold hover:text-blue-700">Customer sign-in</Link>
           </div>
         </div>
       </div>
@@ -177,7 +177,7 @@ function WorldDotBg() {
   return (
     <svg viewBox="0 0 1000 500" preserveAspectRatio="xMidYMid slice" className="w-full h-full">
       {dots.map(({ x, y, k }) => (
-        <circle key={k} cx={x * 1000} cy={y * 500} r={1.5} fill="#34d399" opacity="0.6" />
+        <circle key={k} cx={x * 1000} cy={y * 500} r={1.5} fill="#60a5fa" opacity="0.6" />
       ))}
     </svg>
   );

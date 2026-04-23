@@ -380,17 +380,17 @@ return {
       stop(e);
       if (goodsUploading) return;
       if (e.dataTransfer?.files?.length) uploadGoodsPhotos(e.dataTransfer.files);
-      el.classList.remove("ring-2", "ring-emerald-500/30");
+      el.classList.remove("ring-2", "ring-blue-500/30");
     };
 
     const onDragEnter = (e) => {
       stop(e);
-      el.classList.add("ring-2", "ring-emerald-500/30");
+      el.classList.add("ring-2", "ring-blue-500/30");
     };
 
     const onDragLeave = (e) => {
       stop(e);
-      el.classList.remove("ring-2", "ring-emerald-500/30");
+      el.classList.remove("ring-2", "ring-blue-500/30");
     };
 
     el.addEventListener("dragenter", onDragEnter);
@@ -447,7 +447,7 @@ return {
 
               <a
                 href="#support"
-                className="inline-flex items-center gap-2 px-3 py-1.5 rounded-xl bg-slate-100 text-white text-sm font-semibold hover:bg-emerald-500"
+                className="inline-flex items-center gap-2 px-3 py-1.5 rounded-xl bg-slate-100 text-white text-sm font-semibold hover:bg-blue-500"
               >
                 <HeadsetIcon /> Support
               </a>
@@ -481,7 +481,7 @@ return {
             <div className="lg:col-span-5">
               <div className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white/80 px-3 py-1 text-xs font-semibold text-slate-700">
                 <SparkIcon /> New booking flow
-                <span className="ml-1 rounded-full bg-emerald-500 text-white px-2 py-0.5 text-[10px]">2026</span>
+                <span className="ml-1 rounded-full bg-blue-500 text-white px-2 py-0.5 text-[10px]">2026</span>
               </div>
 
               <h1 className="mt-4 text-4xl sm:text-5xl font-black tracking-tight leading-[1.05]">
@@ -496,7 +496,7 @@ return {
               <div className="mt-6 flex flex-wrap gap-3">
                 <a
                   href="#quote"
-                  className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-emerald-500 text-white font-semibold hover:bg-emerald-400 active:scale-[0.98]"
+                  className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-blue-500 text-white font-semibold hover:bg-blue-400 active:scale-[0.98]"
                 >
                   Get a quote <ChevronDownIcon />
                 </a>
@@ -782,7 +782,7 @@ return {
                             Uploading: <span className="font-medium">{uploadingNames.join(", ")}</span>
                           </div>
                         ) : null}
-                        {goodsUploadErr ? <div className="mt-2 text-xs text-emerald-500">{goodsUploadErr}</div> : null}
+                        {goodsUploadErr ? <div className="mt-2 text-xs text-blue-500">{goodsUploadErr}</div> : null}
                       </div>
 
                       <div className="shrink-0 flex items-center gap-2">
@@ -801,7 +801,7 @@ return {
                           className={`inline-flex items-center gap-2 px-3 py-2 rounded-xl text-sm font-semibold active:scale-[0.98] ${
                             goodsUploading || goodsPhotos.length >= GOODS_MAX
                               ? "bg-slate-100 text-slate-500 cursor-not-allowed"
-                              : "bg-slate-100 text-white hover:bg-emerald-500"
+                              : "bg-slate-100 text-white hover:bg-blue-500"
                           }`}
                         >
                           <PlusIcon />
@@ -846,7 +846,7 @@ return {
                                   e.stopPropagation();
                                   removeGoodsPhoto(p.url);
                                 }}
-                                className="inline-flex items-center gap-1 rounded-lg bg-emerald-500/70 text-white text-[11px] px-2 py-1"
+                                className="inline-flex items-center gap-1 rounded-lg bg-blue-500/70 text-white text-[11px] px-2 py-1"
                               >
                                 <XIcon /> Remove
                               </span>
@@ -856,7 +856,7 @@ return {
                       </div>
                     ) : (
                       <div className="mt-4 rounded-xl border border-dashed bg-white px-4 py-6 text-center">
-                        <div className="mx-auto w-11 h-11 rounded-2xl bg-emerald-500/10 text-emerald-400 grid place-items-center">
+                        <div className="mx-auto w-11 h-11 rounded-2xl bg-blue-500/10 text-blue-400 grid place-items-center">
                           <CameraIcon />
                         </div>
                         <div className="mt-3 text-sm font-semibold">No photos yet</div>
@@ -1015,12 +1015,12 @@ return {
                           </div>
 
                           {!emailOk ? (
-                            <div className="mt-2 text-xs text-emerald-500">
+                            <div className="mt-2 text-xs text-blue-500">
                               Enter a valid <b>recipient email</b> to continue.
                             </div>
                           ) : null}
                           {!addressOk ? (
-                            <div className="mt-1 text-xs text-emerald-500">
+                            <div className="mt-1 text-xs text-blue-500">
                               Enter the <b>recipient street address</b> to continue.
                             </div>
                           ) : null}
@@ -1034,7 +1034,7 @@ return {
                             onClick={onContinueToBilling}
                             className={`inline-flex items-center justify-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold active:scale-[0.98] ${
                               canContinue
-                                ? "bg-slate-100 text-white hover:bg-emerald-500"
+                                ? "bg-slate-100 text-white hover:bg-blue-500"
                                 : "bg-slate-100 text-slate-500 cursor-not-allowed"
                             }`}
                             disabled={!canContinue}
@@ -1255,7 +1255,7 @@ return {
       <section id="support" className="py-14 sm:py-18 bg-white border-t">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 grid lg:grid-cols-12 gap-8 items-center">
           <div className="lg:col-span-6">
-            <div className="inline-flex items-center gap-2 rounded-full bg-emerald-500/10 text-emerald-400 ring-1 ring-emerald-500/20 px-3 py-1 text-xs font-semibold">
+            <div className="inline-flex items-center gap-2 rounded-full bg-blue-500/10 text-blue-400 ring-1 ring-blue-500/20 px-3 py-1 text-xs font-semibold">
               <HeadsetIcon /> Envoy Support
             </div>
 
@@ -1267,7 +1267,7 @@ return {
             <div className="mt-6 flex flex-wrap gap-3">
               <a
                 href="mailto:hello@shipenvoy.com"
-                className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-slate-100 text-white font-semibold hover:bg-emerald-500 active:scale-[0.98]"
+                className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-slate-100 text-white font-semibold hover:bg-blue-500 active:scale-[0.98]"
               >
                 <MailIcon /> Email support
               </a>
@@ -1319,7 +1319,7 @@ function SectionTitle({ icon, title, subtitle, right }) {
   return (
     <div className="flex items-start justify-between gap-4">
       <div className="flex items-start gap-3">
-        <div className="w-10 h-10 rounded-2xl bg-emerald-500/10 text-emerald-400 grid place-items-center">{icon}</div>
+        <div className="w-10 h-10 rounded-2xl bg-blue-500/10 text-blue-400 grid place-items-center">{icon}</div>
         <div>
           <div className="font-semibold">{title}</div>
           {subtitle ? <div className="text-xs text-slate-500 mt-0.5">{subtitle}</div> : null}
@@ -1347,7 +1347,7 @@ function LabeledInput({ label, compact, className = "", ...rest }) {
       <input
         {...rest}
         className={`mt-1 w-full rounded-xl border border-slate-200 bg-white px-3 py-2 outline-none transition
-        focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500/30
+        focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500/30
         ${compact ? "text-sm" : ""}`}
       />
     </label>
@@ -1362,7 +1362,7 @@ function LabeledTextarea({ label, className = "", ...rest }) {
         {...rest}
         rows={3}
         className="mt-1 w-full rounded-xl border border-slate-200 bg-white px-3 py-2 outline-none transition
-        focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500/30 resize-none"
+        focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500/30 resize-none"
       />
     </label>
   );
@@ -1393,14 +1393,14 @@ function SegmentButton({ title, desc, active, onClick }) {
       onClick={onClick}
       aria-pressed={active}
       className={`rounded-2xl border p-4 text-left transition active:scale-[0.99]
-      ${active ? "border-emerald-500/30 bg-emerald-500/10" : "border-slate-200 bg-white hover:bg-white"}`}
+      ${active ? "border-blue-500/30 bg-blue-500/10" : "border-slate-200 bg-white hover:bg-white"}`}
     >
       <div className="flex items-center justify-between gap-3">
         <div>
           <div className="font-semibold">{title}</div>
           <div className="text-xs text-slate-500 mt-0.5">{desc}</div>
         </div>
-        <div className={`w-9 h-9 rounded-xl grid place-items-center ${active ? "bg-emerald-500 text-white" : "bg-slate-100 text-slate-700"}`}>
+        <div className={`w-9 h-9 rounded-xl grid place-items-center ${active ? "bg-blue-500 text-white" : "bg-slate-100 text-slate-700"}`}>
           {active ? <CheckIcon /> : <ArrowRightMini />}
         </div>
       </div>
@@ -1443,11 +1443,11 @@ function Tier({ name, desc, eta, weight, features, highlight, onClick, active })
     <article
       onClick={onClick}
       className={`relative p-6 rounded-3xl border shadow-sm cursor-pointer transition active:scale-[0.99]
-        ${highlight ? "border-emerald-500/30 bg-gradient-to-b from-emerald-500/10 to-white" : "border-slate-200 bg-white"}
-        ${active ? "ring-2 ring-emerald-500/40" : "hover:shadow-md"}`}
+        ${highlight ? "border-blue-500/30 bg-gradient-to-b from-blue-500/10 to-white" : "border-slate-200 bg-white"}
+        ${active ? "ring-2 ring-blue-500/40" : "hover:shadow-md"}`}
     >
       {highlight ? (
-        <span className="absolute -top-3 right-5 text-[10px] font-semibold px-2 py-1 rounded-full bg-emerald-500 text-white">
+        <span className="absolute -top-3 right-5 text-[10px] font-semibold px-2 py-1 rounded-full bg-blue-500 text-white">
           Most popular
         </span>
       ) : null}
@@ -1469,7 +1469,7 @@ function Tier({ name, desc, eta, weight, features, highlight, onClick, active })
       </ul>
 
       <div className="mt-5 inline-flex items-center gap-2 text-xs font-semibold text-slate-700">
-        <span className={`w-2.5 h-2.5 rounded-full ${active ? "bg-emerald-500" : "bg-slate-700"}`} />
+        <span className={`w-2.5 h-2.5 rounded-full ${active ? "bg-blue-500" : "bg-slate-700"}`} />
         {active ? "Selected" : "Select"}
       </div>
     </article>
@@ -1479,9 +1479,9 @@ function Tier({ name, desc, eta, weight, features, highlight, onClick, active })
 function Step({ index, title, text }) {
   return (
     <div className="group relative overflow-hidden p-6 rounded-3xl border border-slate-200 bg-white shadow-sm hover:shadow-md transition">
-      <div className="pointer-events-none absolute -right-4 -bottom-8 text-7xl font-black text-emerald-500/30">{index}</div>
+      <div className="pointer-events-none absolute -right-4 -bottom-8 text-7xl font-black text-blue-500/30">{index}</div>
       <div className="relative z-10">
-        <div className="w-11 h-11 rounded-2xl bg-emerald-500/10 text-emerald-400 grid place-items-center">
+        <div className="w-11 h-11 rounded-2xl bg-blue-500/10 text-blue-400 grid place-items-center">
           <BoxIcon />
         </div>
         <h3 className="mt-4 font-semibold text-lg">{title}</h3>
@@ -1494,7 +1494,7 @@ function Step({ index, title, text }) {
 function Feature({ icon, title, text }) {
   return (
     <div className="p-6 rounded-3xl border border-slate-200 bg-white hover:shadow-sm transition">
-      <div className="w-11 h-11 rounded-2xl bg-emerald-500/10 text-emerald-400 grid place-items-center">{icon}</div>
+      <div className="w-11 h-11 rounded-2xl bg-blue-500/10 text-blue-400 grid place-items-center">{icon}</div>
       <h3 className="mt-3 font-semibold">{title}</h3>
       <p className="mt-1 text-sm text-slate-500">{text}</p>
     </div>
@@ -1532,7 +1532,7 @@ function PreviewModal({ url, onClose, onRemove }) {
   }, [onClose]);
 
   return (
-    <div className="fixed inset-0 z-[80] bg-emerald-500/60 backdrop-blur-sm grid place-items-center p-4" onMouseDown={onClose}>
+    <div className="fixed inset-0 z-[80] bg-blue-500/60 backdrop-blur-sm grid place-items-center p-4" onMouseDown={onClose}>
       <div
         className="w-full max-w-3xl rounded-3xl overflow-hidden bg-white shadow-2xl"
         onMouseDown={(e) => e.stopPropagation()}
@@ -1543,7 +1543,7 @@ function PreviewModal({ url, onClose, onRemove }) {
             <button
               type="button"
               onClick={onRemove}
-              className="inline-flex items-center gap-2 px-3 py-1.5 rounded-xl bg-emerald-500 text-white text-sm font-semibold hover:bg-emerald-400"
+              className="inline-flex items-center gap-2 px-3 py-1.5 rounded-xl bg-blue-500 text-white text-sm font-semibold hover:bg-blue-400"
             >
               <TrashIcon /> Remove
             </button>
@@ -1556,7 +1556,7 @@ function PreviewModal({ url, onClose, onRemove }) {
             </button>
           </div>
         </div>
-        <div className="bg-emerald-500">
+        <div className="bg-blue-500">
           <img src={url} alt="Preview" className="w-full max-h-[70vh] object-contain" />
         </div>
       </div>

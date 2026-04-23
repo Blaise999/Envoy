@@ -25,7 +25,7 @@ export default function CookiesPage() {
             {rows.map((r) => (
               <tr key={r.n}>
                 <td className="p-4 font-mono text-xs">{r.n}</td>
-                <td className="p-4"><span className="px-2 py-1 rounded bg-emerald-50 text-emerald-700 text-xs font-semibold">{r.p}</span></td>
+                <td className="p-4"><span className="px-2 py-1 rounded bg-blue-50 text-blue-700 text-xs font-semibold">{r.p}</span></td>
                 <td className="p-4 text-slate-600">{r.d}</td>
                 <td className="p-4 text-slate-500">{r.life}</td>
               </tr>

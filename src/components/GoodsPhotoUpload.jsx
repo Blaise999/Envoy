@@ -64,7 +64,7 @@ export function GoodsPhotoUpload({ shipmentKey, photos, setPhotos }) {
           onClick={() => inputRef.current?.click()}
           disabled={busy || (photos?.length || 0) >= 3}
           className={`px-3 py-2 rounded-lg text-sm font-semibold ${
-            busy ? "bg-slate-700 text-slate-700" : "bg-emerald-500 text-white"
+            busy ? "bg-slate-700 text-slate-700" : "bg-blue-500 text-white"
           }`}
         >
           {busy ? "Uploading…" : "Add photos"}
@@ -79,7 +79,7 @@ export function GoodsPhotoUpload({ shipmentKey, photos, setPhotos }) {
         />
       </div>
 
-      {err && <div className="mt-2 text-xs text-emerald-500">{err}</div>}
+      {err && <div className="mt-2 text-xs text-blue-500">{err}</div>}
 
       {!!(photos?.length) && (
         <div className="mt-4 grid grid-cols-3 gap-2">

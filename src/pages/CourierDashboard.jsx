@@ -317,7 +317,7 @@ export default function CourierDashboard() {
             <div className="flex items-center gap-3">
               <Link
                 to="/services/express?type=parcel#quote"
-                className="hidden sm:inline-flex items-center gap-2 px-3 py-1.5 rounded-xl bg-emerald-500 text-white text-sm font-semibold hover:bg-emerald-400 active:scale-[0.98]"
+                className="hidden sm:inline-flex items-center gap-2 px-3 py-1.5 rounded-xl bg-blue-500 text-white text-sm font-semibold hover:bg-blue-400 active:scale-[0.98]"
               >
                 <LightningIcon /> Create Shipment
               </Link>
@@ -349,13 +349,13 @@ export default function CourierDashboard() {
               <button
                 key={t}
                 onClick={() => setTab(t)}
-                className={`px-3 py-2 rounded-lg text-sm font-medium ${tab === t ? "bg-emerald-500 text-white" : "hover:bg-white"}`}
+                className={`px-3 py-2 rounded-lg text-sm font-medium ${tab === t ? "bg-blue-500 text-white" : "hover:bg-white"}`}
               >
                 {t}
               </button>
             ))}
             <div className="ml-auto flex items-center text-xs text-slate-500">
-              {loading ? "Loading…" : err ? <span className="text-emerald-500">{err}</span> : null}
+              {loading ? "Loading…" : err ? <span className="text-blue-500">{err}</span> : null}
             </div>
           </div>
         </div>
@@ -560,7 +560,7 @@ export default function CourierDashboard() {
 
             {/* Modal */}
             {pickupOpen && (
-              <div className="fixed inset-0 z-50 grid place-items-center bg-emerald-500/40 p-4" onClick={() => setPickupOpen(false)}>
+              <div className="fixed inset-0 z-50 grid place-items-center bg-blue-500/40 p-4" onClick={() => setPickupOpen(false)}>
                 <div className="w-full max-w-lg rounded-2xl bg-white p-6 shadow-xl" onClick={(e) => e.stopPropagation()}>
                   <div className="flex items-center justify-between">
                     <h3 className="text-lg font-semibold">Request a pickup</h3>
@@ -600,7 +600,7 @@ export default function CourierDashboard() {
                       <input
                         id="recurring" type="checkbox" checked={pickupForm.recurring}
                         onChange={(e) => setPickupForm({ ...pickupForm, recurring: e.target.checked })}
-                        className="rounded border-slate-300 text-emerald-500 focus:ring-emerald-500"
+                        className="rounded border-slate-300 text-blue-500 focus:ring-blue-500"
                       />
                       <label htmlFor="recurring" className="text-sm">Recurring pickup</label>
                       {pickupForm.recurring && (
@@ -731,7 +731,7 @@ function toast(msg) {
   const div = document.createElement("div");
   div.textContent = msg;
   div.className =
-    "fixed z-[100] bottom-4 left-1/2 -translate-x-1/2 px-4 py-2 rounded-xl bg-emerald-500 text-white text-sm shadow";
+    "fixed z-[100] bottom-4 left-1/2 -translate-x-1/2 px-4 py-2 rounded-xl bg-blue-500 text-white text-sm shadow";
   document.body.appendChild(div);
   setTimeout(() => div.remove(), 2600);
 }
@@ -780,7 +780,7 @@ function Input({ label, ...rest }) {
   return (
     <label className="block">
       {label && <span className="block text-sm text-slate-500">{label}</span>}
-      <input {...rest} className="mt-1 w-full rounded-lg border px-3 py-2 outline-none focus:ring-2 focus:ring-emerald-500/30" />
+      <input {...rest} className="mt-1 w-full rounded-lg border px-3 py-2 outline-none focus:ring-2 focus:ring-blue-500/30" />
     </label>
   );
 }
@@ -790,7 +790,7 @@ function Textarea({ label, ...rest }) {
       {label && <span className="block text-sm text-slate-500">{label}</span>}
       <textarea
         {...rest}
-        className="mt-1 w-full rounded-lg border px-3 py-2 outline-none focus:ring-2 focus:ring-emerald-500/30 min-h-[90px]"
+        className="mt-1 w-full rounded-lg border px-3 py-2 outline-none focus:ring-2 focus:ring-blue-500/30 min-h-[90px]"
       />
     </label>
   );
@@ -799,7 +799,7 @@ function Select({ label, options = [], ...rest }) {
   return (
     <label className="block">
       {label && <span className="block text-sm text-slate-500">{label}</span>}
-      <select {...rest} className="mt-1 w-full rounded-lg border px-3 py-2 outline-none focus:ring-2 focus:ring-emerald-500/30">
+      <select {...rest} className="mt-1 w-full rounded-lg border px-3 py-2 outline-none focus:ring-2 focus:ring-blue-500/30">
         {options.map((o) => (
           <option key={o.v} value={o.v}>{o.t}</option>
         ))}
@@ -808,7 +808,7 @@ function Select({ label, options = [], ...rest }) {
   );
 }
 function Tag({ children, color = "slate" }) {
-  const styles = color === "red" ? "bg-emerald-500/10 text-emerald-400 ring-emerald-500/30" : "bg-slate-100 text-slate-700 ring-slate-800";
+  const styles = color === "red" ? "bg-blue-500/10 text-blue-400 ring-blue-500/30" : "bg-slate-100 text-slate-700 ring-slate-800";
   return (
     <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ring-1 ring-inset ${styles}`}>
       {children}
@@ -819,8 +819,8 @@ function StatusBadge({ status }) {
   const map = {
     Created: "bg-slate-100 text-slate-700 ring-slate-800",
     "In Transit": "bg-blue-50 text-blue-700 ring-blue-200",
-    Delivered: "bg-emerald-50 text-emerald-700 ring-emerald-200",
-    Exception: "bg-emerald-500/10 text-emerald-400 ring-emerald-500/30",
+    Delivered: "bg-blue-50 text-blue-700 ring-blue-200",
+    Exception: "bg-blue-500/10 text-blue-400 ring-blue-500/30",
     Posted: "bg-purple-50 text-purple-700 ring-purple-200",
     Requested: "bg-amber-50 text-amber-800 ring-amber-200",
     "Picked Up": "bg-sky-50 text-sky-700 ring-sky-200",
@@ -836,7 +836,7 @@ function StatusBadge({ status }) {
 function ProfilePill({ name, email }) {
   return (
     <div className="flex items-center gap-2 rounded-xl border px-2 py-1.5">
-      <div className="grid place-items-center w-7 h-7 rounded-full bg-emerald-500 text-white text-xs font-bold">
+      <div className="grid place-items-center w-7 h-7 rounded-full bg-blue-500 text-white text-xs font-bold">
         {name.split(" ").map((n) => n[0]).join("").slice(0, 2)}
       </div>
       <div className="hidden sm:block">
@@ -860,7 +860,7 @@ function MiniBarChart({ series = [], labels = [] }) {
         const y = h - bh + 8;
         return (
           <g key={i}>
-            <rect x={x} y={y} width={barW} height={bh} rx="6" className="fill-emerald-500 opacity-90"></rect>
+            <rect x={x} y={y} width={barW} height={bh} rx="6" className="fill-blue-500 opacity-90"></rect>
             <text x={x + barW / 2} y={h + 20} textAnchor="middle" className="fill-slate-400 text-[10px]">
               {labels[i]?.slice(2) || ""}
             </text>

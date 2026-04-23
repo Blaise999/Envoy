@@ -25,7 +25,7 @@ export default function CareersPage() {
       <div className="grid sm:grid-cols-4 gap-4 mb-16">
         {[["350+","Team members"],["12","Countries"],["4.7/5","Glassdoor rating"],["83%","Retention after 2 yrs"]].map(([n,l]) => (
           <div key={l} className="rounded-2xl border border-slate-200 p-6 bg-white">
-            <div className="text-3xl sm:text-4xl font-black text-emerald-600">{n}</div>
+            <div className="text-3xl sm:text-4xl font-black text-blue-600">{n}</div>
             <div className="text-sm text-slate-500 mt-1">{l}</div>
           </div>
         ))}
@@ -70,12 +70,12 @@ export default function CareersPage() {
             <div key={r.title} className="flex flex-col sm:flex-row sm:items-center justify-between p-5 gap-3 hover:bg-slate-50 transition">
               <div className="flex-1">
                 <div className="flex items-center gap-3 flex-wrap">
-                  <span className="px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 text-[10px] font-bold tracking-widest uppercase">{r.dept}</span>
+                  <span className="px-2 py-0.5 rounded-full bg-blue-50 text-blue-700 text-[10px] font-bold tracking-widest uppercase">{r.dept}</span>
                   <div className="font-semibold text-slate-900">{r.title}</div>
                 </div>
                 <div className="mt-1 text-sm text-slate-500">{r.loc} · {r.type}</div>
               </div>
-              <Link to="/contact" className="inline-flex items-center px-4 py-2 rounded-xl bg-emerald-500 text-white text-sm font-semibold hover:bg-emerald-400 transition shrink-0">Apply →</Link>
+              <Link to="/contact" className="inline-flex items-center px-4 py-2 rounded-xl bg-blue-500 text-white text-sm font-semibold hover:bg-blue-400 transition shrink-0">Apply →</Link>
             </div>
           ))}
         </div>
@@ -90,16 +90,16 @@ export default function CareersPage() {
             ["Offer","We make decisions within 48 hours of your last conversation. We don't ghost."],
           ].map(([h,d],i) => (
             <li key={h} className="flex gap-5">
-              <div className="shrink-0 w-10 h-10 rounded-full bg-emerald-500 text-white grid place-items-center font-black">{i + 1}</div>
+              <div className="shrink-0 w-10 h-10 rounded-full bg-blue-500 text-white grid place-items-center font-black">{i + 1}</div>
               <div><div className="font-bold">{h}</div><div className="mt-1 text-slate-600">{d}</div></div>
             </li>
           ))}
         </ol>
       </section>
-      <div className="p-8 sm:p-12 rounded-3xl bg-gradient-to-br from-emerald-500 to-teal-500 text-white">
+      <div className="p-8 sm:p-12 rounded-3xl bg-gradient-to-br from-blue-500 to-blue-600 text-white">
         <h3 className="text-2xl sm:text-3xl font-black">Don't see your role?</h3>
-        <p className="mt-3 text-emerald-50 max-w-xl">We're always on the lookout for exceptional people — especially folks with backgrounds we haven't thought to hire for yet.</p>
-        <a href="mailto:careers@shipenvoy.com" className="mt-6 inline-block px-6 py-3 rounded-full bg-white text-emerald-700 font-semibold hover:bg-emerald-50 transition">careers@shipenvoy.com</a>
+        <p className="mt-3 text-blue-50 max-w-xl">We're always on the lookout for exceptional people — especially folks with backgrounds we haven't thought to hire for yet.</p>
+        <a href="mailto:careers@shipenvoy.com" className="mt-6 inline-block px-6 py-3 rounded-full bg-white text-blue-700 font-semibold hover:bg-blue-50 transition">careers@shipenvoy.com</a>
       </div>
     </PageShell>
   );

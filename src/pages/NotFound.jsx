@@ -14,7 +14,7 @@ export default function NotFound() {
 
       {/* Main */}
       <main className="flex-1 flex flex-col items-center justify-center px-4 text-center">
-        <h1 className="text-7xl font-black text-emerald-500">404</h1>
+        <h1 className="text-7xl font-black text-blue-500">404</h1>
         <p className="mt-4 text-xl font-semibold text-slate-800">
           Oops! Page not found
         </p>
@@ -25,13 +25,13 @@ export default function NotFound() {
         <div className="mt-6 flex gap-3">
           <Link
             to="/"
-            className="px-5 py-2.5 rounded-xl bg-emerald-500 text-white font-semibold hover:bg-emerald-400 active:scale-[0.98]"
+            className="px-5 py-2.5 rounded-xl bg-blue-500 text-white font-semibold hover:bg-blue-400 active:scale-[0.98]"
           >
             Back to Home
           </Link>
           <Link
             to="/track"
-            className="px-5 py-2.5 rounded-xl bg-emerald-500 text-white font-semibold hover:bg-emerald-400 active:scale-[0.98]"
+            className="px-5 py-2.5 rounded-xl bg-blue-500 text-white font-semibold hover:bg-blue-400 active:scale-[0.98]"
           >
             Track Shipment
           </Link>

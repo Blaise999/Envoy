@@ -26,10 +26,10 @@ export default function CustomsPage() {
       </header>
 
       {/* ===== Hero ===== */}
-      <section className="bg-gradient-to-br from-emerald-500 to-emerald-400 text-white">
+      <section className="bg-gradient-to-br from-blue-500 to-blue-400 text-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 text-center">
           <h1 className="text-4xl sm:text-5xl font-bold">Customs & Clearance</h1>
-          <p className="mt-4 max-w-2xl mx-auto text-lg text-emerald-500/20">
+          <p className="mt-4 max-w-2xl mx-auto text-lg text-blue-500/20">
             Envoy ensures smooth cross-border trade with expert customs clearance,
             compliance guidance, and duty optimization — so your cargo moves without delays.
           </p>
@@ -73,13 +73,13 @@ export default function CustomsPage() {
       </section>
 
       {/* ===== CTA ===== */}
-      <section className="py-16 bg-emerald-500 text-white text-center">
+      <section className="py-16 bg-blue-500 text-white text-center">
         <div className="max-w-2xl mx-auto px-4">
           <h2 className="text-3xl font-bold">Ship with confidence</h2>
-          <p className="mt-3 text-emerald-500/20">Let Envoy handle your customs so you can focus on your business.</p>
+          <p className="mt-3 text-blue-500/20">Let Envoy handle your customs so you can focus on your business.</p>
           <a
             href="/services/express?type=parcel#quote"
-            className="mt-6 inline-block px-6 py-3 rounded-xl bg-white text-emerald-400 font-semibold hover:bg-slate-100"
+            className="mt-6 inline-block px-6 py-3 rounded-xl bg-white text-blue-400 font-semibold hover:bg-slate-100"
           >
             Start Shipping
           </a>
@@ -93,7 +93,7 @@ export default function CustomsPage() {
 function InfoCard({ title, text, icon }) {
   return (
     <div className="p-6 rounded-2xl border bg-white shadow-sm hover:shadow-md transition">
-      <div className="w-10 h-10 rounded-lg bg-emerald-500/10 text-emerald-400 grid place-items-center">{icon}</div>
+      <div className="w-10 h-10 rounded-lg bg-blue-500/10 text-blue-400 grid place-items-center">{icon}</div>
       <h3 className="mt-4 text-lg font-semibold">{title}</h3>
       <p className="mt-2 text-sm text-slate-500">{text}</p>
     </div>
@@ -103,7 +103,7 @@ function InfoCard({ title, text, icon }) {
 function Step({ index, title, text }) {
   return (
     <div className="relative p-6 rounded-2xl border bg-white shadow-sm">
-      <div className="absolute -top-3 left-4 text-emerald-500 font-bold text-xl">{index}</div>
+      <div className="absolute -top-3 left-4 text-blue-500 font-bold text-xl">{index}</div>
       <h3 className="mt-2 font-semibold">{title}</h3>
       <p className="mt-1 text-sm text-slate-500">{text}</p>
     </div>

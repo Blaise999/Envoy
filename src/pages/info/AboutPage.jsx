@@ -25,10 +25,10 @@ export default function AboutPage() {
         </div>
       </section>
 
-      <section className="mb-20 p-10 sm:p-14 rounded-3xl bg-gradient-to-br from-emerald-500 to-teal-500 text-white">
-        <div className="text-sm font-bold uppercase tracking-widest text-emerald-100">What we believe</div>
+      <section className="mb-20 p-10 sm:p-14 rounded-3xl bg-gradient-to-br from-blue-500 to-blue-600 text-white">
+        <div className="text-sm font-bold uppercase tracking-widest text-blue-100">What we believe</div>
         <h2 className="mt-3 text-3xl sm:text-5xl font-black tracking-tight leading-tight">The last mile isn't the delivery — it's the impression.</h2>
-        <p className="mt-6 text-lg sm:text-xl text-emerald-50 leading-relaxed max-w-3xl">
+        <p className="mt-6 text-lg sm:text-xl text-blue-50 leading-relaxed max-w-3xl">
           When your customer gets a parcel from you, they don't separate out "the delivery part" from "the product part". The whole thing is you. A chipped box, a confused courier, a three-day-stale tracking page — those are your brand now. We've built our company around that reality.
         </p>
       </section>
@@ -48,7 +48,7 @@ export default function AboutPage() {
             { n: "$0", l: "Hidden fees", sub: "Ever" },
           ].map((s) => (
             <div key={s.l} className="p-6 rounded-2xl border border-slate-200 bg-white">
-              <div className="text-3xl sm:text-4xl font-black bg-gradient-to-br from-emerald-600 to-emerald-400 bg-clip-text text-transparent">{s.n}</div>
+              <div className="text-3xl sm:text-4xl font-black bg-gradient-to-br from-blue-600 to-blue-400 bg-clip-text text-transparent">{s.n}</div>
               <div className="mt-2 font-bold text-slate-900">{s.l}</div>
               <div className="text-xs text-slate-500 mt-0.5">{s.sub}</div>
             </div>
@@ -67,11 +67,11 @@ export default function AboutPage() {
             { name: "Tomás Rivera", role: "CFO", bg: "Goldman Sachs, then CFO at two logistics scale-ups. Chartered Accountant." },
           ].map((p) => (
             <div key={p.name} className="p-6 rounded-2xl border border-slate-200 bg-white">
-              <div className="w-16 h-16 rounded-full bg-gradient-to-br from-emerald-300 to-emerald-500 grid place-items-center text-white font-black text-xl">
+              <div className="w-16 h-16 rounded-full bg-gradient-to-br from-blue-300 to-blue-500 grid place-items-center text-white font-black text-xl">
                 {p.name.split(" ").map(n => n[0]).join("")}
               </div>
               <div className="mt-4 font-bold">{p.name}</div>
-              <div className="text-sm text-emerald-600 font-semibold">{p.role}</div>
+              <div className="text-sm text-blue-600 font-semibold">{p.role}</div>
               <p className="mt-2 text-sm text-slate-600">{p.bg}</p>
             </div>
           ))}
@@ -91,7 +91,7 @@ export default function AboutPage() {
           ].map((o) => (
             <div key={o.city} className="p-5 rounded-2xl bg-slate-50 border border-slate-100">
               <div className="font-black text-lg">{o.city}</div>
-              <div className="text-sm text-emerald-600 font-semibold">{o.role}</div>
+              <div className="text-sm text-blue-600 font-semibold">{o.role}</div>
               <div className="mt-2 text-sm text-slate-600">{o.addr}</div>
             </div>
           ))}
@@ -102,7 +102,7 @@ export default function AboutPage() {
         <h3 className="text-2xl sm:text-3xl font-black">Think we'd be a good fit?</h3>
         <p className="mt-3 text-slate-300 max-w-xl mx-auto">Whether you're looking to ship with us, partner with us, or join us — start here.</p>
         <div className="mt-6 flex flex-wrap gap-3 justify-center">
-          <Link to="/auth/register" className="px-6 py-3 rounded-full bg-emerald-500 font-semibold hover:bg-emerald-400 transition">Ship with us</Link>
+          <Link to="/auth/register" className="px-6 py-3 rounded-full bg-blue-500 font-semibold hover:bg-blue-400 transition">Ship with us</Link>
           <Link to="/careers" className="px-6 py-3 rounded-full bg-white/10 border border-white/20 font-semibold hover:bg-white/15 transition">See open roles</Link>
           <Link to="/contact" className="px-6 py-3 rounded-full bg-white/10 border border-white/20 font-semibold hover:bg-white/15 transition">Partner with us</Link>
         </div>

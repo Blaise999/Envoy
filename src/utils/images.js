@@ -40,12 +40,12 @@ export const FALLBACK_SVG =
   encodeURIComponent(
     `<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 800 600'>
        <defs><linearGradient id='g' x1='0' y1='0' x2='1' y2='1'>
-         <stop offset='0%' stop-color='#ecfdf5'/><stop offset='100%' stop-color='#d1fae5'/>
+         <stop offset='0%' stop-color='#eff6ff'/><stop offset='100%' stop-color='#dbeafe'/>
        </linearGradient></defs>
        <rect width='800' height='600' fill='url(#g)'/>
-       <g fill='#10b981'><circle cx='400' cy='280' r='58'/>
+       <g fill='#3b82f6'><circle cx='400' cy='280' r='58'/>
          <path d='M362 280 L430 240 L420 330 Z' fill='#ffffff'/></g>
-       <text x='400' y='410' text-anchor='middle' fill='#065f46'
+       <text x='400' y='410' text-anchor='middle' fill='#1e40af'
              font-family='system-ui,sans-serif' font-size='28' font-weight='700' letter-spacing='4'>ENVOY</text>
      </svg>`
   );

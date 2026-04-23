@@ -21,7 +21,7 @@ export default function PageShell({ title, subtitle, children }) {
           </nav>
           <Link
             to="/services/express"
-            className="px-4 py-2 rounded-xl bg-emerald-500 text-white text-sm font-semibold hover:bg-emerald-400 transition"
+            className="px-4 py-2 rounded-xl bg-blue-500 text-white text-sm font-semibold hover:bg-blue-400 transition"
           >
             Get a Quote
           </Link>
@@ -29,7 +29,7 @@ export default function PageShell({ title, subtitle, children }) {
       </header>
 
       {/* Hero band */}
-      <section className="bg-gradient-to-b from-emerald-50 to-white border-b border-slate-100">
+      <section className="bg-gradient-to-b from-blue-50 to-white border-b border-slate-100">
         <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-16 sm:py-20">
           <h1 className="text-3xl sm:text-5xl font-black tracking-tight">{title}</h1>
           {subtitle && (
@@ -51,7 +51,7 @@ export default function PageShell({ title, subtitle, children }) {
           <div className="grid gap-8 md:grid-cols-4">
             <div>
               <div className="flex items-center gap-2 mb-3">
-                <div className="w-8 h-8 rounded-lg bg-emerald-500 grid place-items-center">
+                <div className="w-8 h-8 rounded-lg bg-blue-500 grid place-items-center">
                   <svg viewBox="0 0 24 24" className="w-5 h-5 text-white" fill="currentColor">
                     <path d="M2 10l20-7-7 20-3-9z" />
                   </svg>

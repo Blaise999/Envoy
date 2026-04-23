@@ -18,11 +18,11 @@ export default function StatusPage() {
   ];
   return (
     <PageShell title="System Status" subtitle="Live operational status of every Envoy service. Updated every 30 seconds.">
-      <div className="mb-10 p-6 rounded-3xl border-2 border-emerald-200 bg-emerald-50 flex items-center gap-4">
-        <div className="w-4 h-4 rounded-full bg-emerald-500 animate-pulse" />
+      <div className="mb-10 p-6 rounded-3xl border-2 border-blue-200 bg-blue-50 flex items-center gap-4">
+        <div className="w-4 h-4 rounded-full bg-blue-500 animate-pulse" />
         <div>
-          <div className="font-bold text-emerald-900 text-lg">All systems operational</div>
-          <div className="text-sm text-emerald-800">Last checked: just now</div>
+          <div className="font-bold text-blue-900 text-lg">All systems operational</div>
+          <div className="text-sm text-blue-800">Last checked: just now</div>
         </div>
       </div>
       <section className="mb-12">
@@ -35,8 +35,8 @@ export default function StatusPage() {
                 <div className="text-sm text-slate-500">{x.d}</div>
               </div>
               <div className="flex items-center gap-2 shrink-0 ml-4">
-                <span className="w-2 h-2 rounded-full bg-emerald-500" />
-                <span className="text-sm font-semibold text-emerald-700">{x.s}</span>
+                <span className="w-2 h-2 rounded-full bg-blue-500" />
+                <span className="text-sm font-semibold text-blue-700">{x.s}</span>
               </div>
             </div>
           ))}
@@ -47,7 +47,7 @@ export default function StatusPage() {
         <div className="mt-4 rounded-2xl border border-slate-200 bg-white p-6">
           <div className="grid grid-cols-[repeat(90,1fr)] gap-0.5">
             {Array.from({length: 90}).map((_, i) => (
-              <div key={i} className="h-8 bg-emerald-500 rounded-sm" style={{opacity: i === 27 ? 0.35 : 0.85}} title={i === 27 ? "Oct 17 — partial outage" : "Operational"} />
+              <div key={i} className="h-8 bg-blue-500 rounded-sm" style={{opacity: i === 27 ? 0.35 : 0.85}} title={i === 27 ? "Oct 17 — partial outage" : "Operational"} />
             ))}
           </div>
           <div className="mt-4 flex items-center justify-between text-sm">
@@ -70,14 +70,14 @@ export default function StatusPage() {
                   <div className="mt-2 font-semibold">{i.title}</div>
                   <div className="text-sm text-slate-600">Duration: {i.duration}</div>
                 </div>
-                <span className="text-sm font-semibold text-emerald-700 shrink-0">Resolved</span>
+                <span className="text-sm font-semibold text-blue-700 shrink-0">Resolved</span>
               </div>
             </div>
           ))}
         </div>
       </section>
       <div className="mt-10 text-center text-sm text-slate-500">
-        Subscribe to status updates at <a href="#" className="text-emerald-600 font-semibold">status.shipenvoy.com</a>
+        Subscribe to status updates at <a href="#" className="text-blue-600 font-semibold">status.shipenvoy.com</a>
       </div>
     </PageShell>
   );

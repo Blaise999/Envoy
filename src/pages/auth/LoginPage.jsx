@@ -120,7 +120,7 @@ export default function LoginPage() {
   }, [identifier, password, step]);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-emerald-500 to-emerald-300 flex items-center justify-center px-4">
+    <div className="min-h-screen bg-gradient-to-br from-blue-500 to-blue-300 flex items-center justify-center px-4">
       <div className="w-full max-w-md bg-white rounded-2xl shadow-xl p-8">
         <div className="flex justify-center mb-6">
           <img src={Logo} alt="Envoy" className="h-12 w-auto" />
@@ -131,7 +131,7 @@ export default function LoginPage() {
           <>
             <h1 className="text-2xl font-bold text-slate-900">Sign in</h1>
             <p className="mt-1 text-sm text-slate-500">Enter your details to continue.</p>
-            {err && <div className="mt-4 text-sm text-emerald-400 bg-emerald-500/10 border px-3 py-2">{err}</div>}
+            {err && <div className="mt-4 text-sm text-blue-400 bg-blue-500/10 border px-3 py-2">{err}</div>}
 
             <form className="mt-6 space-y-4" onSubmit={(e) => e.preventDefault()}>
               <div>
@@ -140,7 +140,7 @@ export default function LoginPage() {
                   type="email"
                   value={identifier}
                   onChange={(e) => setIdentifier(e.target.value)}
-                  className="mt-1 w-full px-3 py-2 rounded-lg border border-slate-300 focus:ring-2 focus:ring-emerald-500 text-sm"
+                  className="mt-1 w-full px-3 py-2 rounded-lg border border-slate-300 focus:ring-2 focus:ring-blue-500 text-sm"
                 />
               </div>
               <div>
@@ -149,7 +149,7 @@ export default function LoginPage() {
                   type="password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="mt-1 w-full px-3 py-2 rounded-lg border border-slate-300 focus:ring-2 focus:ring-emerald-500 text-sm"
+                  className="mt-1 w-full px-3 py-2 rounded-lg border border-slate-300 focus:ring-2 focus:ring-blue-500 text-sm"
                 />
               </div>
               <button
@@ -157,7 +157,7 @@ export default function LoginPage() {
                 onClick={handleContinue}
                 disabled={isLoginDisabled}
                 className={`w-full mt-2 text-white font-semibold py-2.5 rounded-lg transition ${
-                  isLoginDisabled ? "bg-emerald-400 cursor-not-allowed" : "bg-emerald-500 hover:bg-emerald-400"
+                  isLoginDisabled ? "bg-blue-400 cursor-not-allowed" : "bg-blue-500 hover:bg-blue-400"
                 }`}
               >
                 {loading ? "Please wait…" : "Continue"}
@@ -177,7 +177,7 @@ export default function LoginPage() {
             <p className="mt-1 text-sm text-slate-500">
               We sent a 6-digit code to <span className="font-medium">{identifier}</span>.
             </p>
-            {err && <div className="mt-4 text-sm text-emerald-400 bg-emerald-500/10 border px-3 py-2">{err}</div>}
+            {err && <div className="mt-4 text-sm text-blue-400 bg-blue-500/10 border px-3 py-2">{err}</div>}
 
             <form className="mt-6 space-y-6" onSubmit={(e) => e.preventDefault()}>
               <div className="flex justify-between gap-2">
@@ -191,7 +191,7 @@ export default function LoginPage() {
                     value={val}
                     onChange={(e) => handleOtpChange(i, e.target.value.replace(/\D/g, ""))}
                     onKeyDown={(e) => handleOtpKeyDown(i, e)}
-                    className="w-12 h-12 text-center text-lg font-semibold border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500"
+                    className="w-12 h-12 text-center text-lg font-semibold border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500"
                   />
                 ))}
               </div>
@@ -200,7 +200,7 @@ export default function LoginPage() {
                 onClick={handleVerifyOtp}
                 disabled={!isOtpComplete || loading}
                 className={`w-full text-white font-semibold py-2.5 rounded-lg transition ${
-                  !isOtpComplete || loading ? "bg-emerald-400 cursor-not-allowed" : "bg-emerald-500 hover:bg-emerald-400"
+                  !isOtpComplete || loading ? "bg-blue-400 cursor-not-allowed" : "bg-blue-500 hover:bg-blue-400"
                 }`}
               >
                 {loading ? "Verifying…" : "Verify OTP"}
@@ -211,7 +211,7 @@ export default function LoginPage() {
                   type="button"
                   onClick={handleResend}
                   disabled={loading}
-                  className="text-emerald-500 font-medium hover:underline disabled:text-emerald-400"
+                  className="text-blue-500 font-medium hover:underline disabled:text-blue-400"
                 >
                   Resend
                 </button>

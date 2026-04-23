@@ -26,7 +26,7 @@ export default function DiagnosticPage() {
     try {
       const result = await fn();
       const ms = Date.now() - started;
-      log(`✓ ${name} — ok in ${ms}ms ${result ? `· ${result}` : ""}`, "text-emerald-700");
+      log(`✓ ${name} — ok in ${ms}ms ${result ? `· ${result}` : ""}`, "text-blue-700");
       return true;
     } catch (e) {
       const ms = Date.now() - started;
@@ -116,7 +116,7 @@ export default function DiagnosticPage() {
             <button
               onClick={runAll}
               disabled={running}
-              className="px-4 py-2 rounded-lg bg-emerald-500 hover:bg-emerald-400 text-white font-semibold text-sm disabled:opacity-50"
+              className="px-4 py-2 rounded-lg bg-blue-500 hover:bg-blue-400 text-white font-semibold text-sm disabled:opacity-50"
             >
               {running ? "Running…" : "Re-run probes"}
             </button>
@@ -150,7 +150,7 @@ export default function DiagnosticPage() {
               blocking Render — fix by allowing `0.0.0.0/0` in Atlas Network Access.
             </p>
             <p>
-              <b className="text-emerald-400">Health passes, POST returns 4xx</b> → everything's
+              <b className="text-blue-400">Health passes, POST returns 4xx</b> → everything's
               wired correctly; the 4xx is just our probe sending an invalid body on purpose.
             </p>
             <p>

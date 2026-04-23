@@ -68,7 +68,7 @@ export default function ReceiptPage() {
             <button className="px-4 py-2 rounded-lg border" onClick={() => navigate(-1)}>
               Go back
             </button>
-            <Link className="px-4 py-2 rounded-lg bg-emerald-500 text-white" to="/services/express">
+            <Link className="px-4 py-2 rounded-lg bg-blue-500 text-white" to="/services/express">
               New quote
             </Link>
           </div>
@@ -206,7 +206,7 @@ export default function ReceiptPage() {
                   <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-slate-500">Loading…</span>
                 )}
                 {trackErr && !loadingTrack && (
-                  <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-emerald-500">Error</span>
+                  <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-blue-500">Error</span>
                 )}
               </div>
               <button
@@ -224,7 +224,7 @@ export default function ReceiptPage() {
               <Link
                 to={trackingId ? `/track?ref=${encodeURIComponent(trackingId)}` : "#"}
                 className={`px-4 py-2.5 rounded-xl text-sm font-semibold ${
-                  trackingId ? "bg-emerald-500 text-white hover:bg-emerald-400" : "bg-slate-700 text-slate-500 cursor-not-allowed"
+                  trackingId ? "bg-blue-500 text-white hover:bg-blue-400" : "bg-slate-700 text-slate-500 cursor-not-allowed"
                 }`}
                 aria-disabled={!trackingId}
               >
@@ -301,11 +301,11 @@ export default function ReceiptPage() {
                 )}
                 <div className="flex justify-between">
                   <span>Status</span>
-                  <span className="font-medium text-emerald-600">Succeeded</span>
+                  <span className="font-medium text-blue-600">Succeeded</span>
                 </div>
               </div>
               <div className="mt-3">
-                <button onClick={() => window.print()} className="px-3 py-2 rounded-lg bg-emerald-500 text-white text-sm">
+                <button onClick={() => window.print()} className="px-3 py-2 rounded-lg bg-blue-500 text-white text-sm">
                   Print / Save PDF
                 </button>
               </div>
@@ -394,7 +394,7 @@ export default function ReceiptPage() {
             <Link
               to={trackingId ? `/track?ref=${encodeURIComponent(trackingId)}` : "/track"}
               className={`px-4 py-2 rounded-xl font-semibold ${
-                trackingId ? "bg-emerald-500 text-white hover:bg-emerald-400" : "bg-slate-700 text-slate-700"
+                trackingId ? "bg-blue-500 text-white hover:bg-blue-400" : "bg-slate-700 text-slate-700"
               }`}
             >
               Track shipment

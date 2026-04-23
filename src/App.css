@@ -22,11 +22,11 @@
 .card { @apply rounded-2xl border bg-white shadow-sm transition hover:shadow-md; }
 .card-muted { @apply rounded-2xl border bg-white; }
 .pill-tab { @apply px-3 py-2 rounded-xl text-sm font-medium transition; }
-.pill-tab--active { @apply bg-emerald-500 text-white shadow-sm; }
+.pill-tab--active { @apply bg-blue-500 text-white shadow-sm; }
 .pill-tab--idle { @apply hover:bg-white text-slate-700; }
 
 .btn { @apply inline-flex items-center gap-2 rounded-xl text-sm font-semibold transition active:scale-[0.98]; }
-.btn-primary { @apply btn px-3 py-2 bg-emerald-500 text-white hover:bg-emerald-400; }
+.btn-primary { @apply btn px-3 py-2 bg-blue-500 text-white hover:bg-blue-400; }
 .btn-secondary { @apply btn px-3 py-2 bg-white border hover:bg-white; }
 .btn-ghost { @apply btn px-2 py-1.5 text-slate-700 hover:bg-white; }
 
@@ -43,7 +43,7 @@
 .table thead th { @apply text-left px-4 py-3 font-semibold text-slate-700; }
 .table tbody tr { @apply even:bg-white; }
 .table tbody td { @apply px-4 py-3 align-top; }
-.table tbody tr:hover { @apply bg-emerald-500/10; }
+.table tbody tr:hover { @apply bg-blue-500/10; }
 
 .badge { @apply inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ring-1 ring-inset; }
 

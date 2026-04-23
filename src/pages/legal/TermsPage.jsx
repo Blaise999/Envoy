@@ -81,7 +81,7 @@ export default function TermsPage() {
 
         <section>
           <h2 className="text-2xl font-bold text-slate-900">12. Contact</h2>
-          <p className="mt-3">Questions about these Terms? Email <a href="mailto:legal@shipenvoy.com" className="text-emerald-600 font-semibold">legal@shipenvoy.com</a>.</p>
+          <p className="mt-3">Questions about these Terms? Email <a href="mailto:legal@shipenvoy.com" className="text-blue-600 font-semibold">legal@shipenvoy.com</a>.</p>
         </section>
       </div>
     </PageShell>

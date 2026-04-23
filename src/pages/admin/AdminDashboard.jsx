@@ -105,7 +105,7 @@ export default function AdminDashboard() {
         <div className="text-center">
           <div className="text-sm text-slate-500">Checking admin session…</div>
           {authErr && (
-            <div className="mt-2 text-xs text-emerald-500">{authErr}</div>
+            <div className="mt-2 text-xs text-blue-500">{authErr}</div>
           )}
         </div>
       </div>
@@ -717,7 +717,7 @@ export default function AdminDashboard() {
 
   /* ---------------- UI ---------------- */
   return (
-    <div className="min-h-screen bg-gradient-to-br from-emerald-50/60 via-white to-slate-50">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50/60 via-white to-slate-50">
       {/* Header */}
       <header className="sticky top-0 z-40 bg-white/80 backdrop-blur border-b border-slate-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -739,7 +739,7 @@ export default function AdminDashboard() {
               </button>
               <Link
                 to="/services/express?type=parcel#quote"
-                className="hidden sm:inline-flex items-center gap-2 px-3 py-1.5 rounded-xl bg-emerald-500 text-white text-sm font-semibold hover:bg-emerald-400 active:scale-[0.98]"
+                className="hidden sm:inline-flex items-center gap-2 px-3 py-1.5 rounded-xl bg-blue-500 text-white text-sm font-semibold hover:bg-blue-400 active:scale-[0.98]"
               >
                 Create Shipment
               </Link>
@@ -763,7 +763,7 @@ export default function AdminDashboard() {
                 key={t}
                 onClick={() => setTab(t)}
                 className={`px-3 py-2 rounded-lg text-sm font-medium ${
-                  tab === t ? "bg-emerald-500 text-white" : "hover:bg-white"
+                  tab === t ? "bg-blue-500 text-white" : "hover:bg-white"
                 }`}
               >
                 {t}
@@ -833,7 +833,7 @@ export default function AdminDashboard() {
                   </span>
                 )}
                 {loadErr && (
-                  <span className="text-sm text-emerald-500">
+                  <span className="text-sm text-blue-500">
                     {loadErr}
                   </span>
                 )}
@@ -905,7 +905,7 @@ export default function AdminDashboard() {
                             <MailIcon /> Email
                           </button>
                           <button
-                            className="btn-ghost text-emerald-500"
+                            className="btn-ghost text-blue-500"
                             onClick={() =>
                               deleteShipment(s.tracking)
                             }
@@ -954,7 +954,7 @@ export default function AdminDashboard() {
               </div>
             )}
             {usersErr && (
-              <div className="text-sm text-emerald-500 mb-2">
+              <div className="text-sm text-blue-500 mb-2">
                 {usersErr}
               </div>
             )}
@@ -1090,7 +1090,7 @@ export default function AdminDashboard() {
                   )}
                 </div>
                 {supportErr && (
-                  <div className="px-4 py-2 text-xs text-emerald-500">
+                  <div className="px-4 py-2 text-xs text-blue-500">
                     {supportErr}
                   </div>
                 )}
@@ -1114,7 +1114,7 @@ export default function AdminDashboard() {
                         onClick={() => setSupportSelected(c)}
                         className={`w-full text-left px-4 py-3 border-b text-sm ${
                           isActive
-                            ? "bg-emerald-500/10 border-emerald-500/20"
+                            ? "bg-blue-500/10 border-blue-500/20"
                             : "hover:bg-white"
                         }`}
                       >
@@ -1221,7 +1221,7 @@ export default function AdminDashboard() {
                           <div
                             className={`max-w-[75%] rounded-2xl px-3 py-2 text-sm ${
                               m.sender === "admin"
-                                ? "bg-emerald-500 text-white"
+                                ? "bg-blue-500 text-white"
                                 : "bg-white border border-slate-200 text-slate-900"
                             }`}
                           >
@@ -1249,7 +1249,7 @@ export default function AdminDashboard() {
                       onSubmit={handleSendSupportReply}
                     >
                       <input
-                        className="flex-1 rounded-xl border px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-emerald-500/30"
+                        className="flex-1 rounded-xl border px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-blue-500/30"
                         placeholder="Type your reply…"
                         value={supportReply}
                         onChange={(e) =>
@@ -1592,7 +1592,7 @@ export default function AdminDashboard() {
                     </div>
                     <button
                       type="button"
-                      className="btn-ghost text-emerald-500"
+                      className="btn-ghost text-blue-500"
                       onClick={() => removeEvent(editShip, i)}
                     >
                       <TrashIcon /> Remove
@@ -2070,7 +2070,7 @@ function Input({ label, ...rest }) {
       )}
       <input
         {...rest}
-        className="mt-1 w-full rounded-lg border px-3 py-2 outline-none focus:ring-2 focus:ring-emerald-500/30"
+        className="mt-1 w-full rounded-lg border px-3 py-2 outline-none focus:ring-2 focus:ring-blue-500/30"
       />
     </label>
   );
@@ -2085,7 +2085,7 @@ function Textarea({ label, ...rest }) {
       )}
       <textarea
         {...rest}
-        className="mt-1 w-full rounded-lg border px-3 py-2 outline-none focus:ring-2 focus:ring-emerald-500/30 min-h-[110px]"
+        className="mt-1 w-full rounded-lg border px-3 py-2 outline-none focus:ring-2 focus:ring-blue-500/30 min-h-[110px]"
       />
     </label>
   );
@@ -2103,7 +2103,7 @@ function Select({ label, options = [], ...rest }) {
       )}
       <select
         {...rest}
-        className="mt-1 w-full rounded-lg border px-3 py-2 outline-none focus:ring-2 focus:ring-emerald-500/30"
+        className="mt-1 w-full rounded-lg border px-3 py-2 outline-none focus:ring-2 focus:ring-blue-500/30"
       >
         {opts.map((o) => (
           <option key={o.v} value={o.v}>
@@ -2117,7 +2117,7 @@ function Select({ label, options = [], ...rest }) {
 function Tag({ children, color = "slate" }) {
   const styles =
     color === "red"
-      ? "bg-emerald-500/10 text-emerald-400 ring-emerald-500/30"
+      ? "bg-blue-500/10 text-blue-400 ring-blue-500/30"
       : "bg-slate-100 text-slate-700 ring-slate-800";
   return (
     <span
@@ -2131,12 +2131,12 @@ function StatusBadge({ status }) {
   const map = {
     Created: "bg-slate-100 text-slate-700 ring-slate-800",
     "Picked Up": "bg-sky-50 text-sky-700 ring-sky-200",
-    "In Transit": "bg-emerald-50 text-emerald-700 ring-emerald-200",
+    "In Transit": "bg-blue-50 text-blue-700 ring-blue-200",
     "Out for Delivery":
       "bg-amber-50 text-amber-800 ring-amber-200",
     Delivered:
-      "bg-emerald-50 text-emerald-700 ring-emerald-200",
-    Exception: "bg-emerald-500/10 text-emerald-400 ring-emerald-500/30",
+      "bg-blue-50 text-blue-700 ring-blue-200",
+    Exception: "bg-blue-500/10 text-blue-400 ring-blue-500/30",
   };
   return (
     <span
@@ -2165,7 +2165,7 @@ function Td({ children }) {
 function Modal({ title, onClose, children }) {
   return (
     <div
-      className="fixed inset-0 z-50 grid place-items-center bg-emerald-500/40 p-4"
+      className="fixed inset-0 z-50 grid place-items-center bg-blue-500/40 p-4"
       onClick={onClose}
     >
       <div
@@ -2272,7 +2272,7 @@ function toast(msg) {
   const div = document.createElement("div");
   div.textContent = msg;
   div.className =
-    "fixed z-[100] bottom-4 left-1/2 -translate-x-1/2 px-4 py-2 rounded-xl bg-emerald-500 text-white text-sm shadow";
+    "fixed z-[100] bottom-4 left-1/2 -translate-x-1/2 px-4 py-2 rounded-xl bg-blue-500 text-white text-sm shadow";
   document.body.appendChild(div);
   setTimeout(() => div.remove(), 2400);
 }

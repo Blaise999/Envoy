@@ -28,17 +28,17 @@ export default function FreightPage() {
       </header>
 
       {/* Hero */}
-      <section className="bg-gradient-to-r from-emerald-500 to-emerald-400 text-white">
+      <section className="bg-gradient-to-r from-blue-500 to-blue-400 text-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 text-center">
           <h1 className="text-4xl sm:text-5xl font-bold">Freight & Cargo Solutions</h1>
-          <p className="mt-4 max-w-2xl mx-auto text-lg text-emerald-500/20">
+          <p className="mt-4 max-w-2xl mx-auto text-lg text-blue-500/20">
             Air, sea, and road freight for pallets, containers, and oversized cargo—planned by experts and delivered on time.
           </p>
 
           {/* CTA */}
           <Link
             to="/create?type=freight#quote"
-            className="mt-8 inline-block px-6 py-3 rounded-xl bg-white text-emerald-400 font-semibold hover:bg-slate-100"
+            className="mt-8 inline-block px-6 py-3 rounded-xl bg-white text-blue-400 font-semibold hover:bg-slate-100"
           >
             Get a Freight Quote
           </Link>
@@ -106,17 +106,17 @@ export default function FreightPage() {
       </section>
 
       {/* CTA footer */}
-      <section className="py-16 bg-emerald-500 text-white text-center">
+      <section className="py-16 bg-blue-500 text-white text-center">
         <div className="max-w-2xl mx-auto px-4">
           <h2 className="text-3xl font-bold">Ready to ship by freight?</h2>
-          <p className="mt-3 text-emerald-500/20">Tap below to start a freight quote instantly.</p>
+          <p className="mt-3 text-blue-500/20">Tap below to start a freight quote instantly.</p>
           <Link
             to="/create?type=freight#quote"
-            className="mt-6 inline-block px-6 py-3 rounded-xl bg-white text-emerald-400 font-semibold hover:bg-slate-100"
+            className="mt-6 inline-block px-6 py-3 rounded-xl bg-white text-blue-400 font-semibold hover:bg-slate-100"
           >
             Start Freight Quote
           </Link>
-          <p className="mt-4 text-sm text-emerald-500/20">
+          <p className="mt-4 text-sm text-blue-500/20">
             Prefer parcels? <Link to="/create?type=parcel#quote" className="underline hover:text-white">Go to Express</Link>
           </p>
         </div>
@@ -129,7 +129,7 @@ export default function FreightPage() {
 function InfoCard({ title, text, icon }) {
   return (
     <div className="p-6 rounded-2xl border bg-white shadow-sm hover:shadow-md transition">
-      <div className="w-10 h-10 rounded-lg bg-emerald-500/10 text-emerald-400 grid place-items-center">{icon}</div>
+      <div className="w-10 h-10 rounded-lg bg-blue-500/10 text-blue-400 grid place-items-center">{icon}</div>
       <h3 className="mt-4 text-lg font-semibold">{title}</h3>
       <p className="mt-2 text-sm text-slate-500">{text}</p>
     </div>

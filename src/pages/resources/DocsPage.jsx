@@ -48,7 +48,7 @@ export default function DocsPage() {
             <h2 className="text-xl font-bold mb-3">{s.cat}</h2>
             <ul className="space-y-2">
               {s.items.map((it) => (
-                <li key={it.t} className="p-4 rounded-xl border border-slate-200 bg-white hover:border-emerald-300 hover:shadow-sm transition">
+                <li key={it.t} className="p-4 rounded-xl border border-slate-200 bg-white hover:border-blue-300 hover:shadow-sm transition">
                   <a href="#" className="block">
                     <div className="font-semibold">{it.t}</div>
                     <div className="text-sm text-slate-600 mt-0.5">{it.d}</div>
@@ -62,7 +62,7 @@ export default function DocsPage() {
 
       <div className="mt-12 p-6 rounded-2xl bg-slate-50 border border-slate-200">
         <h3 className="font-bold text-lg">Need help?</h3>
-        <p className="mt-1 text-slate-600">Email <a href="mailto:developers@shipenvoy.com" className="text-emerald-600 font-semibold">developers@shipenvoy.com</a> or join our developer Slack.</p>
+        <p className="mt-1 text-slate-600">Email <a href="mailto:developers@shipenvoy.com" className="text-blue-600 font-semibold">developers@shipenvoy.com</a> or join our developer Slack.</p>
       </div>
     </PageShell>
   );

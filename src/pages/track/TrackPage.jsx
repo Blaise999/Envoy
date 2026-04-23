@@ -80,9 +80,9 @@ function buildDemo(ref) {
 }
 
 /* ============================================================ */
-/*  Custom emerald marker                                        */
+/*  Custom blue marker                                        */
 /* ============================================================ */
-const emeraldPin = L.divIcon({
+const bluePin = L.divIcon({
   className: "envoy-pin",
   html: `
     <div style="
@@ -92,9 +92,9 @@ const emeraldPin = L.divIcon({
     ">
       <div style="
         position:absolute; inset:0;
-        background:#10b981;
+        background:#3b82f6;
         clip-path: path('M16 0C7.2 0 0 7.2 0 16c0 11 16 28 16 28s16-17 16-28C32 7.2 24.8 0 16 0z');
-        box-shadow: 0 4px 12px rgba(16,185,129,0.45);
+        box-shadow: 0 4px 12px rgba(59,130,246,0.45);
       "></div>
       <div style="
         position:absolute; left:50%; top:14px; transform:translateX(-50%);
@@ -232,12 +232,12 @@ export default function TrackPage() {
           <Link to="/" className="flex items-center"><img src={Logo} alt="Envoy" className="h-12 w-auto" /></Link>
           <nav className="hidden md:flex items-center gap-7 text-sm font-medium text-slate-600">
             <Link to="/" className="hover:text-slate-900">Home</Link>
-            <Link to="/track" className="text-emerald-600 font-semibold">Track</Link>
+            <Link to="/track" className="text-blue-600 font-semibold">Track</Link>
             <Link to="/services" className="hover:text-slate-900">Services</Link>
             <Link to="/about" className="hover:text-slate-900">About</Link>
             <Link to="/contact" className="hover:text-slate-900">Contact</Link>
           </nav>
-          <Link to="/services/express" className="px-4 py-2 rounded-full bg-emerald-500 text-white text-sm font-semibold hover:bg-emerald-400 transition">
+          <Link to="/services/express" className="px-4 py-2 rounded-full bg-blue-500 text-white text-sm font-semibold hover:bg-blue-400 transition">
             Get a Quote
           </Link>
         </div>
@@ -251,7 +251,7 @@ export default function TrackPage() {
 
           <div className="relative z-10 flex flex-col items-center justify-center min-h-[80vh] px-4 py-16 text-center">
             <div className="inline-flex items-center gap-2 text-xs font-semibold px-3 py-1 rounded-full bg-white border border-slate-200 text-slate-700 shadow-sm">
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+              <span className="w-1.5 h-1.5 rounded-full bg-blue-500 animate-pulse" />
               Live tracking · 220+ lanes
             </div>
 
@@ -286,7 +286,7 @@ export default function TrackPage() {
               <button
                 type="submit"
                 disabled={loading}
-                className="px-7 py-3 rounded-xl bg-gradient-to-r from-emerald-500 to-emerald-400 text-white font-semibold hover:from-emerald-400 hover:to-emerald-300 transition shadow-md disabled:opacity-60"
+                className="px-7 py-3 rounded-xl bg-gradient-to-r from-blue-500 to-blue-400 text-white font-semibold hover:from-blue-400 hover:to-blue-300 transition shadow-md disabled:opacity-60"
               >
                 {loading ? "…" : "Track"}
               </button>
@@ -302,7 +302,7 @@ export default function TrackPage() {
                     navigate(`/track?ref=${t}`, { replace: true });
                     submitLookup(t);
                   }}
-                  className="px-3 py-1 rounded-full bg-white border border-slate-200 text-slate-700 hover:border-emerald-400 hover:text-emerald-700 font-mono transition"
+                  className="px-3 py-1 rounded-full bg-white border border-slate-200 text-slate-700 hover:border-blue-400 hover:text-blue-700 font-mono transition"
                 >
                   {t}
                 </button>
@@ -324,7 +324,7 @@ export default function TrackPage() {
                   <h1 className="text-2xl sm:text-3xl font-black font-mono tracking-tight">
                     {ship.trackingNumber || ref}
                   </h1>
-                  <span className="px-3 py-1 rounded-full bg-emerald-50 text-emerald-700 text-xs font-bold uppercase tracking-wider">
+                  <span className="px-3 py-1 rounded-full bg-blue-50 text-blue-700 text-xs font-bold uppercase tracking-wider">
                     {(ship.status || "in transit").replace("_", " ")}
                   </span>
                 </div>
@@ -341,7 +341,7 @@ export default function TrackPage() {
                 className="flex items-stretch gap-2 max-w-md w-full sm:w-auto"
               >
                 <input
-                  className="flex-1 rounded-xl border border-slate-200 px-4 py-2 text-sm outline-none focus:border-emerald-400 transition"
+                  className="flex-1 rounded-xl border border-slate-200 px-4 py-2 text-sm outline-none focus:border-blue-400 transition"
                   placeholder="Track another shipment"
                   value={ref}
                   onChange={(e) => setRef(e.target.value)}
@@ -373,7 +373,7 @@ export default function TrackPage() {
                         <Polyline
                           positions={routeArc}
                           pathOptions={{
-                            color: "#10b981",
+                            color: "#3b82f6",
                             weight: 4,
                             opacity: 0.9,
                             dashArray: "8 6",
@@ -381,13 +381,13 @@ export default function TrackPage() {
                         />
                       )}
 
-                      <Marker position={[route.origin.lat, route.origin.lon]} icon={emeraldPin}>
+                      <Marker position={[route.origin.lat, route.origin.lon]} icon={bluePin}>
                         <Popup>
                           <b>From</b><br />
                           {route.origin.label}
                         </Popup>
                       </Marker>
-                      <Marker position={[route.dest.lat, route.dest.lon]} icon={emeraldPin}>
+                      <Marker position={[route.dest.lat, route.dest.lon]} icon={bluePin}>
                         <Popup>
                           <b>To</b><br />
                           {route.dest.label}
@@ -406,10 +406,10 @@ export default function TrackPage() {
                       <li key={i} className="relative pl-5">
                         <span
                           className={`absolute left-0 top-1 w-3 h-3 rounded-full ring-2 ring-white ${
-                            t.current ? "bg-emerald-500 animate-pulse" : t.done ? "bg-emerald-500" : "bg-slate-300"
+                            t.current ? "bg-blue-500 animate-pulse" : t.done ? "bg-blue-500" : "bg-slate-300"
                           }`}
                         />
-                        <div className={`text-xs font-semibold ${t.current ? "text-emerald-600" : t.done ? "text-slate-900" : "text-slate-500"}`}>
+                        <div className={`text-xs font-semibold ${t.current ? "text-blue-600" : t.done ? "text-slate-900" : "text-slate-500"}`}>
                           {t.label} <span className="text-slate-400 font-normal">{t.time}</span>
                         </div>
                       </li>
@@ -428,7 +428,7 @@ export default function TrackPage() {
                       <div className="text-xs text-slate-400 font-semibold">From</div>
                       <div className="font-bold">{ship.from}</div>
                     </div>
-                    <svg className="w-6 h-6 text-emerald-500 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                    <svg className="w-6 h-6 text-blue-500 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
                       <path d="M5 12h14M13 6l6 6-6 6" strokeLinecap="round" strokeLinejoin="round" />
                     </svg>
                     <div className="text-right">
@@ -451,15 +451,15 @@ export default function TrackPage() {
                 <div className="rounded-3xl bg-white border border-slate-200 shadow-lg p-6">
                   <div className="flex items-center justify-between mb-4">
                     <div className="text-xs uppercase tracking-widest text-slate-400 font-bold">Live Updates</div>
-                    <span className="flex items-center gap-1 text-[10px] text-emerald-600 font-bold">
-                      <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                    <span className="flex items-center gap-1 text-[10px] text-blue-600 font-bold">
+                      <span className="w-1.5 h-1.5 rounded-full bg-blue-500 animate-pulse" />
                       LIVE
                     </span>
                   </div>
                   <ul className="space-y-4 max-h-[260px] overflow-y-auto pr-1">
                     {(ship.updates || []).map((u, i) => (
                       <li key={i} className="relative pl-5 text-sm">
-                        <span className={`absolute left-0 top-1.5 w-2 h-2 rounded-full ${i === 0 ? "bg-emerald-500" : "bg-slate-300"}`} />
+                        <span className={`absolute left-0 top-1.5 w-2 h-2 rounded-full ${i === 0 ? "bg-blue-500" : "bg-slate-300"}`} />
                         <div className="text-xs text-slate-500">{u.date}</div>
                         <div className="text-slate-800 font-medium">{u.note}</div>
                       </li>
@@ -483,7 +483,7 @@ export default function TrackPage() {
                             href={src}
                             target="_blank"
                             rel="noreferrer"
-                            className="block aspect-square rounded-lg overflow-hidden border border-slate-200 bg-slate-50 hover:ring-2 hover:ring-emerald-400 transition"
+                            className="block aspect-square rounded-lg overflow-hidden border border-slate-200 bg-slate-50 hover:ring-2 hover:ring-blue-400 transition"
                             title="Click to enlarge"
                           >
                             <img
@@ -524,10 +524,10 @@ export default function TrackPage() {
                   <li key={i} className="relative pl-6">
                     <span
                       className={`absolute left-0 top-0.5 w-4 h-4 rounded-full ring-2 ring-white ${
-                        t.current ? "bg-emerald-500 animate-pulse" : t.done ? "bg-emerald-500" : "bg-slate-300"
+                        t.current ? "bg-blue-500 animate-pulse" : t.done ? "bg-blue-500" : "bg-slate-300"
                       }`}
                     />
-                    <div className={`text-sm font-semibold ${t.current ? "text-emerald-600" : t.done ? "text-slate-900" : "text-slate-500"}`}>
+                    <div className={`text-sm font-semibold ${t.current ? "text-blue-600" : t.done ? "text-slate-900" : "text-slate-500"}`}>
                       {t.label}
                     </div>
                     <div className="text-xs text-slate-500">{t.time}</div>

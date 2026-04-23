@@ -34,7 +34,7 @@ export default function App() {
           </nav>
           <div className="hidden md:flex items-center gap-3">
             <Link to="/auth/login" className="text-sm font-medium text-slate-700 hover:text-slate-900">Sign in</Link>
-            <Link to="/services/express" className="px-4 py-2 rounded-full bg-emerald-500 text-white text-sm font-semibold hover:bg-emerald-400 shadow-sm transition">
+            <Link to="/services/express" className="px-4 py-2 rounded-full bg-blue-500 text-white text-sm font-semibold hover:bg-blue-400 shadow-sm transition">
               Get a Quote
             </Link>
           </div>
@@ -53,7 +53,7 @@ export default function App() {
             ))}
             <div className="pt-2 flex gap-2">
               <Link to="/auth/login" className="flex-1 text-center px-3 py-2 rounded-lg bg-slate-100 font-medium">Sign in</Link>
-              <Link to="/services/express" className="flex-1 text-center px-3 py-2 rounded-lg bg-emerald-500 text-white font-semibold">Get a Quote</Link>
+              <Link to="/services/express" className="flex-1 text-center px-3 py-2 rounded-lg bg-blue-500 text-white font-semibold">Get a Quote</Link>
             </div>
           </div>
         )}
@@ -67,14 +67,14 @@ export default function App() {
 
         <div className="relative z-10 max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-20 sm:py-28 lg:py-36 text-center">
           <div className={`transition-all duration-700 ${mounted ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"}`}>
-            <span className="inline-flex items-center gap-2 text-xs font-semibold px-3 py-1 rounded-full bg-emerald-500/15 text-emerald-300 ring-1 ring-inset ring-emerald-400/30 backdrop-blur">
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+            <span className="inline-flex items-center gap-2 text-xs font-semibold px-3 py-1 rounded-full bg-blue-500/15 text-blue-300 ring-1 ring-inset ring-blue-400/30 backdrop-blur">
+              <span className="w-1.5 h-1.5 rounded-full bg-blue-400 animate-pulse" />
               Now delivering in 220+ countries
             </span>
 
             <h1 className="mt-6 text-4xl sm:text-6xl md:text-7xl lg:text-8xl font-black leading-[1.02] tracking-tight">
               Parcels that{" "}
-              <span className="bg-gradient-to-r from-emerald-300 via-emerald-400 to-teal-300 bg-clip-text text-transparent">
+              <span className="bg-gradient-to-r from-blue-300 via-blue-400 to-sky-300 bg-clip-text text-transparent">
                 show up.
               </span>
               <br />
@@ -101,15 +101,15 @@ export default function App() {
                 value={trackingId}
                 onChange={(e) => setTrackingId(e.target.value)}
               />
-              <button type="submit" className="px-5 sm:px-7 py-3 rounded-full bg-gradient-to-r from-emerald-500 to-emerald-400 text-white text-sm font-semibold hover:from-emerald-400 hover:to-emerald-300 transition shadow-lg shadow-emerald-500/30">
+              <button type="submit" className="px-5 sm:px-7 py-3 rounded-full bg-gradient-to-r from-blue-500 to-blue-400 text-white text-sm font-semibold hover:from-blue-400 hover:to-blue-300 transition shadow-lg shadow-blue-500/30">
                 Track →
               </button>
             </form>
 
             <div className="mt-6 flex flex-wrap items-center justify-center gap-x-5 gap-y-2 text-sm">
-              <Link to="/services/express" className="text-emerald-300 hover:text-emerald-200 font-semibold">Ship a package →</Link>
-              <Link to="/services/express?type=parcel#quote" className="text-emerald-300 hover:text-emerald-200 font-semibold">See rates →</Link>
-              <Link to="/contact" className="text-emerald-300 hover:text-emerald-200 font-semibold">Talk to sales →</Link>
+              <Link to="/services/express" className="text-blue-300 hover:text-blue-200 font-semibold">Ship a package →</Link>
+              <Link to="/services/express?type=parcel#quote" className="text-blue-300 hover:text-blue-200 font-semibold">See rates →</Link>
+              <Link to="/contact" className="text-blue-300 hover:text-blue-200 font-semibold">Talk to sales →</Link>
             </div>
           </div>
         </div>
@@ -119,12 +119,12 @@ export default function App() {
           <div className="flex gap-12 py-3 animate-[scroll_40s_linear_infinite] whitespace-nowrap text-xs sm:text-sm text-slate-300">
             {[...Array(2)].map((_, k) => (
               <div key={k} className="flex gap-12 shrink-0">
-                <span><b className="text-emerald-400">● Delivered</b> · Paris → London · 6h 23m</span>
-                <span><b className="text-emerald-400">● In transit</b> · Singapore → Sydney · 142 parcels</span>
-                <span><b className="text-emerald-400">● Out for delivery</b> · New York, USA</span>
-                <span><b className="text-emerald-400">● Customs cleared</b> · Rotterdam port</span>
-                <span><b className="text-emerald-400">● Picked up</b> · Tokyo fulfillment</span>
-                <span><b className="text-emerald-400">● Delivered</b> · Dubai → Mumbai · 14h 02m</span>
+                <span><b className="text-blue-400">● Delivered</b> · Paris → London · 6h 23m</span>
+                <span><b className="text-blue-400">● In transit</b> · Singapore → Sydney · 142 parcels</span>
+                <span><b className="text-blue-400">● Out for delivery</b> · New York, USA</span>
+                <span><b className="text-blue-400">● Customs cleared</b> · Rotterdam port</span>
+                <span><b className="text-blue-400">● Picked up</b> · Tokyo fulfillment</span>
+                <span><b className="text-blue-400">● Delivered</b> · Dubai → Mumbai · 14h 02m</span>
               </div>
             ))}
           </div>
@@ -146,7 +146,7 @@ export default function App() {
             { n: "24/7", l: "Operations" },
           ].map((s) => (
             <div key={s.l} className="bg-white p-6 sm:p-8 text-center">
-              <div className="text-3xl sm:text-5xl font-black bg-gradient-to-br from-emerald-600 to-emerald-400 bg-clip-text text-transparent">{s.n}</div>
+              <div className="text-3xl sm:text-5xl font-black bg-gradient-to-br from-blue-600 to-blue-400 bg-clip-text text-transparent">{s.n}</div>
               <div className="mt-1 text-xs sm:text-sm text-slate-500 uppercase tracking-wider font-semibold">{s.l}</div>
             </div>
           ))}
@@ -175,7 +175,7 @@ export default function App() {
       <section className="py-20 sm:py-28">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 grid lg:grid-cols-2 gap-12 items-center">
           <div>
-            <div className="text-sm font-semibold text-emerald-600 uppercase tracking-widest">The promise</div>
+            <div className="text-sm font-semibold text-blue-600 uppercase tracking-widest">The promise</div>
             <h2 className="mt-3 text-3xl sm:text-5xl lg:text-6xl font-black tracking-tight leading-tight">
               Shipping that doesn't feel like shipping.
             </h2>
@@ -215,7 +215,7 @@ export default function App() {
       <section className="py-20 sm:py-28 bg-slate-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="max-w-3xl">
-            <div className="text-sm font-semibold text-emerald-600 uppercase tracking-widest">What we do</div>
+            <div className="text-sm font-semibold text-blue-600 uppercase tracking-widest">What we do</div>
             <h2 className="mt-3 text-3xl sm:text-5xl font-black tracking-tight">Every link in the chain. One bill.</h2>
             <p className="mt-4 text-lg text-slate-600">Six services, built to fit together so you don't spend your week copy-pasting tracking numbers between six different couriers' dashboards.</p>
           </div>
@@ -253,13 +253,13 @@ export default function App() {
       <section className="bg-slate-950 text-white py-20 sm:py-28 overflow-hidden">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="max-w-3xl">
-            <div className="text-sm font-semibold text-emerald-400 uppercase tracking-widest">How it works</div>
+            <div className="text-sm font-semibold text-blue-400 uppercase tracking-widest">How it works</div>
             <h2 className="mt-3 text-3xl sm:text-5xl font-black tracking-tight">A parcel's journey, drawn simply.</h2>
             <p className="mt-4 text-lg text-slate-400">From the moment you click "book" to the moment your customer signs.</p>
           </div>
 
           <div className="mt-12 relative">
-            <div className="absolute top-12 left-0 right-0 h-0.5 bg-gradient-to-r from-transparent via-emerald-400/60 to-transparent hidden md:block" />
+            <div className="absolute top-12 left-0 right-0 h-0.5 bg-gradient-to-r from-transparent via-blue-400/60 to-transparent hidden md:block" />
             <div className="grid md:grid-cols-4 gap-10 relative">
               {[
                 { t: "Book", d: "Get a quote, generate a label, schedule a pickup. Under a minute, no phone call." },
@@ -268,7 +268,7 @@ export default function App() {
                 { t: "Deliver", d: "Hand-off with photo confirmation. Signature if you asked for one." },
               ].map((s, i) => (
                 <div key={s.t} className="relative">
-                  <div className="w-24 h-24 mx-auto md:mx-0 rounded-2xl bg-emerald-500/10 ring-1 ring-emerald-400/30 grid place-items-center text-2xl font-black text-emerald-300 relative z-10 backdrop-blur">
+                  <div className="w-24 h-24 mx-auto md:mx-0 rounded-2xl bg-blue-500/10 ring-1 ring-blue-400/30 grid place-items-center text-2xl font-black text-blue-300 relative z-10 backdrop-blur">
                     0{i + 1}
                   </div>
                   <h3 className="mt-5 text-xl font-bold text-center md:text-left">{s.t}</h3>
@@ -284,7 +284,7 @@ export default function App() {
       <section className="py-20 sm:py-28 bg-slate-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 grid lg:grid-cols-2 gap-12 items-center">
           <div>
-            <div className="text-sm font-semibold text-emerald-600 uppercase tracking-widest">The network</div>
+            <div className="text-sm font-semibold text-blue-600 uppercase tracking-widest">The network</div>
             <h2 className="mt-3 text-3xl sm:text-5xl font-black tracking-tight">One network. Every continent.</h2>
             <p className="mt-4 text-lg text-slate-600">
               Our hubs sit inside 34 major airports, 12 sea ports, and 80+ sorting centres. Stitched together by a routing engine that picks the fastest path on every single scan.
@@ -296,7 +296,7 @@ export default function App() {
                 ["Predictive ETAs", "Our model updates arrival estimates on every scan. No more \"out for delivery\" for four straight days."],
               ].map(([h, d]) => (
                 <li key={h} className="flex gap-3">
-                  <div className="shrink-0 w-6 h-6 rounded-full bg-emerald-500 grid place-items-center mt-0.5">
+                  <div className="shrink-0 w-6 h-6 rounded-full bg-blue-500 grid place-items-center mt-0.5">
                     <svg viewBox="0 0 24 24" className="w-4 h-4 text-white" fill="none" stroke="currentColor" strokeWidth="3">
                       <path d="M5 12l5 5L20 7" strokeLinecap="round" strokeLinejoin="round" />
                     </svg>
@@ -319,7 +319,7 @@ export default function App() {
       <section className="py-20 sm:py-28">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center max-w-2xl mx-auto">
-            <div className="text-sm font-semibold text-emerald-600 uppercase tracking-widest">Built for</div>
+            <div className="text-sm font-semibold text-blue-600 uppercase tracking-widest">Built for</div>
             <h2 className="mt-3 text-3xl sm:text-5xl font-black tracking-tight">Whoever's doing the shipping.</h2>
           </div>
           <div className="mt-14 grid md:grid-cols-3 gap-5">
@@ -354,10 +354,10 @@ export default function App() {
                   <img src={p.img} onError={onImgErr} alt={p.tag} className="w-full h-full object-cover group-hover:scale-105 transition duration-700" />
                 </div>
                 <div className="p-6">
-                  <div className="text-xs font-semibold text-emerald-600 uppercase tracking-widest">{p.tag}</div>
+                  <div className="text-xs font-semibold text-blue-600 uppercase tracking-widest">{p.tag}</div>
                   <h3 className="mt-2 text-xl font-bold">{p.title}</h3>
                   <p className="mt-2 text-slate-600">{p.body}</p>
-                  <Link to={p.href} className="mt-4 inline-flex items-center gap-1 font-semibold text-emerald-600 hover:text-emerald-700">
+                  <Link to={p.href} className="mt-4 inline-flex items-center gap-1 font-semibold text-blue-600 hover:text-blue-700">
                     {p.cta} <span aria-hidden>→</span>
                   </Link>
                 </div>
@@ -374,7 +374,7 @@ export default function App() {
       <section className="py-20 sm:py-28 bg-slate-50">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center">
-            <div className="text-sm font-semibold text-emerald-600 uppercase tracking-widest">Quick answers</div>
+            <div className="text-sm font-semibold text-blue-600 uppercase tracking-widest">Quick answers</div>
             <h2 className="mt-3 text-3xl sm:text-5xl font-black tracking-tight">Things people ask before signing up.</h2>
           </div>
           <div className="mt-10 space-y-3">
@@ -396,7 +396,7 @@ export default function App() {
                 a: "No. You pay per shipment. If you're moving enough volume that a contract would save you money, we'll reach out — or you can poke us first at sales@shipenvoy.com.",
               },
             ].map((f) => (
-              <details key={f.q} className="group rounded-2xl border border-slate-200 bg-white p-5 sm:p-6 hover:border-emerald-300 transition">
+              <details key={f.q} className="group rounded-2xl border border-slate-200 bg-white p-5 sm:p-6 hover:border-blue-300 transition">
                 <summary className="list-none cursor-pointer flex items-center justify-between font-semibold text-slate-900">
                   <span>{f.q}</span>
                   <svg className="w-5 h-5 text-slate-400 group-open:rotate-180 transition" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -408,7 +408,7 @@ export default function App() {
             ))}
           </div>
           <div className="mt-8 text-center">
-            <Link to="/faq" className="text-emerald-600 font-semibold hover:text-emerald-700">See all questions →</Link>
+            <Link to="/faq" className="text-blue-600 font-semibold hover:text-blue-700">See all questions →</Link>
           </div>
         </div>
       </section>
@@ -423,7 +423,7 @@ export default function App() {
               <h2 className="text-3xl sm:text-5xl font-black tracking-tight">Ready to ship?</h2>
               <p className="mt-4 text-lg text-slate-300">Your first shipment is on us. Make an account in three minutes — no sales call, no long demo, nothing.</p>
               <div className="mt-8 flex flex-wrap gap-3">
-                <Link to="/auth/register" className="px-6 py-3 rounded-full bg-emerald-500 text-white font-semibold hover:bg-emerald-400 transition shadow-lg shadow-emerald-500/30">Create free account</Link>
+                <Link to="/auth/register" className="px-6 py-3 rounded-full bg-blue-500 text-white font-semibold hover:bg-blue-400 transition shadow-lg shadow-blue-500/30">Create free account</Link>
                 <Link to="/contact" className="px-6 py-3 rounded-full bg-white/10 backdrop-blur border border-white/20 text-white font-semibold hover:bg-white/15 transition">Talk to sales</Link>
               </div>
             </div>
@@ -437,7 +437,7 @@ export default function App() {
           <div className="grid md:grid-cols-5 gap-10">
             <div className="md:col-span-2">
               <div className="flex items-center gap-2">
-                <div className="w-10 h-10 rounded-xl bg-emerald-500 grid place-items-center">
+                <div className="w-10 h-10 rounded-xl bg-blue-500 grid place-items-center">
                   <svg viewBox="0 0 24 24" className="w-6 h-6 text-white" fill="currentColor">
                     <path d="M2 10l20-7-7 20-3-9z" />
                   </svg>
@@ -498,10 +498,10 @@ function SpotlightRow({ n, title, body, cta, img, align = "left" }) {
         <div className="absolute bottom-4 left-4 text-white font-black text-3xl drop-shadow-2xl">{n}</div>
       </div>
       <div>
-        <div className="text-6xl font-black text-emerald-500/20 leading-none">{n}</div>
+        <div className="text-6xl font-black text-blue-500/20 leading-none">{n}</div>
         <h3 className="mt-2 text-2xl sm:text-4xl font-black tracking-tight">{title}</h3>
         <p className="mt-4 text-lg text-slate-600">{body}</p>
-        <Link to={cta.to} className="mt-6 inline-flex items-center gap-2 font-semibold text-emerald-600 hover:text-emerald-700">
+        <Link to={cta.to} className="mt-6 inline-flex items-center gap-2 font-semibold text-blue-600 hover:text-blue-700">
           {cta.text} <span aria-hidden>→</span>
         </Link>
       </div>
@@ -525,7 +525,7 @@ function RotatingTestimonial() {
   return (
     <section className="py-20 sm:py-28">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-        <svg className="w-12 h-12 mx-auto text-emerald-500/30" viewBox="0 0 24 24" fill="currentColor" aria-hidden>
+        <svg className="w-12 h-12 mx-auto text-blue-500/30" viewBox="0 0 24 24" fill="currentColor" aria-hidden>
           <path d="M7 7h4v4H9c0 2 1 3 3 3v2c-4 0-6-3-6-6V7zm8 0h4v4h-2c0 2 1 3 3 3v2c-4 0-6-3-6-6V7z" />
         </svg>
         <blockquote className="mt-6 text-2xl sm:text-3xl font-bold tracking-tight text-slate-900 leading-snug min-h-[140px] transition-all duration-500" key={i}>
@@ -538,7 +538,7 @@ function RotatingTestimonial() {
         <div className="mt-6 flex justify-center gap-2">
           {quotes.map((_, k) => (
             <button key={k} onClick={() => setI(k)} aria-label={`Testimonial ${k + 1}`}
-              className={`h-2 rounded-full transition ${i === k ? "bg-emerald-500 w-8" : "bg-slate-300 hover:bg-slate-400 w-2"}`} />
+              className={`h-2 rounded-full transition ${i === k ? "bg-blue-500 w-8" : "bg-slate-300 hover:bg-slate-400 w-2"}`} />
           ))}
         </div>
       </div>
@@ -577,7 +577,7 @@ function WorldMapBg() {
   return (
     <svg viewBox="0 0 1000 500" preserveAspectRatio="xMidYMid slice" className="w-full h-full">
       {dots.map(({ x, y, k }) => (
-        <circle key={k} cx={x * 1000} cy={y * 500} r={1.5} fill="#34d399" opacity="0.55" />
+        <circle key={k} cx={x * 1000} cy={y * 500} r={1.5} fill="#60a5fa" opacity="0.55" />
       ))}
       {[
         [220, 230, 475, 220],
@@ -587,12 +587,12 @@ function WorldMapBg() {
         <g key={`ln-${i}`}>
           <path
             d={`M${x1} ${y1} Q ${(x1+x2)/2} ${Math.min(y1,y2)-30} ${x2} ${y2}`}
-            stroke="#10b981" strokeOpacity="0.55" strokeWidth="1.2" fill="none" strokeDasharray="4 4"
+            stroke="#3b82f6" strokeOpacity="0.55" strokeWidth="1.2" fill="none" strokeDasharray="4 4"
           />
-          <circle cx={x1} cy={y1} r="3" fill="#34d399">
+          <circle cx={x1} cy={y1} r="3" fill="#60a5fa">
             <animate attributeName="r" values="3;7;3" dur="2s" repeatCount="indefinite" begin={`${i * 0.3}s`} />
           </circle>
-          <circle cx={x2} cy={y2} r="3" fill="#34d399">
+          <circle cx={x2} cy={y2} r="3" fill="#60a5fa">
             <animate attributeName="r" values="3;7;3" dur="2s" repeatCount="indefinite" begin={`${i * 0.3 + 1}s`} />
           </circle>
         </g>

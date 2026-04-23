@@ -79,11 +79,11 @@ export default function ServicesOverviewPage() {
           <nav className="hidden md:flex items-center gap-7 text-sm font-medium text-slate-600">
             <Link to="/" className="hover:text-slate-900">Home</Link>
             <Link to="/track" className="hover:text-slate-900">Track</Link>
-            <Link to="/services" className="text-emerald-600 font-semibold">Services</Link>
+            <Link to="/services" className="text-blue-600 font-semibold">Services</Link>
             <Link to="/about" className="hover:text-slate-900">About</Link>
             <Link to="/contact" className="hover:text-slate-900">Contact</Link>
           </nav>
-          <Link to="/auth/register" className="px-4 py-2 rounded-full bg-emerald-500 text-white text-sm font-semibold hover:bg-emerald-400 transition">
+          <Link to="/auth/register" className="px-4 py-2 rounded-full bg-blue-500 text-white text-sm font-semibold hover:bg-blue-400 transition">
             Open an account
           </Link>
         </div>
@@ -91,13 +91,13 @@ export default function ServicesOverviewPage() {
 
       {/* Hero — editorial magazine cover vibe */}
       <section className="relative overflow-hidden border-b border-slate-100">
-        <div className="absolute top-0 right-0 w-1/2 h-full bg-gradient-to-bl from-emerald-100/60 via-emerald-50/40 to-transparent -z-10" />
+        <div className="absolute top-0 right-0 w-1/2 h-full bg-gradient-to-bl from-blue-100/60 via-blue-50/40 to-transparent -z-10" />
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 sm:py-28 grid lg:grid-cols-12 gap-10 items-end">
           <div className="lg:col-span-7">
-            <div className="text-xs font-semibold tracking-[0.3em] text-emerald-600 uppercase">Issue 06 · Services</div>
+            <div className="text-xs font-semibold tracking-[0.3em] text-blue-600 uppercase">Issue 06 · Services</div>
             <h1 className="mt-5 text-5xl sm:text-7xl lg:text-8xl font-black tracking-tight leading-[0.95]">
               What<br />
-              <span className="bg-gradient-to-r from-emerald-500 to-teal-500 bg-clip-text text-transparent">we actually</span><br />
+              <span className="bg-gradient-to-r from-blue-500 to-blue-600 bg-clip-text text-transparent">we actually</span><br />
               do.
             </h1>
           </div>
@@ -134,7 +134,7 @@ export default function ServicesOverviewPage() {
               { n: "11 min", l: "Avg customs clearance" },
             ].map((s) => (
               <div key={s.l} className="bg-slate-950 p-8 text-center">
-                <div className="text-4xl sm:text-5xl font-black bg-gradient-to-br from-emerald-300 to-emerald-500 bg-clip-text text-transparent">{s.n}</div>
+                <div className="text-4xl sm:text-5xl font-black bg-gradient-to-br from-blue-300 to-blue-500 bg-clip-text text-transparent">{s.n}</div>
                 <div className="mt-2 text-sm text-slate-400">{s.l}</div>
               </div>
             ))}
@@ -157,14 +157,14 @@ export default function ServicesOverviewPage() {
               { q: "I need delivery inside the country, today or tomorrow", a: "Domestic", to: "/services/domestic" },
               { q: "I want someone else to hold my stock and ship it out", a: "Warehousing & Fulfillment", to: "/services/warehousing" },
             ].map((r) => (
-              <Link to={r.to} key={r.q} className="flex items-center justify-between p-6 hover:bg-emerald-50/50 transition group">
+              <Link to={r.to} key={r.q} className="flex items-center justify-between p-6 hover:bg-blue-50/50 transition group">
                 <div className="flex-1 pr-4">
                   <div className="font-semibold text-slate-900">"{r.q}"</div>
                 </div>
                 <div className="text-right shrink-0">
-                  <div className="text-sm text-emerald-600 font-bold group-hover:underline">{r.a}</div>
+                  <div className="text-sm text-blue-600 font-bold group-hover:underline">{r.a}</div>
                 </div>
-                <svg className="w-5 h-5 text-slate-400 ml-4 group-hover:text-emerald-600 group-hover:translate-x-1 transition" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <svg className="w-5 h-5 text-slate-400 ml-4 group-hover:text-blue-600 group-hover:translate-x-1 transition" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                   <path d="M5 12h14M13 6l6 6-6 6" strokeLinecap="round" strokeLinejoin="round" />
                 </svg>
               </Link>
@@ -179,7 +179,7 @@ export default function ServicesOverviewPage() {
           <h2 className="text-3xl sm:text-5xl font-black tracking-tight">Still can't decide? Just call us.</h2>
           <p className="mt-4 text-lg text-slate-600">Our operations team picks up within 40 seconds, and they're mostly ex-couriers. They'll tell you which service fits in about two minutes.</p>
           <div className="mt-8 flex flex-wrap gap-3 justify-center">
-            <Link to="/contact" className="px-6 py-3 rounded-full bg-emerald-500 text-white font-semibold hover:bg-emerald-400 transition shadow-lg shadow-emerald-500/20">Talk to operations</Link>
+            <Link to="/contact" className="px-6 py-3 rounded-full bg-blue-500 text-white font-semibold hover:bg-blue-400 transition shadow-lg shadow-blue-500/20">Talk to operations</Link>
             <Link to="/track" className="px-6 py-3 rounded-full bg-slate-100 text-slate-900 font-semibold hover:bg-slate-200 transition">Track a parcel instead</Link>
           </div>
         </div>
@@ -210,14 +210,14 @@ function ServiceRow({ s, reversed }) {
             {s.tag}
           </div>
           {s.feat && (
-            <div className="absolute top-5 right-5 bg-emerald-500 text-white px-3 py-1 rounded-full text-xs font-bold">
+            <div className="absolute top-5 right-5 bg-blue-500 text-white px-3 py-1 rounded-full text-xs font-bold">
               Most booked
             </div>
           )}
         </div>
       </div>
       <div className={`lg:col-span-5 ${reversed ? "lg:order-1" : ""}`}>
-        <div className="text-xs font-semibold tracking-widest text-emerald-600 uppercase">{s.kicker}</div>
+        <div className="text-xs font-semibold tracking-widest text-blue-600 uppercase">{s.kicker}</div>
         <h2 className="mt-2 text-3xl sm:text-5xl font-black tracking-tight">{s.title}</h2>
         <p className="mt-4 text-lg text-slate-600">{s.body}</p>
         <div className="mt-6 grid grid-cols-3 gap-3 max-w-md">
@@ -228,7 +228,7 @@ function ServiceRow({ s, reversed }) {
             </div>
           ))}
         </div>
-        <Link to={`/services/${s.slug}`} className="mt-6 inline-flex items-center gap-2 text-emerald-600 font-bold hover:text-emerald-700 group">
+        <Link to={`/services/${s.slug}`} className="mt-6 inline-flex items-center gap-2 text-blue-600 font-bold hover:text-blue-700 group">
           {s.cta}
           <span className="group-hover:translate-x-1 transition">→</span>
         </Link>
