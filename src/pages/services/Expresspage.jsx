@@ -1,4 +1,3 @@
-// src/pages/services/ExpressPage.jsx
 import { useMemo, useState, useEffect, useRef } from "react";
 import { Link, useNavigate, useLocation, useSearchParams } from "react-router-dom";
 import { upload } from "@vercel/blob/client";
@@ -115,8 +114,6 @@ export default function ExpressPage() {
       for (const file of chosen) {
         const pathname = `shipments/${shipmentKey}/goods/${Date.now()}-${safeName(file.name)}`;
 
-        // Requires your token endpoint:
-        // POST /api/goods/upload (server) -> returns a vercel blob client token
         const blob = await upload(pathname, file, {
           access: "public",
           handleUploadUrl: "/api/goods/upload",
@@ -161,7 +158,6 @@ export default function ExpressPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // helper: select a service/mode/level and jump to estimator
   function selectAndScroll({ type, level, mode }) {
     if (type === "parcel") {
       setServiceType("parcel");
@@ -183,7 +179,6 @@ export default function ExpressPage() {
     }, 0);
   }
 
-  // ---------------- calcs: parcel ----------------
   const volumetricParcel = useMemo(() => {
     const l = +parcel.length || 0;
     const w = +parcel.width || 0;
@@ -197,7 +192,6 @@ export default function ExpressPage() {
     return Math.max(actual, volumetricParcel);
   }, [parcel.weight, volumetricParcel]);
 
-  // ---------------- calcs: freight ----------------
   const volumetricFreight = useMemo(() => {
     const l = +freight.length || 0;
     const w = +freight.width || 0;
@@ -212,7 +206,6 @@ export default function ExpressPage() {
     return Math.max(actual, volumetricFreight);
   }, [freight.weight, freight.pallets, volumetricFreight]);
 
-  // ---------------- quotes ----------------
   const parcelQuote = useMemo(() => {
     if (!parcel.from || !parcel.to || !billableParcel) return null;
 
@@ -228,20 +221,20 @@ export default function ExpressPage() {
     const subtotal = (base + billableParcel * perKg) * speedMult;
     const sur = subtotal * fuel + security;
     const total = Math.max(9, subtotal + sur);
-return {
-  currency: "EUR",
-  total: round2(total),
-  eta:
-    parcelLevel === "standard"
-      ? "2–5 business days"
-      : parcelLevel === "express"
-      ? "24–72 hours"
-      : "12–48 hours",
-  billable: billableParcel,
-  recipientEmail: parcel.recipientEmail || "",
-  recipientAddress: parcel.recipientAddress || "",
-};
 
+    return {
+      currency: "EUR",
+      total: round2(total),
+      eta:
+        parcelLevel === "standard"
+          ? "2–5 business days"
+          : parcelLevel === "express"
+          ? "24–72 hours"
+          : "12–48 hours",
+      billable: billableParcel,
+      recipientEmail: parcel.recipientEmail || "",
+      recipientAddress: parcel.recipientAddress || "",
+    };
   }, [parcel.from, parcel.to, billableParcel, parcelLevel, parcel.recipientEmail, parcel.recipientAddress]);
 
   const freightQuote = useMemo(() => {
@@ -279,13 +272,11 @@ return {
 
   const quote = serviceType === "parcel" ? parcelQuote : freightQuote;
 
-  // email + address gating
   const currentEmail = serviceType === "parcel" ? parcel.recipientEmail : freight.recipientEmail;
   const currentAddress = serviceType === "parcel" ? parcel.recipientAddress : freight.recipientAddress;
   const emailOk = isEmail(currentEmail);
   const addressOk = (currentAddress || "").trim().length > 5;
 
-  // ---------- build draft & navigate ----------
   function makeDraft({ serviceType, parcelLevel, freightMode, parcel, freight, from, to }) {
     if (serviceType === "freight") {
       return {
@@ -352,13 +343,10 @@ return {
       to: serviceType === "parcel" ? parcel.to : freight.to,
     });
 
-    // attach quote snapshot
     draft.price = quote.total;
     draft.currency = quote.currency;
     draft.eta = quote.eta;
     draft.billable = quote.billable;
-
-    // attach goods photos (Blob URLs) so Tracking can show them later
     draft.shipmentKey = shipmentKey;
     draft.goodsPhotos = goodsPhotos;
 
@@ -366,7 +354,6 @@ return {
     navigate("/Billing", { state: { fromEstimator: true } });
   }
 
-  // drag & drop (no extra libs)
   useEffect(() => {
     const el = dropRef.current;
     if (!el) return;
@@ -404,7 +391,6 @@ return {
       el.removeEventListener("dragleave", onDragLeave);
       el.removeEventListener("drop", onDrop);
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [goodsUploading, goodsPhotos.length]);
 
   const titleLine =
@@ -425,7 +411,6 @@ return {
 
   return (
     <div className="min-h-screen bg-white text-slate-900">
-      {/* Top nav */}
       <header className="sticky top-0 z-50 bg-white/85 backdrop-blur border-b border-slate-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="h-14 flex items-center justify-between">
@@ -463,10 +448,8 @@ return {
         </div>
       </header>
 
-      {/* HERO / QUOTE */}
       <section className="relative overflow-hidden">
-        {/* 2026-ish background: soft gradient + subtle grid */}
-        <div className="absolute inset-0 bg-[radial-gradient(1200px_700px_at_15%_10%,rgba(16,185,129,0.18),transparent_55%),radial-gradient(900px_500px_at_90%_10%,rgba(0,0,0,0.12),transparent_60%),linear-gradient(180deg,rgba(0,0,0,0.02),rgba(0,0,0,0.00))]" />
+        <div className="absolute inset-0 bg-[radial-gradient(1200px_700px_at_15%_10%,rgba(59,130,246,0.18),transparent_55%),radial-gradient(900px_500px_at_90%_10%,rgba(0,0,0,0.12),transparent_60%),linear-gradient(180deg,rgba(0,0,0,0.02),rgba(0,0,0,0.00))]" />
         <div
           className="absolute inset-0 opacity-[0.08]"
           style={{
@@ -477,7 +460,6 @@ return {
         />
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16">
           <div className="grid lg:grid-cols-12 gap-8 items-start">
-            {/* Left copy */}
             <div className="lg:col-span-5">
               <div className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white/80 px-3 py-1 text-xs font-semibold text-slate-700">
                 <SparkIcon /> New booking flow
@@ -544,7 +526,6 @@ return {
               </div>
             </div>
 
-            {/* Right estimator card */}
             <div id="quote" className="lg:col-span-7">
               <div className="rounded-[28px] border border-slate-200 bg-white shadow-[0_22px_70px_rgba(0,0,0,0.10)] overflow-hidden">
                 <div className="p-6 bg-gradient-to-b from-slate-50 to-slate-900 border-b">
@@ -564,7 +545,6 @@ return {
                 </div>
 
                 <div className="p-6 grid gap-6">
-                  {/* Service selector */}
                   <SectionTitle icon={<BoltIcon />} title="Service" subtitle="Choose parcel/freight and speed." />
 
                   <div className="grid sm:grid-cols-2 gap-2">
@@ -608,7 +588,6 @@ return {
                     </div>
                   )}
 
-                  {/* Route & contacts */}
                   <SectionTitle icon={<MapIcon />} title="Route & contacts" subtitle="Who’s sending, who’s receiving." />
 
                   <div className="grid sm:grid-cols-2 gap-3">
@@ -755,7 +734,6 @@ return {
                     )}
                   </div>
 
-                  {/* Goods photos */}
                   <SectionTitle
                     icon={<CameraIcon />}
                     title="Goods photos"
@@ -871,7 +849,6 @@ return {
                     </div>
                   </div>
 
-                  {/* Package details */}
                   <SectionTitle icon={<BoxIcon />} title="Package details" subtitle="Weight + dimensions for pricing." />
 
                   {serviceType === "parcel" ? (
@@ -1001,7 +978,6 @@ return {
                     </div>
                   )}
 
-                  {/* Quote footer */}
                   <div className="rounded-2xl border border-slate-200 bg-gradient-to-b from-slate-50 to-white p-4">
                     {quote ? (
                       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
@@ -1058,7 +1034,6 @@ return {
             </div>
           </div>
 
-          {/* Photo preview modal */}
           {activePreview ? (
             <PreviewModal
               url={activePreview}
@@ -1069,7 +1044,6 @@ return {
         </div>
       </section>
 
-      {/* Choose service cards */}
       <section className="py-14 sm:py-18 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-end justify-between gap-4">
@@ -1145,7 +1119,6 @@ return {
         </div>
       </section>
 
-      {/* How it works */}
       <section className="py-14 sm:py-18 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between">
@@ -1161,7 +1134,6 @@ return {
         </div>
       </section>
 
-      {/* Benefits */}
       <section className="py-14 sm:py-18 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <h2 className="text-2xl sm:text-3xl font-bold tracking-tight">Why Envoy?</h2>
@@ -1180,7 +1152,6 @@ return {
         </div>
       </section>
 
-      {/* SLA & limits */}
       <section className="py-14 sm:py-18 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <h2 className="text-2xl sm:text-3xl font-bold tracking-tight">Service commitments</h2>
@@ -1228,7 +1199,6 @@ return {
         </div>
       </section>
 
-      {/* FAQ */}
       <section className="py-14 sm:py-18 bg-white">
         <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
           <h2 className="text-2xl sm:text-3xl font-bold tracking-tight">FAQs</h2>
@@ -1251,7 +1221,6 @@ return {
         </div>
       </section>
 
-      {/* Support CTA (no placeholder image — real “control center” card + SVG) */}
       <section id="support" className="py-14 sm:py-18 bg-white border-t">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 grid lg:grid-cols-12 gap-8 items-center">
           <div className="lg:col-span-6">
@@ -1312,8 +1281,6 @@ return {
     </div>
   );
 }
-
-/* ========================= UI bits ========================= */
 
 function SectionTitle({ icon, title, subtitle, right }) {
   return (
@@ -1520,8 +1487,6 @@ function SupportBadge({ title, value }) {
   );
 }
 
-/* ========================= Preview modal ========================= */
-
 function PreviewModal({ url, onClose, onRemove }) {
   useEffect(() => {
     const onKey = (e) => {
@@ -1564,8 +1529,6 @@ function PreviewModal({ url, onClose, onRemove }) {
   );
 }
 
-/* ========================= FAQ item ========================= */
-
 function FaqItem({ q, a }) {
   const [open, setOpen] = useState(false);
   return (
@@ -1581,8 +1544,6 @@ function FaqItem({ q, a }) {
     </div>
   );
 }
-
-/* ========================= Support “art” ========================= */
 
 function MiniTimeline() {
   const rows = [
@@ -1614,28 +1575,26 @@ function WorldRouteArt() {
     <svg viewBox="0 0 640 260" className="w-full h-auto">
       <defs>
         <linearGradient id="g1" x1="0" x2="1">
-          <stop offset="0" stopColor="rgba(16,185,129,0.85)" />
+          <stop offset="0" stopColor="rgba(59,130,246,0.85)" />
           <stop offset="1" stopColor="rgba(0,0,0,0.85)" />
         </linearGradient>
         <radialGradient id="g2" cx="30%" cy="30%" r="70%">
-          <stop offset="0" stopColor="rgba(16,185,129,0.18)" />
-          <stop offset="1" stopColor="rgba(16,185,129,0)" />
+          <stop offset="0" stopColor="rgba(59,130,246,0.18)" />
+          <stop offset="1" stopColor="rgba(59,130,246,0)" />
         </radialGradient>
       </defs>
 
       <rect x="0" y="0" width="640" height="260" rx="18" fill="white" />
       <rect x="0" y="0" width="640" height="260" rx="18" fill="url(#g2)" />
 
-      {/* “world” dots */}
       {Array.from({ length: 220 }).map((_, i) => {
         const x = (i * 37) % 640;
-        const y = ((i * 91) % 260);
-        const r = (i % 7 === 0 ? 1.6 : 1.0);
+        const y = (i * 91) % 260;
+        const r = i % 7 === 0 ? 1.6 : 1.0;
         const o = i % 9 === 0 ? 0.22 : 0.12;
         return <circle key={i} cx={x} cy={y} r={r} fill={`rgba(0,0,0,${o})`} />;
       })}
 
-      {/* route arcs */}
       <path
         d="M120 170 C 210 70, 350 70, 460 140"
         fill="none"
@@ -1646,18 +1605,16 @@ function WorldRouteArt() {
       <path
         d="M170 190 C 260 120, 380 120, 530 150"
         fill="none"
-        stroke="rgba(16,185,129,0.55)"
+        stroke="rgba(59,130,246,0.55)"
         strokeWidth="2.5"
         strokeLinecap="round"
         strokeDasharray="7 9"
       />
 
-      {/* points */}
-      <circle cx="120" cy="170" r="7" fill="rgba(16,185,129,0.95)" />
+      <circle cx="120" cy="170" r="7" fill="rgba(59,130,246,0.95)" />
       <circle cx="460" cy="140" r="7" fill="rgba(0,0,0,0.90)" />
-      <circle cx="530" cy="150" r="5.5" fill="rgba(16,185,129,0.75)" />
+      <circle cx="530" cy="150" r="5.5" fill="rgba(59,130,246,0.75)" />
 
-      {/* labels */}
       <text x="120" y="198" fontSize="12" fill="rgba(0,0,0,0.60)" textAnchor="middle">
         Origin
       </text>
@@ -1670,8 +1627,6 @@ function WorldRouteArt() {
     </svg>
   );
 }
-
-/* ========================= Utils ========================= */
 
 function round2(n) {
   return Math.round(n * 100) / 100;
@@ -1693,8 +1648,6 @@ function humanSize(bytes) {
   const mb = kb / 1024;
   return `${mb.toFixed(1)}MB`;
 }
-
-/* ========================= Icons ========================= */
 
 function Dot() {
   return <span className="inline-block w-1.5 h-1.5 rounded-full bg-slate-500" />;
