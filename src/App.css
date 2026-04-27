@@ -34,7 +34,7 @@
 .kpi::after{
   content:"";
   @apply absolute inset-0 pointer-events-none;
-  background: radial-gradient(120px 60px at 85% -10%, rgba(16,185,129,.08), transparent);
+  background: radial-gradient(120px 60px at 85% -10%, rgba(59,130,246,.10), transparent);
 }
 
 .table-wrap { @apply mt-4 overflow-x-auto rounded-2xl border; }

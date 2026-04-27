@@ -50,11 +50,11 @@ export default function AdminLogin() {
   return (
     <div className="min-h-screen grid lg:grid-cols-2">
       {/* Left — branded panel */}
-      <div className="hidden lg:flex relative bg-slate-950 text-white overflow-hidden flex-col justify-between p-12">
+      <div className="hidden lg:flex relative bg-gradient-to-br from-blue-600 via-blue-500 to-blue-700 text-white overflow-hidden flex-col justify-between p-12">
         <div className="absolute inset-0 opacity-30">
           <WorldDotBg />
         </div>
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(16,185,129,0.2),transparent_60%)]" />
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(59,130,246,0.25),transparent_60%)]" />
         <div className="relative z-10">
           <Link to="/" className="inline-flex items-center gap-2">
             <div className="w-10 h-10 rounded-xl bg-blue-500 grid place-items-center">
@@ -65,16 +65,16 @@ export default function AdminLogin() {
             <span className="text-2xl font-black">Envoy</span>
           </Link>
           <div className="mt-12 max-w-md">
-            <div className="text-xs font-bold uppercase tracking-widest text-blue-400">Operations Console</div>
+            <div className="text-xs font-bold uppercase tracking-widest text-blue-100">Operations Console</div>
             <h1 className="mt-3 text-4xl font-black tracking-tight leading-tight">
               Every shipment. Every scan. One window.
             </h1>
-            <p className="mt-4 text-slate-300">
+            <p className="mt-4 text-blue-50">
               The internal console for Envoy operations staff. Sign in with your work credentials.
             </p>
           </div>
         </div>
-        <div className="relative z-10 text-xs text-slate-500">
+        <div className="relative z-10 text-xs text-blue-100/80">
           Restricted access · All actions logged and audited
         </div>
       </div>
@@ -177,7 +177,7 @@ function WorldDotBg() {
   return (
     <svg viewBox="0 0 1000 500" preserveAspectRatio="xMidYMid slice" className="w-full h-full">
       {dots.map(({ x, y, k }) => (
-        <circle key={k} cx={x * 1000} cy={y * 500} r={1.5} fill="#60a5fa" opacity="0.6" />
+        <circle key={k} cx={x * 1000} cy={y * 500} r={1.5} fill="#ffffff" opacity="0.55" />
       ))}
     </svg>
   );

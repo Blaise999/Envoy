@@ -1,8 +1,8 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 480 120" width="480" height="120">
   <defs>
     <linearGradient id="g2" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#34d399"/>
-      <stop offset="100%" stop-color="#10b981"/>
+      <stop offset="0%" stop-color="#60a5fa"/>
+      <stop offset="100%" stop-color="#2563eb"/>
     </linearGradient>
   </defs>
   <g transform="translate(8,16)">
@@ -13,7 +13,7 @@
     </g>
   </g>
   <g transform="translate(116,82)" font-family="system-ui, -apple-system, 'Segoe UI', Inter, Arial, sans-serif" font-weight="800" letter-spacing="-2">
-    <text x="0" y="0" font-size="64" fill="#f1f5f9">Envoy</text>
-    <circle cx="258" cy="-58" r="6" fill="#34d399"/>
+    <text x="0" y="0" font-size="64" fill="#0f172a">Envoy</text>
+    <circle cx="258" cy="-58" r="6" fill="#3b82f6"/>
   </g>
 </svg>

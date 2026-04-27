@@ -2,6 +2,7 @@
 // Shared header + footer for simple content pages.
 import { Link } from "react-router-dom";
 import Logo from "../assets/envoy.png";
+import { ChatWidget } from "./support/ChatWidget";
 
 export default function PageShell({ title, subtitle, children }) {
   return (
@@ -97,6 +98,8 @@ export default function PageShell({ title, subtitle, children }) {
           </div>
         </div>
       </footer>
+
+      <ChatWidget />
     </div>
   );
 }

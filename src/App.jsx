@@ -62,7 +62,7 @@ export default function App() {
       {/* ============ HERO ============ */}
       <section className="relative overflow-hidden bg-slate-950 text-white">
         <div className="absolute inset-0 opacity-60"><WorldMapBg /></div>
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(16,185,129,0.18),transparent_60%)]" />
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(59,130,246,0.18),transparent_60%)]" />
         <FloatingBoxes />
 
         <div className="relative z-10 max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-20 sm:py-28 lg:py-36 text-center">
@@ -309,7 +309,7 @@ export default function App() {
           <div className="rounded-3xl overflow-hidden border border-slate-200 shadow-2xl bg-slate-950 aspect-square sm:aspect-[4/3]">
             <div className="w-full h-full relative">
               <WorldMapBg />
-              <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(16,185,129,0.18),transparent_60%)]" />
+              <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(59,130,246,0.18),transparent_60%)]" />
             </div>
           </div>
         </div>
@@ -418,7 +418,7 @@ export default function App() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="relative overflow-hidden rounded-[2.5rem] bg-slate-950 p-10 sm:p-16 text-white">
             <div className="absolute inset-0 opacity-40"><WorldMapBg /></div>
-            <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,rgba(16,185,129,0.3),transparent_60%)]" />
+            <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,rgba(59,130,246,0.3),transparent_60%)]" />
             <div className="relative z-10 max-w-2xl">
               <h2 className="text-3xl sm:text-5xl font-black tracking-tight">Ready to ship?</h2>
               <p className="mt-4 text-lg text-slate-300">Your first shipment is on us. Make an account in three minutes — no sales call, no long demo, nothing.</p>

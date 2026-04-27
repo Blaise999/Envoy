@@ -833,7 +833,7 @@ export default function AdminDashboard() {
                   </span>
                 )}
                 {loadErr && (
-                  <span className="text-sm text-blue-500">
+                  <span className="text-sm text-rose-600">
                     {loadErr}
                   </span>
                 )}
@@ -905,7 +905,7 @@ export default function AdminDashboard() {
                             <MailIcon /> Email
                           </button>
                           <button
-                            className="btn-ghost text-blue-500"
+                            className="btn-ghost text-rose-600 hover:bg-rose-50"
                             onClick={() =>
                               deleteShipment(s.tracking)
                             }
@@ -1090,7 +1090,7 @@ export default function AdminDashboard() {
                   )}
                 </div>
                 {supportErr && (
-                  <div className="px-4 py-2 text-xs text-blue-500">
+                  <div className="px-4 py-2 text-xs text-rose-600">
                     {supportErr}
                   </div>
                 )}
@@ -1222,7 +1222,7 @@ export default function AdminDashboard() {
                             className={`max-w-[75%] rounded-2xl px-3 py-2 text-sm ${
                               m.sender === "admin"
                                 ? "bg-blue-500 text-white"
-                                : "bg-white border border-slate-200 text-slate-900"
+                                : "bg-slate-100 border border-slate-200 text-slate-900"
                             }`}
                           >
                             <div className="mb-1 text-[10px] font-semibold uppercase tracking-[0.16em] opacity-70">
@@ -1592,7 +1592,7 @@ export default function AdminDashboard() {
                     </div>
                     <button
                       type="button"
-                      className="btn-ghost text-blue-500"
+                      className="btn-ghost text-rose-600 hover:bg-rose-50"
                       onClick={() => removeEvent(editShip, i)}
                     >
                       <TrashIcon /> Remove
@@ -2117,8 +2117,8 @@ function Select({ label, options = [], ...rest }) {
 function Tag({ children, color = "slate" }) {
   const styles =
     color === "red"
-      ? "bg-blue-500/10 text-blue-400 ring-blue-500/30"
-      : "bg-slate-100 text-slate-700 ring-slate-800";
+      ? "bg-blue-500/10 text-blue-700 ring-blue-500/30"
+      : "bg-slate-100 text-slate-700 ring-slate-200";
   return (
     <span
       className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ring-1 ring-inset ${styles}`}
@@ -2129,20 +2129,20 @@ function Tag({ children, color = "slate" }) {
 }
 function StatusBadge({ status }) {
   const map = {
-    Created: "bg-slate-100 text-slate-700 ring-slate-800",
+    Created: "bg-slate-100 text-slate-700 ring-slate-200",
     "Picked Up": "bg-sky-50 text-sky-700 ring-sky-200",
     "In Transit": "bg-blue-50 text-blue-700 ring-blue-200",
     "Out for Delivery":
       "bg-amber-50 text-amber-800 ring-amber-200",
     Delivered:
       "bg-blue-50 text-blue-700 ring-blue-200",
-    Exception: "bg-blue-500/10 text-blue-400 ring-blue-500/30",
+    Exception: "bg-rose-50 text-rose-700 ring-rose-200",
   };
   return (
     <span
       className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ring-1 ring-inset ${
         map[status] ||
-        "bg-slate-100 text-slate-700 ring-slate-800"
+        "bg-slate-100 text-slate-700 ring-slate-200"
       }`}
     >
       {status}
@@ -2165,7 +2165,7 @@ function Td({ children }) {
 function Modal({ title, onClose, children }) {
   return (
     <div
-      className="fixed inset-0 z-50 grid place-items-center bg-blue-500/40 p-4"
+      className="fixed inset-0 z-50 grid place-items-center bg-slate-900/40 p-4"
       onClick={onClose}
     >
       <div
