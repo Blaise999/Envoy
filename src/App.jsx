@@ -33,7 +33,7 @@ export default function App() {
             ))}
           </nav>
           <div className="hidden md:flex items-center gap-3">
-            <Link to="/auth/login" className="text-sm font-medium text-slate-700 hover:text-slate-900">Sign in</Link>
+            <Link to="/auth/register" className="text-sm font-medium text-slate-700 hover:text-slate-900">Sign up</Link>
             <Link to="/services/express" className="px-4 py-2 rounded-full bg-blue-500 text-white text-sm font-semibold hover:bg-blue-400 shadow-sm transition">
               Get a Quote
             </Link>
@@ -52,7 +52,7 @@ export default function App() {
               </Link>
             ))}
             <div className="pt-2 flex gap-2">
-              <Link to="/auth/login" className="flex-1 text-center px-3 py-2 rounded-lg bg-slate-100 font-medium">Sign in</Link>
+              <Link to="/auth/register" className="flex-1 text-center px-3 py-2 rounded-lg bg-slate-100 font-medium">Sign up</Link>
               <Link to="/services/express" className="flex-1 text-center px-3 py-2 rounded-lg bg-blue-500 text-white font-semibold">Get a Quote</Link>
             </div>
           </div>

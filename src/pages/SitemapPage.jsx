@@ -52,7 +52,7 @@ export default function SitemapPage() {
     {
       cat: "Account",
       links: [
-        ["Sign in", "/auth/login"],
+        ["Sign up", "/auth/register"],
         ["Create account", "/auth/register"],
         ["Dashboard", "/dashboard"],
       ],
