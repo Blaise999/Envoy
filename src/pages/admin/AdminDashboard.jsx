@@ -18,6 +18,8 @@ import {
 } from "../../utils/api";
 // SUPPORT: import supabase client (pure frontend, no backend for chat)
 import { supabase } from "../../libs/supabaseClient";
+// NEW: forms-based per-user dashboard editor (replaces JSON textarea)
+import AdminUserDashboardEditor from "./AdminUserDashboardEditor.jsx";
 
 /* ---------------- mapper: API Shipment -> Admin row shape ---------------- */
 function mapDocToRow(s) {
@@ -665,54 +667,18 @@ export default function AdminDashboard() {
     }
   }
 
-  /* ---------------- UserDetails JSON editor ---------------- */
+  /* ---------------- UserDetails (forms-based editor) ---------------- */
+  // Replaced the old JSON textarea with AdminUserDashboardEditor.
   const [detailsOpen, setDetailsOpen] = useState(false);
   const [detailsUser, setDetailsUser] = useState(null);
-  const [detailsJSON, setDetailsJSON] = useState("{\n}");
-  const [detailsErr, setDetailsErr] = useState("");
-  const [recomputeOnSave, setRecomputeOnSave] = useState(true);
 
-  async function openDetails(u) {
+  function openDetails(u) {
     setDetailsUser(u);
-    setDetailsErr("");
-    try {
-      const doc = await adminUsers.getDetails(
-        u.id
-      ); // GET /api/admin/users/:id/details
-      setDetailsJSON(JSON.stringify(doc || {}, null, 2));
-      setDetailsOpen(true);
-    } catch (e) {
-      toast(
-        e?.data?.message || e?.message || "Failed to load details"
-      );
-    }
+    setDetailsOpen(true);
   }
-
-  function prettyDetails() {
-    try {
-      const obj = JSON.parse(detailsJSON);
-      setDetailsJSON(JSON.stringify(obj, null, 2));
-      setDetailsErr("");
-    } catch (e) {
-      setDetailsErr(String(e.message || e));
-    }
-  }
-
-  async function saveDetails(e) {
-    e.preventDefault();
-    try {
-      const body = JSON.parse(detailsJSON);
-      await adminUsers.setDetails(detailsUser.id, body, {
-        recompute: recomputeOnSave ? 1 : 0,
-      }); // PUT /api/admin/users/:id/details
-      setDetailsOpen(false);
-      toast("UserDetails saved");
-      await loadUsers();
-    } catch (e) {
-      setDetailsErr(
-        e?.data?.message || e?.message || "Failed to save details"
-      );
-    }
+  function closeDetails() {
+    setDetailsOpen(false);
+    setDetailsUser(null);
   }
 
   /* ---------------- UI ---------------- */
@@ -2044,6 +2010,16 @@ export default function AdminDashboard() {
             </div>
           </form>
         </Modal>
+      )}
+
+      {/* New forms-based per-user dashboard editor */}
+      {detailsOpen && detailsUser && (
+        <AdminUserDashboardEditor
+          userId={detailsUser.id}
+          userLabel={`${detailsUser.firstName || ""} ${detailsUser.lastName || ""} — ${detailsUser.email || detailsUser.id}`}
+          onClose={closeDetails}
+          onSaved={() => loadUsers()}
+        />
       )}
     </div>
   );

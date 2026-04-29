@@ -19,35 +19,22 @@ const USER_TOKEN_KEY = "envoy_user_token";
 const ADMIN_TOKEN_KEY = "envoy_admin_token";
 
 export function getUserToken() {
-  try {
-    return localStorage.getItem(USER_TOKEN_KEY) || null;
-  } catch {
-    return null;
-  }
+  try { return localStorage.getItem(USER_TOKEN_KEY) || null; } catch { return null; }
 }
 export function setUserToken(token) {
   try {
-    token
-      ? localStorage.setItem(USER_TOKEN_KEY, token)
-      : localStorage.removeItem(USER_TOKEN_KEY);
+    token ? localStorage.setItem(USER_TOKEN_KEY, token) : localStorage.removeItem(USER_TOKEN_KEY);
   } catch {}
 }
-export function clearUserToken() {
-  setUserToken(null);
-}
+export function clearUserToken() { setUserToken(null); }
 
 export function getAdminToken() {
-  try {
-    return localStorage.getItem(ADMIN_TOKEN_KEY) || null;
-  } catch {
-    return null;
-  }
+  try { return localStorage.getItem(ADMIN_TOKEN_KEY) || null; } catch { return null; }
 }
 export function setAdminToken(token) {
   try {
     if (token) {
       localStorage.setItem(ADMIN_TOKEN_KEY, token);
-      // verify it actually persisted
       const confirm = localStorage.getItem(ADMIN_TOKEN_KEY);
       if (!confirm) throw new Error("LocalStorage write failed");
     } else {
@@ -55,14 +42,12 @@ export function setAdminToken(token) {
     }
   } catch (e) {
     console.error("[setAdminToken] persist failed:", e);
-    throw e; // bubble up so UI shows a clear error
+    throw e;
   }
 }
-export function clearAdminToken() {
-  setAdminToken(null);
-}
+export function clearAdminToken() { setAdminToken(null); }
 
-// ---- Back-compat aliases so existing code like getAuthToken() keeps working ----
+// Back-compat aliases
 export const getAuthToken = getUserToken;
 export const setAuthToken = setUserToken;
 export const clearAuthToken = clearUserToken;
@@ -74,14 +59,9 @@ function authHeader(token) {
     : {};
 }
 
-async function request(
-  path,
-  { method = "GET", body, headers = {}, token, signal } = {}
-) {
+async function request(path, { method = "GET", body, headers = {}, token, signal } = {}) {
   const url = `${API_BASE}${path}`;
   const startedAt = Date.now();
-
-  // 🔎 Outgoing log — makes it obvious in the console what's being hit
   console.log(`[API ->] ${method} ${url}`, body ? { body } : "");
 
   let res;
@@ -97,17 +77,8 @@ async function request(
       signal,
     });
   } catch (networkErr) {
-    // Fetch threw before getting any response — usually one of:
-    //  • CORS preflight blocked
-    //  • Server unreachable (DNS/TCP timeout / service down)
-    //  • SSL handshake fail
-    //  • Request aborted
     const ms = Date.now() - startedAt;
-    console.error(
-      `[API X] ${method} ${url} — network failure after ${ms}ms:`,
-      networkErr?.name,
-      networkErr?.message
-    );
+    console.error(`[API X] ${method} ${url} — network failure after ${ms}ms:`, networkErr?.name, networkErr?.message);
     const err = new Error(
       `Can't reach the server. This is a network/CORS/server-down issue, not a code bug. ` +
       `Tried ${method} ${url}. Raw: ${networkErr?.message || networkErr}`
@@ -121,20 +92,13 @@ async function request(
   const ms = Date.now() - startedAt;
   const text = await res.text();
   let data;
-  try {
-    data = text ? JSON.parse(text) : null;
-  } catch {
-    data = { message: text || "" };
-  }
+  try { data = text ? JSON.parse(text) : null; }
+  catch { data = { message: text || "" }; }
 
-  console.log(
-    `[API <-] ${method} ${url} — ${res.status} in ${ms}ms`,
-    data
-  );
+  console.log(`[API <-] ${method} ${url} — ${res.status} in ${ms}ms`, data);
 
   if (!res.ok) {
-    const msg =
-      (data && (data.error || data.message)) || res.statusText || "Request failed";
+    const msg = (data && (data.error || data.message)) || res.statusText || "Request failed";
     const err = new Error(msg);
     err.status = res.status;
     err.data = data;
@@ -154,18 +118,12 @@ function withQuery(path, params = {}) {
 
 // ---------- Public / User Auth ----------
 export const auth = {
-  register({ name, email, password }) {
-    return request("/auth/register", {
-      method: "POST",
-      body: { name, email, password },
-    });
+  register({ name, email, password, phone }) {
+    return request("/auth/register", { method: "POST", body: { name, email, password, phone } });
   },
   verifyOtp({ email, otp, code }) {
     const theOtp = otp || code;
-    return request("/auth/verify-otp", {
-      method: "POST",
-      body: { email, otp: theOtp },
-    });
+    return request("/auth/verify-otp", { method: "POST", body: { email, otp: theOtp } });
   },
   resendOtp({ email }) {
     return request("/auth/resend-otp", { method: "POST", body: { email } });
@@ -173,25 +131,12 @@ export const auth = {
   login({ email, password }) {
     return request("/auth/login", { method: "POST", body: { email, password } });
   },
-  me(token = getUserToken()) {
-    return request("/auth/me", { token });
-  },
-  logout(token = getUserToken()) {
-    return request("/auth/logout", { method: "POST", token });
-  },
+  me(token = getUserToken()) { return request("/auth/me", { token }); },
+  logout(token = getUserToken()) { return request("/auth/logout", { method: "POST", token }); },
 };
 
-// ---------- Shipments ----------
-/**
- * Routes available:
- *   POST /api/shipments/quote          (no auth)
- *   POST /api/shipments/public         (guest booking, no auth)
- *   GET  /api/shipments                (auth)
- *   GET  /api/shipments/:id            (auth)
- *   GET  /api/shipments/track/:id      (no auth)
- */
+// ---------- Shipments (existing public/private routes) ----------
 export const shipments = {
-  // Quote (no auth)
   quote({ origin, destination, parcel, parcels, serviceLevel = "standard" }) {
     const body = {
       origin: origin ?? "",
@@ -201,25 +146,80 @@ export const shipments = {
     };
     return request("/shipments/quote", { method: "POST", body });
   },
+  create(payload) { return request("/shipments/public", { method: "POST", body: payload }); },
+  listMine(token = getUserToken()) { return request("/shipments", { token }); },
+  getOne(id, token = getUserToken()) { return request(`/shipments/${id}`, { token }); },
+  track(trackingNumber) { return request(`/shipments/track/${encodeURIComponent(trackingNumber)}`); },
+};
 
-  // Create shipment (calls public guest endpoint — no token)
-  create(payload) {
-    return request("/shipments/public", { method: "POST", body: payload });
+// ---------- USER: Dashboard / details / address book / payments / pickups / quotes / support ----------
+export const userDetails = {
+  // Full merged dashboard view
+  get(token = getUserToken()) {
+    return request("/users/me/details", { token });
+  },
+  // Bulk save
+  save(body, token = getUserToken()) {
+    return request("/users/me/details", { method: "PUT", body, token });
   },
 
-  // List my shipments (requires auth)
-  listMine(token = getUserToken()) {
-    return request("/shipments", { token });
+  // Address book
+  addAddress(body, token = getUserToken()) {
+    return request("/users/me/addresses", { method: "POST", body, token });
+  },
+  updateAddress(idx, body, token = getUserToken()) {
+    return request(`/users/me/addresses/${idx}`, { method: "PUT", body, token });
+  },
+  deleteAddress(idx, token = getUserToken()) {
+    return request(`/users/me/addresses/${idx}`, { method: "DELETE", token });
   },
 
-  // Get one of my shipments (requires auth)
-  getOne(id, token = getUserToken()) {
-    return request(`/shipments/${id}`, { token });
+  // Payment methods
+  addPayment(body, token = getUserToken()) {
+    return request("/users/me/payments", { method: "POST", body, token });
+  },
+  deletePayment(idx, token = getUserToken()) {
+    return request(`/users/me/payments/${idx}`, { method: "DELETE", token });
   },
 
-  // Public tracking (no auth)
-  track(trackingNumber) {
-    return request(`/shipments/track/${encodeURIComponent(trackingNumber)}`);
+  // Pickups
+  addPickup(body, token = getUserToken()) {
+    return request("/users/me/pickups", { method: "POST", body, token });
+  },
+  updatePickup(idx, body, token = getUserToken()) {
+    return request(`/users/me/pickups/${idx}`, { method: "PUT", body, token });
+  },
+  deletePickup(idx, token = getUserToken()) {
+    return request(`/users/me/pickups/${idx}`, { method: "DELETE", token });
+  },
+
+  // Quotes
+  addQuote(body, token = getUserToken()) {
+    return request("/users/me/quotes", { method: "POST", body, token });
+  },
+  deleteQuote(idx, token = getUserToken()) {
+    return request(`/users/me/quotes/${idx}`, { method: "DELETE", token });
+  },
+
+  // Support tickets
+  openTicket(body, token = getUserToken()) {
+    return request("/users/me/support", { method: "POST", body, token });
+  },
+  replyTicket(idx, message, token = getUserToken()) {
+    return request(`/users/me/support/${idx}/reply`, { method: "POST", body: { message }, token });
+  },
+  closeTicket(idx, token = getUserToken()) {
+    return request(`/users/me/support/${idx}`, { method: "DELETE", token });
+  },
+
+  // Notification preferences
+  setNotifications(prefs, token = getUserToken()) {
+    return request("/users/me/notifications", { method: "PUT", body: prefs, token });
+  },
+
+  // Profile
+  saveProfile(body, token = getUserToken()) {
+    return request("/users/me/profile", { method: "PUT", body, token });
   },
 };
 
@@ -234,12 +234,8 @@ export const adminAuth = {
   login({ email, password }) {
     return request("/admin/auth/login", { method: "POST", body: { email, password } });
   },
-  me(token = getAdminToken()) {
-    return request("/admin/auth/me", { token });
-  },
-  logout(token = getAdminToken()) {
-    return request("/admin/auth/logout", { method: "POST", token });
-  },
+  me(token = getAdminToken()) { return request("/admin/auth/me", { token }); },
+  logout(token = getAdminToken()) { return request("/admin/auth/logout", { method: "POST", token }); },
 };
 
 // ---------- Admin: Shipments ----------
@@ -247,45 +243,21 @@ export const adminShipments = {
   list(params = {}, token = getAdminToken()) {
     return request(withQuery("/admin/shipments", params), { token });
   },
-  getOne(id, token = getAdminToken()) {
-    return request(`/admin/shipments/${id}`, { token });
-  },
+  getOne(id, token = getAdminToken()) { return request(`/admin/shipments/${id}`, { token }); },
   update(id, patch, token = getAdminToken()) {
-    return request(`/admin/shipments/${id}`, {
-      method: "PATCH",
-      body: patch,
-      token,
-    });
+    return request(`/admin/shipments/${id}`, { method: "PATCH", body: patch, token });
   },
-
-  // Flexible notify:
-  //  - notify(id)
-  //  - notify(id, body)
-  //  - notify(id, tokenString)
-  //  - notify(id, body, tokenString)
   notify(id, payloadOrToken, maybeToken) {
     let body, token;
-
     if (typeof payloadOrToken === "string" || payloadOrToken == null) {
-      // notify(id) or notify(id, tokenString)
       body  = undefined;
       token = payloadOrToken || getAdminToken();
     } else {
-      // notify(id, body) or notify(id, body, tokenString)
       body  = payloadOrToken;
-      token = (typeof maybeToken === "string" && maybeToken.length)
-        ? maybeToken
-        : getAdminToken();
+      token = (typeof maybeToken === "string" && maybeToken.length) ? maybeToken : getAdminToken();
     }
-
-    return request(`/admin/shipments/${id}/notify`, {
-      method: "POST",
-      body,
-      token,
-    });
+    return request(`/admin/shipments/${id}/notify`, { method: "POST", body, token });
   },
-
-  // ADD: create a shipment (used by Admin Add Shipment modal)
   create(body, token = getAdminToken()) {
     return request(`/admin/shipments`, { method: "POST", body, token });
   },
@@ -296,27 +268,17 @@ export const adminUsers = {
   list(params = {}, token = getAdminToken()) {
     return request(withQuery("/admin/users", params), { token });
   },
-  getOne(id, token = getAdminToken()) {
-    return request(`/admin/users/${id}`, { token });
-  },
+  getOne(id, token = getAdminToken()) { return request(`/admin/users/${id}`, { token }); },
   update(id, patch, token = getAdminToken()) {
-    return request(`/admin/users/${id}`, {
-      method: "PATCH",
-      body: patch,
-      token,
-    });
+    return request(`/admin/users/${id}`, { method: "PATCH", body: patch, token });
   },
 
-  // ✅ Full UserDetails doc
+  // Full UserDetails doc
   getDetails(userId, token = getAdminToken()) {
     return request(`/admin/users/${encodeURIComponent(userId)}/details`, { token });
   },
-
-  // ✅ Replace/save UserDetails doc; set {recompute:1} to recompute billing
   setDetails(userId, body, { recompute = 1 } = {}, token = getAdminToken()) {
-    const path = withQuery(`/admin/users/${encodeURIComponent(userId)}/details`, {
-      recompute,
-    });
+    const path = withQuery(`/admin/users/${encodeURIComponent(userId)}/details`, { recompute });
     return request(path, { method: "PUT", body, token });
   },
 
@@ -327,46 +289,29 @@ export const adminUsers = {
 
 // ---------- Admin: Mock overlay (inject / clear / get) ----------
 export const adminMock = {
-  // GET the current overlay bundle for a user
   get(userId, token = getAdminToken()) {
     return request(`/admin/mock/${encodeURIComponent(userId)}`, { token });
   },
-  // POST: inject/merge overlay
   inject(userId, body, token = getAdminToken()) {
-    return request(`/admin/mock/${encodeURIComponent(userId)}`, {
-      method: "POST",
-      body,
-      token,
-    });
+    return request(`/admin/mock/${encodeURIComponent(userId)}`, { method: "POST", body, token });
   },
-  // DELETE: clear overlay
   clear(userId, token = getAdminToken()) {
-    return request(`/admin/mock/${encodeURIComponent(userId)}`, {
-      method: "DELETE",
-      token,
-    });
+    return request(`/admin/mock/${encodeURIComponent(userId)}`, { method: "DELETE", token });
   },
 };
 
 // ---------- Admin: Email ----------
 export const adminEmail = {
   send({ to, subject, body }, token = getAdminToken()) {
-    // backend expects html or text; we send html.
-    return request("/email/send", {
-      method: "POST",
-      body: { to, subject, html: body },
-      token,
-    });
+    return request("/email/send", { method: "POST", body: { to, subject, html: body }, token });
   },
 };
 
-// ---------- Geocode (NEW) ----------
-// Hits backend GET /api/geocode?q=City, Country -> { lat, lon }
+// ---------- Geocode ----------
 export const geocode = {
   search(q, { signal } = {}) {
     return request(withQuery("/geocode", { q }), { signal });
   },
-  // convenience: returns {lat, lon} with nulls if not found
   async resolve(place, opts) {
     try {
       const r = await geocode.search(place, opts);
@@ -378,26 +323,24 @@ export const geocode = {
 };
 
 // ---------- Lightweight direct helpers ----------
-export async function apiGet(path, token) {
+export async function apiGet(path, token = getUserToken()) {
   return request(path, { token });
 }
-export async function apiPost(path, body, token) {
+export async function apiPost(path, body, token = getUserToken()) {
   return request(path, { method: "POST", body, token });
 }
-export async function apiPatch(path, body, token) {
+export async function apiPatch(path, body, token = getUserToken()) {
   return request(path, { method: "PATCH", body, token });
 }
-export async function apiPut(path, body, token) {
+export async function apiPut(path, body, token = getUserToken()) {
   return request(path, { method: "PUT", body, token });
 }
 
 // ---------- Book from draft (helper) ----------
-export async function bookFromDraft(draft) {
-  return shipments.create(draft);
-}
+export async function bookFromDraft(draft) { return shipments.create(draft); }
 
 // ---- Back-compat module aliases ----
 export const AuthAPI = auth;
 export const ShipAPI = shipments;
-export const GeoAPI = geocode; // alias for conveniences
+export const GeoAPI = geocode;
 export const AdminAPI = adminShipments;
