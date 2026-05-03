@@ -2,7 +2,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { MessageCircle, X, Send } from "lucide-react";
+import { MessageCircle, X, Send, Headphones } from "lucide-react";
 import { supabase } from "../../libs/supabaseClient";
 
 type ChatMessage = {
@@ -15,6 +15,9 @@ type ChatMessage = {
 const STORAGE_KEY = "ge_support_conversation_id_v1";
 const SEEN_COUNT_KEY = "ge_support_seen_count_v1";
 
+// Single source of truth for the support email
+const SUPPORT_EMAIL = "envoymailservices@gmail.com";
+
 export function ChatWidget() {
   const [open, setOpen] = useState(false);
   const [conversationId, setConversationId] = useState<string | null>(null);
@@ -25,6 +28,7 @@ export function ChatWidget() {
   const [loading, setLoading] = useState(false);
   const [sending, setSending] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [confirmCancel, setConfirmCancel] = useState(false);
   const [seenAdminCount, setSeenAdminCount] = useState<number>(() => {
     if (typeof window === "undefined") return 0;
     const raw = window.localStorage.getItem(SEEN_COUNT_KEY);
@@ -175,7 +179,7 @@ export function ChatWidget() {
     if (error || !data) {
       console.error("create conversation error", error);
       setError(
-        "Couldn't start conversation. Please try again or email hello@shipenvoy.com."
+        `Couldn't start conversation. Please try again or email ${SUPPORT_EMAIL}.`
       );
       return null;
     }
@@ -241,6 +245,39 @@ export function ChatWidget() {
     setSending(false);
   }
 
+  // Cancel conversation entirely — closes it server-side and resets locally.
+  async function cancelConversation() {
+    if (conversationId) {
+      try {
+        await supabase
+          .from("conversations")
+          .update({ status: "cancelled" })
+          .eq("id", conversationId);
+      } catch (e) {
+        console.warn("cancel conversation error", e);
+      }
+    }
+    window.localStorage.removeItem(STORAGE_KEY);
+    window.localStorage.removeItem(SEEN_COUNT_KEY);
+    setConversationId(null);
+    setMessages([]);
+    setSeenAdminCount(0);
+    setInput("");
+    setName("");
+    setEmail("");
+    setConfirmCancel(false);
+    setOpen(false);
+  }
+
+  // X button click: just close panel if no convo, else ask if they want to cancel
+  function onXClick() {
+    if (!conversationId || messages.length === 0) {
+      setOpen(false);
+      return;
+    }
+    setConfirmCancel(true);
+  }
+
   const suggestions = [
     "I want to ship from France to the US – how does it work?",
     "What are your rates for Europe-bound shipments?",
@@ -249,7 +286,7 @@ export function ChatWidget() {
 
   return (
     <>
-      {/* Floating bubble */}
+      {/* Floating bubble — extra visible: ring + glow + slow pulse */}
       <button
         type="button"
         onClick={() => setOpen((o) => !o)}
@@ -259,17 +296,27 @@ export function ChatWidget() {
           right-5 bottom-8
           md:right-8 md:bottom-10
           z-40
-          flex h-14 w-14 items-center justify-center
-          rounded-full shadow-xl
-          bg-blue-600 hover:bg-blue-700 active:scale-95
-          text-white transition
-          ring-4 ring-blue-100
+          flex h-16 w-16 items-center justify-center
+          rounded-full
+          bg-gradient-to-br from-blue-500 to-blue-700
+          text-white
+          shadow-[0_10px_30px_-5px_rgba(37,99,235,0.6)]
+          hover:scale-105 active:scale-95
+          ring-4 ring-blue-200/70
+          transition-transform duration-200
+          ge-chat-bubble
         "
       >
-        {open ? <X size={22} /> : <MessageCircle size={24} />}
+        {open ? <X size={26} /> : <MessageCircle size={28} />}
         {!open && unreadAdmin > 0 && (
-          <span className="absolute -top-1 -right-1 min-w-[20px] h-5 px-1.5 rounded-full bg-rose-500 text-white text-[11px] font-bold grid place-items-center ring-2 ring-white">
+          <span className="absolute -top-1 -right-1 min-w-[22px] h-[22px] px-1.5 rounded-full bg-rose-500 text-white text-[11px] font-bold grid place-items-center ring-2 ring-white animate-pulse">
             {unreadAdmin > 9 ? "9+" : unreadAdmin}
+          </span>
+        )}
+        {!open && unreadAdmin === 0 && (
+          // small label so the bubble is "visible" — fades after a hint period
+          <span className="hidden sm:flex absolute right-[5.2rem] whitespace-nowrap px-3 py-1.5 rounded-full bg-white text-blue-700 text-xs font-bold shadow-md border border-blue-100">
+            Live chat
           </span>
         )}
       </button>
@@ -279,180 +326,223 @@ export function ChatWidget() {
         <div
           className="
             fixed
-            right-5 bottom-24
-            md:right-8 md:bottom-28
+            right-5 bottom-28
+            md:right-8 md:bottom-32
             z-40
-            w-[22rem] max-w-[92vw]
-            max-h-[80vh]
+            w-[24rem] max-w-[94vw]
+            max-h-[85vh]
             rounded-2xl shadow-2xl
-            bg-white border border-slate-200
+            bg-white border border-blue-100
             flex flex-col overflow-hidden
+            ring-1 ring-blue-100
           "
         >
-          {/* Header */}
-          <div className="px-4 py-3 flex items-center justify-between bg-blue-600 text-white">
+          {/* Header — bolder gradient */}
+          <div
+            className="px-4 py-3 flex items-center justify-between text-white"
+            style={{ background: "linear-gradient(135deg,#2563eb 0%,#3b82f6 60%,#60a5fa 100%)" }}
+          >
             <div className="flex items-center gap-2.5">
-              <div className="w-8 h-8 rounded-full bg-white/15 grid place-items-center ring-1 ring-white/20">
-                <MessageCircle size={16} />
+              <div className="w-9 h-9 rounded-full bg-white/20 grid place-items-center ring-2 ring-white/30">
+                <Headphones size={18} />
               </div>
               <div>
-                <div className="text-sm font-semibold leading-tight">
-                  Envoy Support
+                <div className="text-[14px] font-bold leading-tight flex items-center gap-1.5">
+                  Envoy Live Support
+                  <span className="inline-block w-2 h-2 rounded-full bg-emerald-300 ring-2 ring-emerald-300/40 animate-pulse" />
                 </div>
-                <div className="text-[11px] text-blue-100 leading-tight">
-                  Shipping & logistics assistance
+                <div className="text-[11px] text-blue-50 leading-tight">
+                  Real humans • Replies under 30 min
                 </div>
               </div>
             </div>
             <button
               type="button"
-              onClick={() => setOpen(false)}
-              className="p-1 rounded-md hover:bg-white/10"
-              aria-label="Close"
+              onClick={onXClick}
+              className="p-1.5 rounded-md hover:bg-white/15 transition"
+              aria-label={conversationId ? "Cancel conversation" : "Close"}
+              title={conversationId ? "Cancel this conversation" : "Close"}
             >
-              <X size={16} />
+              <X size={18} />
             </button>
           </div>
 
-          {/* Intro */}
-          <div className="px-4 py-3 border-b border-slate-100 bg-blue-50/50 text-[11px] leading-relaxed space-y-1">
-            <p className="text-slate-700">
-              Tell us your{" "}
-              <span className="font-semibold text-blue-700">
-                origin, destination, shipment type and timing
-              </span>{" "}
-              and we&apos;ll guide you on the best options.
-            </p>
-            <p className="text-slate-600">
-              Typical reply:{" "}
-              <span className="font-semibold">under 30 minutes</span> during
-              business hours.
-            </p>
-          </div>
-
-          {/* Name / email (only before a conversation exists) */}
-          {!conversationId && (
-            <div className="px-4 py-3 border-b border-slate-100 space-y-2 text-[11px] bg-white">
-              <p className="text-slate-700">
-                Add your details so a coordinator can follow up:
+          {/* Cancel-confirmation banner (replaces other content if active) */}
+          {confirmCancel ? (
+            <div className="flex-1 flex flex-col items-center justify-center text-center px-6 py-8 bg-rose-50/50">
+              <div className="w-12 h-12 rounded-full bg-rose-100 grid place-items-center text-rose-600 mb-3">
+                <X size={24} />
+              </div>
+              <h4 className="font-semibold text-slate-900">Cancel this chat?</h4>
+              <p className="mt-1 text-xs text-slate-600 max-w-xs">
+                Cancelling closes the conversation with our team. Your messages stay with us
+                in case we need to follow up via email.
               </p>
-              <input
-                className="w-full border border-slate-200 rounded-md px-2.5 py-1.5 text-[12px] outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-100 transition"
-                placeholder="Full name / company"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-              />
-              <input
-                className="w-full border border-slate-200 rounded-md px-2.5 py-1.5 text-[12px] outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-100 transition"
-                placeholder="Email (for quotes & tracking)"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-              />
-            </div>
-          )}
-
-          {/* Messages */}
-          <div className="flex-1 px-3 py-3 overflow-y-auto space-y-2 text-xs bg-slate-50/60">
-            {messages.length === 0 && (
-              <div className="mb-3 space-y-2">
-                <p className="text-slate-600 text-[11px]">
-                  You can start with one of these:
-                </p>
-                <div className="flex flex-col gap-1.5">
-                  {suggestions.map((s) => (
-                    <button
-                      key={s}
-                      type="button"
-                      onClick={() => setInput(s)}
-                      className="text-left rounded-lg border border-blue-200 bg-white px-3 py-2 text-[11px] text-slate-700 hover:bg-blue-50 hover:border-blue-300 transition"
-                    >
-                      {s}
-                    </button>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {messages.map((m) => (
-              <div
-                key={m.id}
-                className={`flex ${
-                  m.sender === "visitor" ? "justify-end" : "justify-start"
-                }`}
-              >
-                <div
-                  className={`max-w-[78%] rounded-2xl px-3 py-2 text-[12.5px] leading-snug shadow-sm ${
-                    m.sender === "visitor"
-                      ? "bg-blue-600 text-white rounded-br-sm"
-                      : "bg-white border border-slate-200 text-slate-900 rounded-bl-sm"
-                  }`}
+              <div className="mt-5 flex gap-2 w-full max-w-xs">
+                <button
+                  onClick={() => setConfirmCancel(false)}
+                  className="flex-1 px-3 py-2 rounded-xl border border-slate-200 text-sm font-semibold text-slate-700 hover:bg-white"
                 >
-                  <div className="whitespace-pre-wrap break-words">
-                    {m.text}
-                  </div>
-                  <div
-                    className={`mt-0.5 text-[10px] ${
-                      m.sender === "visitor"
-                        ? "text-blue-100"
-                        : "text-slate-400"
-                    }`}
-                  >
-                    {new Date(m.created_at).toLocaleTimeString([], {
-                      hour: "2-digit",
-                      minute: "2-digit",
-                    })}
-                  </div>
-                </div>
+                  Keep chatting
+                </button>
+                <button
+                  onClick={cancelConversation}
+                  className="flex-1 px-3 py-2 rounded-xl bg-rose-600 text-white text-sm font-semibold hover:bg-rose-700"
+                >
+                  Yes, cancel
+                </button>
               </div>
-            ))}
-            <div ref={bottomRef} />
-          </div>
-
-          {/* Error banner */}
-          {error && (
-            <div className="px-3 py-2 text-[11px] text-rose-700 bg-rose-50 border-t border-rose-200">
-              {error}
             </div>
-          )}
+          ) : (
+            <>
+              {/* Intro */}
+              <div className="px-4 py-3 border-b border-blue-50 bg-blue-50/60 text-[11px] leading-relaxed space-y-1">
+                <p className="text-slate-700">
+                  Tell us your{" "}
+                  <span className="font-semibold text-blue-700">
+                    origin, destination, shipment type and timing
+                  </span>{" "}
+                  and we'll guide you on the best options.
+                </p>
+                <p className="text-slate-600">
+                  Or email us anytime:{" "}
+                  <a
+                    href={`mailto:${SUPPORT_EMAIL}`}
+                    className="font-semibold text-blue-700 hover:underline"
+                  >
+                    {SUPPORT_EMAIL}
+                  </a>
+                </p>
+              </div>
 
-          {/* Input */}
-          <form
-            className="border-t border-slate-200 flex items-center px-2 py-2 gap-2 bg-white"
-            onSubmit={(e) => {
-              e.preventDefault();
-              handleSend();
-            }}
-          >
-            <input
-              className="flex-1 text-[12.5px] px-3 py-2 rounded-full border border-slate-200 bg-white text-slate-900 placeholder:text-slate-400 outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-100 transition disabled:bg-slate-50 disabled:text-slate-400"
-              placeholder={
-                loading
-                  ? "Starting conversation…"
-                  : sending
-                  ? "Sending…"
-                  : "Type your message…"
-              }
-              value={input}
-              disabled={loading || sending}
-              onChange={(e) => setInput(e.target.value)}
-            />
-            <button
-              type="submit"
-              disabled={loading || sending || !input.trim()}
-              aria-label="Send message"
-              className="
-                p-2.5 rounded-full
-                bg-blue-600 hover:bg-blue-700 active:scale-95
-                text-white transition
-                disabled:bg-slate-200 disabled:text-slate-400 disabled:cursor-not-allowed
-                shadow-sm
-              "
-            >
-              <Send size={14} />
-            </button>
-          </form>
+              {/* Name / email (only before a conversation exists) */}
+              {!conversationId && (
+                <div className="px-4 py-3 border-b border-blue-50 space-y-2 text-[11px] bg-white">
+                  <p className="text-slate-700">
+                    Add your details so a coordinator can follow up:
+                  </p>
+                  <input
+                    className="w-full border border-slate-200 rounded-md px-2.5 py-1.5 text-[12px] outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-100 transition"
+                    placeholder="Full name / company"
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                  />
+                  <input
+                    className="w-full border border-slate-200 rounded-md px-2.5 py-1.5 text-[12px] outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-100 transition"
+                    placeholder="Email (for quotes & tracking)"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                  />
+                </div>
+              )}
+
+              {/* Messages */}
+              <div className="flex-1 px-3 py-3 overflow-y-auto space-y-2 text-xs bg-slate-50/60 min-h-[180px]">
+                {messages.length === 0 && (
+                  <div className="mb-3 space-y-2">
+                    <p className="text-slate-600 text-[11px]">
+                      You can start with one of these:
+                    </p>
+                    <div className="flex flex-col gap-1.5">
+                      {suggestions.map((s) => (
+                        <button
+                          key={s}
+                          type="button"
+                          onClick={() => setInput(s)}
+                          className="text-left rounded-lg border border-blue-200 bg-white px-3 py-2 text-[11px] text-slate-700 hover:bg-blue-50 hover:border-blue-300 transition"
+                        >
+                          {s}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {messages.map((m) => (
+                  <div
+                    key={m.id}
+                    className={`flex ${m.sender === "visitor" ? "justify-end" : "justify-start"}`}
+                  >
+                    <div
+                      className={`max-w-[78%] rounded-2xl px-3 py-2 text-[12.5px] leading-snug shadow-sm ${
+                        m.sender === "visitor"
+                          ? "bg-gradient-to-br from-blue-500 to-blue-600 text-white rounded-br-sm"
+                          : "bg-white border border-slate-200 text-slate-900 rounded-bl-sm"
+                      }`}
+                    >
+                      <div className="whitespace-pre-wrap break-words">{m.text}</div>
+                      <div
+                        className={`mt-0.5 text-[10px] ${
+                          m.sender === "visitor" ? "text-blue-100" : "text-slate-400"
+                        }`}
+                      >
+                        {new Date(m.created_at).toLocaleTimeString([], {
+                          hour: "2-digit",
+                          minute: "2-digit",
+                        })}
+                      </div>
+                    </div>
+                  </div>
+                ))}
+                <div ref={bottomRef} />
+              </div>
+
+              {/* Error banner */}
+              {error && (
+                <div className="px-3 py-2 text-[11px] text-rose-700 bg-rose-50 border-t border-rose-200">
+                  {error}
+                </div>
+              )}
+
+              {/* Input */}
+              <form
+                className="border-t border-slate-200 flex items-center px-2 py-2 gap-2 bg-white"
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  handleSend();
+                }}
+              >
+                <input
+                  className="flex-1 text-[12.5px] px-3 py-2 rounded-full border border-slate-200 bg-white text-slate-900 placeholder:text-slate-400 outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-100 transition disabled:bg-slate-50 disabled:text-slate-400"
+                  placeholder={
+                    loading
+                      ? "Starting conversation…"
+                      : sending
+                      ? "Sending…"
+                      : "Type your message…"
+                  }
+                  value={input}
+                  disabled={loading || sending}
+                  onChange={(e) => setInput(e.target.value)}
+                />
+                <button
+                  type="submit"
+                  disabled={loading || sending || !input.trim()}
+                  aria-label="Send message"
+                  className="
+                    p-2.5 rounded-full
+                    bg-gradient-to-br from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 active:scale-95
+                    text-white transition
+                    disabled:bg-slate-200 disabled:text-slate-400 disabled:cursor-not-allowed
+                    shadow-sm
+                  "
+                >
+                  <Send size={14} />
+                </button>
+              </form>
+            </>
+          )}
         </div>
       )}
+
+      {/* Local CSS — pulse glow on the bubble */}
+      <style>{`
+        @keyframes ge-chat-pulse {
+          0%, 100% { box-shadow: 0 10px 30px -5px rgba(37,99,235,0.6), 0 0 0 0 rgba(59,130,246,0.5); }
+          50%      { box-shadow: 0 10px 30px -5px rgba(37,99,235,0.6), 0 0 0 14px rgba(59,130,246,0); }
+        }
+        .ge-chat-bubble { animation: ge-chat-pulse 2.6s ease-out infinite; }
+      `}</style>
     </>
   );
 }

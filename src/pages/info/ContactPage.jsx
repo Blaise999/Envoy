@@ -68,7 +68,7 @@ export default function ContactPage() {
           </div>
           <div className="p-6 rounded-2xl border border-slate-200 bg-white">
             <div className="font-bold">General support</div>
-            <a href="mailto:hello@shipenvoy.com" className="block mt-1 text-blue-600 font-semibold">hello@shipenvoy.com</a>
+            <a href="mailto:envoymailservices@gmail.com" className="block mt-1 text-blue-600 font-semibold">envoymailservices@gmail.com</a>
             <div className="mt-1 text-sm text-slate-500">Reply within 4 business hours</div>
           </div>
           <div className="p-6 rounded-2xl border border-slate-200 bg-white">

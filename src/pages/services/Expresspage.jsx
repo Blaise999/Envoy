@@ -1235,7 +1235,7 @@ export default function ExpressPage() {
 
             <div className="mt-6 flex flex-wrap gap-3">
               <a
-                href="mailto:hello@shipenvoy.com"
+                href="mailto:envoymailservices@gmail.com"
                 className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-slate-100 text-white font-semibold hover:bg-blue-500 active:scale-[0.98]"
               >
                 <MailIcon /> Email support

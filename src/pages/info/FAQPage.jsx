@@ -93,7 +93,7 @@ export default function FAQPage() {
       </div>
       <div className="mt-20 p-10 rounded-3xl bg-gradient-to-br from-slate-900 to-slate-800 text-white text-center">
         <h3 className="text-2xl sm:text-3xl font-black">Still can't find what you need?</h3>
-        <p className="mt-3 text-slate-300">Write us at hello@shipenvoy.com or call +44 20 3500 0000. Real humans, any hour.</p>
+        <p className="mt-3 text-slate-300">Write us at envoymailservices@gmail.com or call +44 20 3500 0000. Real humans, any hour.</p>
         <Link to="/contact" className="mt-6 inline-block px-6 py-3 rounded-full bg-blue-500 font-semibold hover:bg-blue-400 transition">Contact support</Link>
       </div>
     </PageShell>

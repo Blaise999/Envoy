@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 
 export default function SitemapPage() {
   const groups = [
-    { h: "Main pages", links: [["Home", "/"], ["Track a shipment", "/track"], ["Get a quote", "/services/express"], ["Sign up", "/auth/register"], ["Create an account", "/auth/register"]] },
+    { h: "Main pages", links: [["Home", "/"], ["Track a shipment", "/track"], ["Get a quote", "/services/express"], ["Sign in", "/auth/login"], ["Create an account", "/auth/register"]] },
     { h: "All services", links: [["Overview", "/services"], ["Express Parcel", "/services/express"], ["Freight & Cargo", "/services/freight"], ["E-commerce", "/services/ecommerce"], ["Customs & Clearance", "/services/customs"], ["Domestic", "/services/domestic"], ["Warehousing", "/services/warehousing"]] },
     { h: "Company", links: [["About", "/about"], ["Careers", "/careers"], ["News", "/news"], ["Contact", "/contact"]] },
     { h: "Support", links: [["FAQ", "/faq"], ["System status", "/status"], ["Contact support", "/contact"]] },
