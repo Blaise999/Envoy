@@ -9,7 +9,7 @@ import Logo from "../../assets/envoy.png";
 import { shipments as ShipAPI } from "../../utils/api";
 import { resolveCoordsSync, resolveCoords } from "../../utils/geoResolve";
 import { useAuth } from "../../auth/AuthContext";
-import TrackSupportThread from "../../components/support/TrackSupportThread";
+import TrackChatWidget from "../../components/support/TrackChatWidget";
 
 import { MapContainer, TileLayer, Marker, Popup, Polyline, useMap } from "react-leaflet";
 import L from "leaflet";
@@ -1049,13 +1049,15 @@ export default function TrackPage() {
                   </ul>
                 </div>
 
-                {/* Support thread scoped to THIS shipment — routes to whichever
-                    admin owns it, so the customer never repeats the tracking
-                    number and the team sees the shipment immediately. */}
-                <TrackSupportThread
-                  tracking={ship.trackingNumber}
-                  shipmentStatus={ship.status}
-                />
+              {/* Floating chat for THIS shipment. Routes to whichever admin owns
+                  it, and takes the corner from the site-wide ChatWidget so the
+                  customer is never guessing which bubble reaches their parcel. */}
+              <TrackChatWidget
+                tracking={ship.trackingNumber}
+                shipmentStatus={ship.status}
+                from={ship.from}
+                to={ship.to}
+              />
 
               {/* Goods Media - Photos + Videos */}
 {((Array.isArray(ship.goodsPhotos) && ship.goodsPhotos.length > 0) ||

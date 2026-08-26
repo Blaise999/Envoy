@@ -4,6 +4,7 @@
 import { useEffect, useRef, useState } from "react";
 import { MessageCircle, X, Send, Headphones } from "lucide-react";
 import { supabase } from "../../libs/supabaseClient";
+import { subscribeTrackChat } from "./chatScope";
 
 type ChatMessage = {
   id: string;
@@ -35,6 +36,11 @@ export function ChatWidget() {
     return raw ? Number(raw) || 0 : 0;
   });
   const bottomRef = useRef<HTMLDivElement | null>(null);
+
+  // Step aside when a shipment-specific chat is on screen: one bubble in the
+  // corner, and it's the one that reaches the team holding the parcel.
+  const [trackChatActive, setTrackChatActiveLocal] = useState(false);
+  useEffect(() => subscribeTrackChat(setTrackChatActiveLocal), []);
 
   // Restore an existing conversation — but VERIFY it still exists first.
   // A stale id (different Supabase project, or the table was reset) would
@@ -324,6 +330,8 @@ export function ChatWidget() {
     "What are your rates for Europe-bound shipments?",
     "Can you help with customs and last-mile delivery?",
   ];
+
+  if (trackChatActive) return null;
 
   return (
     <>

@@ -436,32 +436,34 @@ export const auth = {
   async register({ name, email, password, phone }) {
     const addr = String(email || "").trim();
 
-    const { data, error } = await supabase.auth.signUp({
+    // Account creation goes through our own function, which uses the admin API
+    // with email_confirm already set. Supabase's mailer is never invoked, so
+    // this can't hit "email rate limit exceeded" — and it doesn't matter what
+    // the Confirm email toggle in the dashboard is set to.
+    const res = await callOtp({
+      action: "signup",
       email: addr,
       password,
-      options: { data: { name: name || "", phone: phone || "" } },
+      name: name || "",
+      phone: phone || "",
     });
-    if (error) throw fail(error, "Could not register");
 
-    if (data?.session?.access_token) setUserToken(data.session.access_token);
-
-    // Send our own code. If the mail provider is down the account still
-    // exists, so say so rather than pretending signup failed.
-    let sent = true;
-    try {
-      await callOtp({ action: "request", email: addr, purpose: "signup" });
-    } catch (e) {
-      console.warn("[auth.register] code not sent:", e?.message || e);
-      sent = false;
+    // Sign in straight away so there's a live session behind the OTP screen.
+    const { data, error } = await supabase.auth.signInWithPassword({
+      email: addr,
+      password,
+    });
+    if (!error && data?.session?.access_token) {
+      setUserToken(data.session.access_token);
     }
 
     return {
-      message: sent
+      message: res?.codeSent
         ? "Account created. Check your email for the 6-digit code."
-        : "Account created, but we couldn't email your code. Use Resend code.",
-      userId: data?.user?.id || null,
+        : "Account created, but we couldn't email your code. Tap Resend code.",
+      userId: res?.userId || data?.user?.id || null,
       otpRequired: true,
-      codeSent: sent,
+      codeSent: !!res?.codeSent,
       session: data?.session || null,
     };
   },
@@ -1072,24 +1074,16 @@ export const userDetails = {
 /* ========================================================================== */
 
 export const adminAuth = {
-  /** Sign up, then claim the invite code (checked server-side). */
+  /** Create the account, then claim the invite code (checked server-side). */
   async register({ name, email, password, inviteCode }) {
     const addr = String(email || "").trim();
-    const { data, error } = await supabase.auth.signUp({
-      email: addr,
-      password,
-      options: { data: { name: name || "" } },
-    });
-    if (error) throw fail(error, "Could not create admin");
 
-    if (!data?.session) {
-      const signIn = await supabase.auth.signInWithPassword({ email: addr, password });
-      if (signIn.error) {
-        throw fail({
-          message: "Account created — confirm the email, sign in, then claim the invite code.",
-        });
-      }
-    }
+    // Same path as customer signup: the admin API creates the account so
+    // Supabase's rate-limited mailer is never involved.
+    await callOtp({ action: "signup", email: addr, password, name: name || "" });
+
+    const signIn = await supabase.auth.signInWithPassword({ email: addr, password });
+    if (signIn.error) throw fail(signIn.error, "Account created, but sign-in failed");
 
     unwrap(
       await supabase.rpc("claim_admin_invite", { p_code: String(inviteCode || "") }),

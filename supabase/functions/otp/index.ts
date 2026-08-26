@@ -10,8 +10,13 @@
 // Supabase Auth still holds identity, so auth.uid() and every RLS policy keep
 // working. It just has nothing to do with your customers' inboxes.
 //
+//   POST { action: "signup",  email, password, name?, phone? } -> creates + emails a code
 //   POST { action: "request", email, purpose? }        -> issues + emails a code
 //   POST { action: "verify",  email, code, purpose? }  -> checks it, marks verified
+//
+// "signup" creates the account with the admin API and email_confirm already
+// true, so Supabase's own mailer is never invoked — no "email rate limit
+// exceeded", regardless of what the Confirm email toggle is set to.
 //
 // Secrets:
 //   RESEND_API_KEY   re_xxx
@@ -191,41 +196,85 @@ Deno.serve(async (req) => {
 
     db.rpc("purge_expired_otps").then(() => {}, () => {});
 
-    /* ---------------------------- request a code --------------------------- */
-    if (action === "request") {
+    /* ------- shared: issue a code for an address and email it via Resend ------ */
+    async function issueCode(target: string, p: Purpose) {
       const since = new Date(Date.now() - 15 * 60_000).toISOString();
       const { count } = await db
         .from("otp_codes")
         .select("id", { count: "exact", head: true })
-        .eq("email", email)
+        .eq("email", target)
         .gte("created_at", since);
 
       if ((count ?? 0) >= MAX_PER_WINDOW) {
-        return json({ error: "Too many codes requested. Try again in a few minutes." }, 429);
+        return { ok: false as const, status: 429, error: "Too many codes requested. Try again in a few minutes." };
       }
 
-      // retire any code still outstanding for this purpose
       await db.from("otp_codes")
         .update({ used_at: new Date().toISOString() })
-        .eq("email", email).eq("purpose", purpose).is("used_at", null);
+        .eq("email", target).eq("purpose", p).is("used_at", null);
 
       const code = generateOtp();
       await db.from("otp_codes").insert({
-        email,
+        email: target,
         code_hash: await hashCode(code),
-        purpose,
+        purpose: p,
         expires_at: new Date(Date.now() + TTL_MINUTES * 60_000).toISOString(),
       });
 
       const subject =
-        purpose === "login" ? `Your ${BRAND_NAME} sign-in code`
-          : purpose === "password_reset" ? `Reset your ${BRAND_NAME} password`
+        p === "login" ? `Your ${BRAND_NAME} sign-in code`
+          : p === "password_reset" ? `Reset your ${BRAND_NAME} password`
           : `Confirm your ${BRAND_NAME} account`;
 
-      const sent = await sendMail(email, subject, otpEmail(code, purpose));
-      if (!sent.ok) return json({ error: sent.error }, 502);
+      const sent = await sendMail(target, subject, otpEmail(code, p));
+      if (!sent.ok) return { ok: false as const, status: 502, error: sent.error };
+      return { ok: true as const, dev: sent.dev ?? false };
+    }
 
-      return json({ sent: true, expiresInMinutes: TTL_MINUTES, dev: sent.dev ?? false });
+    /* ------------------------------ create account -------------------------- */
+    // Uses the admin API with email_confirm already true, so Supabase's own
+    // mailer never runs. This is what makes the flow independent of the
+    // "Confirm email" setting — and immune to its rate limit.
+    if (action === "signup") {
+      const password = String(body.password ?? "");
+      if (password.length < 6) {
+        return json({ error: "Password must be at least 6 characters" }, 400);
+      }
+
+      const { data: created, error: createErr } = await db.auth.admin.createUser({
+        email,
+        password,
+        email_confirm: true,
+        user_metadata: {
+          name: String(body.name ?? ""),
+          phone: String(body.phone ?? ""),
+        },
+      });
+
+      if (createErr) {
+        const msg = String(createErr.message || "");
+        if (/already|registered|exists|duplicate/i.test(msg)) {
+          return json({ error: "An account with this email already exists" }, 409);
+        }
+        return json({ error: msg || "Could not create the account" }, 400);
+      }
+
+      const issued = await issueCode(email, "signup");
+      // The account exists either way — say so rather than implying it failed.
+      return json({
+        created: true,
+        userId: created?.user?.id ?? null,
+        codeSent: issued.ok,
+        codeError: issued.ok ? null : issued.error,
+        dev: issued.ok ? issued.dev : false,
+      });
+    }
+
+    /* ---------------------------- request a code --------------------------- */
+    if (action === "request") {
+      const issued = await issueCode(email, purpose);
+      if (!issued.ok) return json({ error: issued.error }, issued.status);
+      return json({ sent: true, expiresInMinutes: TTL_MINUTES, dev: issued.dev });
     }
 
     /* ----------------------------- verify a code --------------------------- */
@@ -270,7 +319,7 @@ Deno.serve(async (req) => {
       return json({ verified: true, userId: prof?.id ?? null });
     }
 
-    return json({ error: 'action must be "request" or "verify"' }, 400);
+    return json({ error: 'action must be "signup", "request" or "verify"' }, 400);
   } catch (e) {
     console.error("[otp]", e);
     return json({ error: (e as Error).message ?? "Unexpected error" }, 500);

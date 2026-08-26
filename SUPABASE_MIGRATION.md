@@ -566,8 +566,14 @@ Edge Function through Resend, from your address. Same arrangement as Ridgeford.
 
 ### Setup
 
-**1. Switch off Supabase's own emails.** Authentication → Providers → Email →
-turn **Confirm email** OFF. That is what stops Supabase sending anything.
+**1. Nothing to switch off.** Accounts are created through the `otp` function's
+`signup` action, which uses the admin API with `email_confirm` already set — so
+Supabase's mailer never runs whatever the **Confirm email** toggle says. That is
+what fixes `429 email rate limit exceeded`: the built-in sender, limited to a
+couple of emails an hour on the free tier, is simply never called.
+
+Turning **Confirm email** off anyway is still tidy, but it is no longer load
+bearing.
 
 **2. Deploy and configure:**
 
@@ -615,3 +621,71 @@ inverted by Gmail and Outlook, then inverted again by dark-mode clients.
 The `auth-email` hook function is still in the repo as the alternative approach
 (keep Supabase orchestrating, Resend delivering). With this setup you don't
 need it — deploy one or the other, not both.
+
+---
+
+## Tracking chat widget
+
+The inline panel is gone. Tracking-scoped support is now a floating widget that
+appears **only when a shipment is on screen**, and it takes the corner from the
+site-wide ChatWidget while it's there — two bubbles in one corner is clutter,
+and it makes the customer guess which one reaches the person holding their
+parcel.
+
+`chatScope.js` is the handoff: `TrackChatWidget` flags itself active on mount,
+`ChatWidget` subscribes and returns null while that flag is set.
+
+### Design
+
+The panel header is a miniature waybill — monospace tracking number, a live
+status dot in the shipment's own status colour, origin → destination, and a
+perforated tear edge along the bottom. A shipping label is the one artifact
+every customer in this flow already recognises, so the chat reads as part of
+the parcel rather than as a website feature bolted on.
+
+The bubble carries the same idea: a parcel mark ringed in the status colour,
+with the tracking number in monospace under the label. It changes to "Your
+conversation" once a thread exists.
+
+- Mobile: full-width bottom sheet. Desktop: anchored 382px panel.
+- Esc closes; visible focus rings; `prefers-reduced-motion` respected.
+- Unread replies counted per tracking number in localStorage.
+- Photo attachments, and the database guard's own message is shown verbatim
+  when a send is rate limited.
+
+`TrackSupportThread.jsx` was deleted — `TrackChatWidget.jsx` replaces it.
+
+---
+
+## Verification bypass — found and fixed (20260826000600)
+
+A full end-to-end pass caught a real hole. Accounts are created through the
+admin API with `email_confirm: true` (that is what keeps Supabase's
+rate-limited mailer out of the path), but two triggers were still deriving
+`profiles.is_verified` from `auth.users.email_confirmed_at`:
+
+- `handle_new_user()` set it at creation
+- `handle_user_updated()` re-synced it on every `auth.users` update
+
+So every new account arrived **already verified** and the OTP step could be
+skipped entirely: sign up, ignore the code, log straight in.
+
+`is_verified` now starts false and is written in exactly one place —
+`mark_email_verified()`, called by the `otp` function after a correct code. The
+migration also repairs any account created under the old behaviour.
+
+Verified after the fix: new signup starts unverified, a later `auth.users`
+update doesn't flip it, a correct code does, and the seeded admins are
+untouched.
+
+`adminAuth.register()` was still calling `supabase.auth.signUp()` directly —
+the one remaining path that could hit the mail rate limit. It now goes through
+the same `otp` signup action. There are no `supabase.auth.signUp` calls left in
+the codebase.
+
+### Worth knowing
+
+`is_verified` is a UX gate, not the security boundary. An unverified user holds
+a valid session, so they could reach `/dashboard` by URL — but RLS still limits
+them to their own rows, so there is nothing there to see. If you want the gate
+to be absolute, add an `is_verified` check to `ProtectedRoute`.
