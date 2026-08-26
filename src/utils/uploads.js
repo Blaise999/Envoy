@@ -30,7 +30,10 @@ export async function uploadGoodsFile(shipmentKey, file) {
   if (!shipmentKey) throw new Error("Missing shipment key.");
   if (!file) throw new Error("No file selected.");
 
-  const path = `shipments/${shipmentKey}/goods/${Date.now()}-${safeName(file.name)}`;
+  // "support/<id>" routes to the support folder; anything else is a shipment key
+  const path = String(shipmentKey).startsWith("support/")
+    ? `${shipmentKey}/${Date.now()}-${safeName(file.name)}`
+    : `shipments/${shipmentKey}/goods/${Date.now()}-${safeName(file.name)}`;
 
   const { error } = await supabase.storage
     .from(GOODS_BUCKET)

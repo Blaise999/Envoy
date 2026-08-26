@@ -195,6 +195,9 @@ export default function AdminDashboard() {
             shipmentFrom: t.shipmentFrom,
             shipmentTo: t.shipmentTo,
             messageCount: t.messageCount,
+            unreadCount: t.unreadCount,
+            attachmentCount: t.attachmentCount,
+            priority: t.priority,
             lastAt: t.lastAt,
           }))
         );
@@ -302,6 +305,29 @@ export default function AdminDashboard() {
         .from("ge_conversations")
         .update({ last_message: text, status: "open" })
         .eq("id", supportSelected.id);
+
+      // If the customer left an email, let them know there's a reply waiting.
+      // Best-effort: never block the chat on the mail provider.
+      if (supportSelected.email) {
+        const ref = supportSelected.trackingNumber;
+        supabase.functions
+          .invoke("send-email", {
+            body: {
+              mode: "raw",
+              to: supportSelected.email,
+              subject: ref
+                ? `Reply about your shipment ${ref}`
+                : "Reply from Envoy Support",
+              html:
+                `<p>We've replied to your message${ref ? ` about <b>${ref}</b>` : ""}:</p>` +
+                `<p>${text.replace(/[<>]/g, "")}</p>` +
+                (ref
+                  ? `<p>You can continue the conversation on your tracking page.</p>`
+                  : ""),
+            },
+          })
+          .then(() => {}, () => {});
+      }
     } catch (err) {
       console.error(err);
       toast(err?.message || "Failed to send reply");
@@ -1101,7 +1127,21 @@ export default function AdminDashboard() {
                       <button
                         key={c.id}
                         type="button"
-                        onClick={() => setSupportSelected(c)}
+                        onClick={() => {
+                          setSupportSelected(c);
+                          // clears the unread badge for this thread
+                          supabase
+                            .rpc("admin_mark_thread_read", { p_id: c.id })
+                            .then(
+                              () =>
+                                setSupportConvos((prev) =>
+                                  prev.map((x) =>
+                                    x.id === c.id ? { ...x, unreadCount: 0 } : x
+                                  )
+                                ),
+                              () => {}
+                            );
+                        }}
                         className={`w-full text-left px-4 py-3 border-b text-sm ${
                           isActive
                             ? "bg-blue-500/10 border-blue-500/20"
@@ -1149,6 +1189,18 @@ export default function AdminDashboard() {
                             “{c.last_message}”
                           </div>
                         )}
+                        <div className="mt-1 flex items-center gap-1.5">
+                          {c.unreadCount > 0 && (
+                            <span className="text-[10px] font-bold text-white bg-rose-500 rounded-full px-1.5 py-0.5">
+                              {c.unreadCount} new
+                            </span>
+                          )}
+                          {c.attachmentCount > 0 && (
+                            <span className="text-[10px] text-slate-500">
+                              📎 {c.attachmentCount}
+                            </span>
+                          )}
+                        </div>
                       </button>
                     );
                   })}
@@ -1242,6 +1294,19 @@ export default function AdminDashboard() {
                             <div className="whitespace-pre-wrap text-[13px]">
                               {m.text}
                             </div>
+                            {Array.isArray(m.attachments) && m.attachments.length > 0 && (
+                              <div className="mt-2 flex gap-1.5 flex-wrap">
+                                {m.attachments.map((a, i) => (
+                                  <a key={i} href={a.url} target="_blank" rel="noreferrer" title={a.name}>
+                                    <img
+                                      src={a.url}
+                                      alt={a.name || "attachment"}
+                                      className="w-24 h-24 object-cover rounded-lg border border-white/30"
+                                    />
+                                  </a>
+                                ))}
+                              </div>
+                            )}
                             <div className="mt-1 text-[10px] opacity-60">
                               {new Date(
                                 m.created_at

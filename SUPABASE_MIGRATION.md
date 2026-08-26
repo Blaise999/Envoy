@@ -449,3 +449,169 @@ In `20260826000300`, change the `shipments_select_own` policy back to:
       user_id = auth.uid()
       or (public.is_admin() and (public.is_admin_all() or assigned_admin_id = auth.uid()))
     )
+
+---
+
+## Support extras (20260826000400)
+
+**Photo attachments on support messages.** The most useful thing a courier's
+support thread can carry — damage claims, wrong item, proof of condition. Up to
+3 images per message, 8MB each, stored in the public `goods` bucket under
+`support/<conversationId>/`. Thumbnails render inline for both the customer and
+the admin, clickable to full size.
+
+**Unread counts.** `admin_support_threads()` now returns `unreadCount` per
+thread (visitor messages newer than `admin_last_read_at`). The inbox shows a red
+badge; opening a thread calls `admin_mark_thread_read()` and clears it.
+
+**Spam limits.** Anonymous visitors can post, so there is a hard stop in the
+database: max 10 visitor messages per minute per conversation, and 2000
+characters per message. Admin replies are exempt. The trigger raises a readable
+message, which the widget shows verbatim.
+
+**Reply notifications.** When an admin replies to a thread where the customer
+left an email, the `send-email` function sends them a note with the tracking
+number. Best-effort — chat never blocks on the mail provider.
+
+**Dashboard stats** — `admin_dashboard_stats()`, scoped to the calling admin:
+
+    select public.admin_dashboard_stats();
+
+Returns totals by status, active/delivered/exception counts, revenue (excluding
+test bookings), discount given, a 7-day series of bookings and revenue, top 5
+routes, unread support count and open threads. Blaise sees only his numbers.
+
+### Verified
+
+- 10th rapid message blocked; 2500-char message blocked; admin replies unaffected
+- Attachment stored and counted (`attachmentCount: 1`)
+- `unreadCount` 2 → mark read → 0
+- Blaise's stats cover only his shipments
+
+---
+
+## Auth email — sending from your own address (the Ridgeford pattern)
+
+Ridgeford owns its auth outright: its own `users` table, bcrypt passwords, its
+own `otp_codes` table, and every email through Resend from `MAIL_FROM`. It can
+do that because it's Next.js — it has a server on every request.
+
+Envoy is a Vite SPA with no server, and its whole security model is RLS on
+`auth.uid()`. Porting Ridgeford's model wholesale would mean moving every query
+into Edge Functions behind the service-role key, and RLS would become
+decorative. So Envoy keeps Supabase Auth for identity and takes over **email
+delivery** instead — same outcome for sender and branding, no loss of RLS.
+
+### Why signup looked broken
+
+Supabase's built-in sender is rate limited (a couple of emails an hour on the
+free tier) and often only delivers to the project owner's address. The account
+gets created, the code never arrives, and the OTP screen has nothing to verify.
+
+### The fix: a Send Email Hook
+
+`supabase/functions/auth-email/` implements Supabase's Send Email Hook.
+Supabase calls it for every auth email; it renders the template and sends
+through Resend from your address.
+
+    npx supabase functions deploy auth-email --no-verify-jwt
+
+`--no-verify-jwt` matters: Supabase calls this itself, not a signed-in user.
+
+Then **Dashboard → Authentication → Hooks → Send Email Hook**: enable it, point
+it at `auth-email`, and copy the generated secret.
+
+    npx supabase secrets set ^
+      SEND_EMAIL_HOOK_SECRET="v1,whsec_..." ^
+      RESEND_API_KEY=re_xxx ^
+      MAIL_FROM="Envoy Courier <noreply@envoyservices.com>" ^
+      MAIL_REPLY_TO=support@envoyservices.com ^
+      APP_URL=https://www.shipenvoy.com
+
+`envoyservices.com` must be verified in Resend (DNS records) or every send is
+rejected. Until then use `onboarding@resend.dev`, which only delivers to your
+own Resend account address.
+
+With the hook enabled, the dashboard's email templates are bypassed entirely —
+the HTML in `auth-email/index.ts` is what goes out, so `{{ .Token }}` no longer
+matters.
+
+### Simpler alternative
+
+If you'd rather not run a function, **Project Settings → Authentication → SMTP
+Settings** with host `smtp.resend.com`, port `465`, username `resend`, password
+your API key, sender `noreply@envoyservices.com`. That fixes the sender and the
+rate limit, but templates stay in the dashboard editor rather than in code — and
+the **Confirm signup** template then *does* need `{{ .Token }}` in it, or the
+OTP screen has no code to verify.
+
+### Template design notes
+
+Borrowed from Ridgeford: tables for layout (Outlook ignores flexbox), inline
+CSS only, 600px max width, system fonts, and **paper background rather than the
+app's dark UI** — dark HTML email gets partially inverted by Gmail and Outlook,
+then inverted again by dark-mode clients, and the result is unreadable in a way
+you cannot test for.
+
+The code renders as `123 456` — spaced groups are measurably easier to retype.
+
+---
+
+## Your own OTP — Supabase sends nothing (20260826000500)
+
+Supabase Auth is out of the email business entirely. It still holds identity,
+so `auth.uid()` and every RLS policy keep working — it just never touches a
+customer's inbox. Codes are issued, stored hashed and emailed by the `otp`
+Edge Function through Resend, from your address. Same arrangement as Ridgeford.
+
+### Setup
+
+**1. Switch off Supabase's own emails.** Authentication → Providers → Email →
+turn **Confirm email** OFF. That is what stops Supabase sending anything.
+
+**2. Deploy and configure:**
+
+    npx supabase functions deploy otp
+    npx supabase secrets set ^
+      RESEND_API_KEY=re_xxx ^
+      MAIL_FROM="Envoy Courier <noreply@envoyservices.com>" ^
+      MAIL_REPLY_TO=support@envoyservices.com ^
+      OTP_PEPPER="a-long-random-string-you-generate-once"
+
+**3. Run** `20260826000500_own_otp.sql`.
+
+`OTP_PEPPER` is the HMAC key the codes are hashed with. Set it once and don't
+change it — changing it invalidates every outstanding code.
+
+### The flow
+
+1. `signUp()` creates the account. Supabase confirms the address itself and
+   sends nothing.
+2. The app calls `otp` → a 6-digit code is generated, HMAC'd, stored, and
+   emailed via Resend.
+3. The person enters it → `otp` verifies and sets `profiles.is_verified`.
+4. Logging in while unverified re-sends a code instead of letting them through.
+
+`profiles.is_verified` is now the real verification flag.
+`auth.users.email_confirmed_at` is set at creation and means nothing.
+
+### Security
+
+- Codes are HMAC-SHA256'd with `OTP_PEPPER` — never stored in the clear
+- 10-minute TTL, single use, previous codes retired on re-request
+- 5 wrong guesses burns the code; 5 requests per email per 15 minutes
+- Constant-time comparison, so timing can't leak the code
+- `otp_codes` is RLS-enabled with **no policies and no grants** — verified that
+  both `anon` and `authenticated` get `permission denied`. Only the Edge
+  Function's service role can read it
+- No master code and no environment-gated bypass
+
+### Email design
+
+Tables for layout, inline CSS, 600px, system fonts, code shown as `123 456`.
+Paper background rather than the app's dark UI — dark HTML email gets partially
+inverted by Gmail and Outlook, then inverted again by dark-mode clients.
+
+The `auth-email` hook function is still in the repo as the alternative approach
+(keep Supabase orchestrating, Resend delivering). With this setup you don't
+need it — deploy one or the other, not both.

@@ -65,10 +65,14 @@ export default function RegisterPage() {
     try {
       setLoading(true);
       // Logic unchanged: only sending the original fields.
-      await auth.register({ name: fullName, email, password, phone });
+      const res = await auth.register({ name: fullName, email, password, phone });
 
       setStep("otp");
-      setNote("We sent a 6-digit code to your email. Enter it below to finish.");
+      setNote(
+        res?.codeSent === false
+          ? "Account created, but the code didn't send. Tap Resend code."
+          : "We sent a 6-digit code to your email. Enter it below to finish."
+      );
     } catch (e) {
       setErr(e?.message || "Registration failed.");
     } finally {

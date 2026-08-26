@@ -13,6 +13,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { supabase } from "../../libs/supabaseClient";
+import { uploadGoodsFile } from "../../utils/uploads";
 
 const keyFor = (tracking) => `envoy_track_support_${tracking}`;
 
@@ -24,6 +25,9 @@ export default function TrackSupportThread({ tracking, shipmentStatus }) {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [sending, setSending] = useState(false);
+  const [pending, setPending] = useState([]);   // attachments staged for the next message
+  const [uploading, setUploading] = useState(false);
+  const fileRef = useRef(null);
   const [error, setError] = useState(null);
   const endRef = useRef(null);
 
@@ -142,9 +146,48 @@ export default function TrackSupportThread({ tracking, shipmentStatus }) {
     return id;
   }, [conversationId, name, email, tracking]);
 
+  /* ---------- photo attachments (damage claims, wrong item, etc.) ---------- */
+  async function handleAttach(e) {
+    const files = Array.from(e.target.files || []);
+    if (!files.length) return;
+    setUploading(true);
+    setError(null);
+
+    try {
+      const id = await ensureThread();
+      if (!id) return;
+
+      const done = [];
+      for (const f of files.slice(0, 3)) {
+        if (!/^image\//.test(f.type)) {
+          setError("Only images can be attached.");
+          continue;
+        }
+        if (f.size > 8 * 1024 * 1024) {
+          setError("Each image must be under 8MB.");
+          continue;
+        }
+        // reuse the public `goods` bucket, under support/<conversationId>/
+        const up = await uploadGoodsFile(`support/${id}`, f);
+        done.push({
+          url: up.url,
+          name: up.name,
+          contentType: up.contentType,
+          size: up.size,
+        });
+      }
+      setPending((prev) => [...prev, ...done]);
+    } catch (err) {
+      setError(err?.message || "Upload failed.");
+    } finally {
+      setUploading(false);
+      if (fileRef.current) fileRef.current.value = "";
+    }
+  }
+
   async function handleSend() {
     const text = input.trim();
-    if (!text || sending) return;
+    if ((!text && pending.length === 0) || sending) return;
 
     setSending(true);
     setError(null);
@@ -153,7 +196,13 @@ export default function TrackSupportThread({ tracking, shipmentStatus }) {
     const tempId = `temp-${Date.now()}`;
     setMessages((prev) => [
       ...prev,
-      { id: tempId, sender: "visitor", text, created_at: new Date().toISOString() },
+      {
+        id: tempId,
+        sender: "visitor",
+        text,
+        attachments: pending,
+        created_at: new Date().toISOString(),
+      },
     ]);
 
     try {
@@ -166,14 +215,22 @@ export default function TrackSupportThread({ tracking, shipmentStatus }) {
 
       const { error: msgErr } = await supabase
         .from("ge_messages_raw")
-        .insert({ conversation_id: id, sender: "visitor", text });
+        .insert({
+          conversation_id: id,
+          sender: "visitor",
+          text,
+          attachments: pending,
+        });
 
       if (msgErr) {
-        setError("Message couldn't be delivered. Check your connection.");
+        // the server-side guard returns a readable reason (rate limit, length)
+        setError(msgErr.message || "Message couldn't be delivered.");
         setMessages((prev) => prev.filter((m) => m.id !== tempId));
         setInput(text);
         return;
       }
+
+      setPending([]);
 
       supabase
         .from("ge_conversations")
@@ -265,6 +322,25 @@ export default function TrackSupportThread({ tracking, shipmentStatus }) {
                     </div>
                   )}
                   {m.text}
+                  {Array.isArray(m.attachments) && m.attachments.length > 0 && (
+                    <div className="mt-2 flex gap-1.5 flex-wrap">
+                      {m.attachments.map((a, i) => (
+                        <a
+                          key={i}
+                          href={a.url}
+                          target="_blank"
+                          rel="noreferrer"
+                          title={a.name}
+                        >
+                          <img
+                            src={a.url}
+                            alt={a.name || "attachment"}
+                            className="w-20 h-20 object-cover rounded-lg border border-white/20"
+                          />
+                        </a>
+                      ))}
+                    </div>
+                  )}
                 </div>
               </div>
             ))}
@@ -275,7 +351,46 @@ export default function TrackSupportThread({ tracking, shipmentStatus }) {
             <p className="px-5 pb-2 text-xs text-rose-600">{error}</p>
           )}
 
+          {pending.length > 0 && (
+            <div className="px-5 pb-2 flex gap-2 flex-wrap">
+              {pending.map((a, i) => (
+                <div key={i} className="relative">
+                  <img
+                    src={a.url}
+                    alt={a.name}
+                    className="w-14 h-14 object-cover rounded-lg border border-slate-200"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setPending((p) => p.filter((_, j) => j !== i))}
+                    className="absolute -top-1.5 -right-1.5 w-5 h-5 rounded-full bg-slate-900 text-white text-xs leading-none"
+                    aria-label="Remove attachment"
+                  >
+                    ×
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
+
           <div className="px-5 pb-5 flex gap-2">
+            <input
+              ref={fileRef}
+              type="file"
+              accept="image/*"
+              multiple
+              onChange={handleAttach}
+              className="hidden"
+            />
+            <button
+              type="button"
+              onClick={() => fileRef.current?.click()}
+              disabled={uploading}
+              title="Attach a photo — useful for damage or wrong-item claims"
+              className="px-3 py-2 rounded-lg border border-slate-300 text-sm text-slate-600 hover:bg-slate-50 disabled:opacity-50"
+            >
+              {uploading ? "…" : "📎"}
+            </button>
             <input
               value={input}
               onChange={(e) => setInput(e.target.value)}
@@ -291,7 +406,7 @@ export default function TrackSupportThread({ tracking, shipmentStatus }) {
             <button
               type="button"
               onClick={handleSend}
-              disabled={sending || !input.trim()}
+              disabled={sending || (!input.trim() && pending.length === 0)}
               className="px-4 py-2 rounded-lg bg-slate-900 text-white text-sm font-semibold hover:bg-slate-800 disabled:bg-slate-300"
             >
               {sending ? "…" : "Send"}

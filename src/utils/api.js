@@ -405,81 +405,128 @@ async function mutateOwnArray(key, mutator) {
 /* Public / User auth                                                         */
 /* ========================================================================== */
 
+/**
+ * Auth.
+ *
+ * Supabase Auth holds identity (so auth.uid() and every RLS policy keep
+ * working) but sends NO email. "Confirm email" is off in the project settings;
+ * codes are issued, stored hashed and emailed by the `otp` Edge Function
+ * through Resend, from your own address.
+ */
+async function callOtp(body) {
+  const { data, error } = await supabase.functions.invoke("otp", { body });
+  if (error) {
+    let detail = error.message;
+    try {
+      const parsed = await error.context?.json?.();
+      if (parsed?.error) detail = parsed.error;
+    } catch { /* keep the generic message */ }
+    throw fail({ message: detail }, "Could not send the code");
+  }
+  if (data?.error) throw fail({ message: data.error }, "Could not send the code");
+  return data || {};
+}
+
 export const auth = {
   /**
-   * Supabase sends the confirmation email. Put {{ .Token }} in the
-   * "Confirm signup" template so the 6-digit OTP screen keeps working.
+   * Creates the account, then emails OUR code. Supabase confirms the address
+   * itself (confirmations are off), so `profiles.is_verified` is what actually
+   * records that the person proved they own the inbox.
    */
   async register({ name, email, password, phone }) {
+    const addr = String(email || "").trim();
+
     const { data, error } = await supabase.auth.signUp({
-      email: String(email || "").trim(),
+      email: addr,
       password,
       options: { data: { name: name || "", phone: phone || "" } },
     });
     if (error) throw fail(error, "Could not register");
+
+    if (data?.session?.access_token) setUserToken(data.session.access_token);
+
+    // Send our own code. If the mail provider is down the account still
+    // exists, so say so rather than pretending signup failed.
+    let sent = true;
+    try {
+      await callOtp({ action: "request", email: addr, purpose: "signup" });
+    } catch (e) {
+      console.warn("[auth.register] code not sent:", e?.message || e);
+      sent = false;
+    }
+
     return {
-      message: "Registered. Check your email for the verification code.",
+      message: sent
+        ? "Account created. Check your email for the 6-digit code."
+        : "Account created, but we couldn't email your code. Use Resend code.",
       userId: data?.user?.id || null,
+      otpRequired: true,
+      codeSent: sent,
+      session: data?.session || null,
     };
   },
 
-  async verifyOtp({ email, otp, code }) {
-    const token = String(otp || code || "").trim();
+  async verifyOtp({ email, otp, code, purpose = "signup" }) {
     const addr = String(email || "").trim();
+    const submitted = String(otp || code || "").trim();
 
-    let res = await supabase.auth.verifyOtp({ email: addr, token, type: "signup" });
-    if (res.error) {
-      // magic-link / email-change style codes use a different type
-      res = await supabase.auth.verifyOtp({ email: addr, token, type: "email" });
+    await callOtp({ action: "verify", email: addr, code: submitted, purpose });
+
+    // Verified. Make sure there's a live session — signUp already created one,
+    // but a returning user verifying on another device won't have it.
+    let { data: sess } = await supabase.auth.getSession();
+    if (!sess?.session) {
+      const stored = getUserToken();
+      if (!stored) {
+        return { message: "Verified", token: null, user: { email: addr, role: "user" } };
+      }
     }
-    if (res.error) throw fail(res.error, "Invalid or expired code");
 
-    const session = res.data?.session;
-    const user = res.data?.user;
-    if (session?.access_token) setUserToken(session.access_token);
+    const token = sess?.session?.access_token || getUserToken();
+    if (token) setUserToken(token);
 
+    const profile = await currentProfile();
     return {
       message: "Verified",
-      token: session?.access_token || null,
+      token,
       user: {
-        id: user?.id,
-        name: user?.user_metadata?.name || "",
-        email: user?.email || addr,
-        role: "user",
+        id: profile?.id || sess?.session?.user?.id,
+        name: profile?.name || "",
+        email: profile?.email || addr,
+        role: profile?.role || "user",
       },
     };
   },
 
-  async resendOtp({ email }) {
-    const { error } = await supabase.auth.resend({
-      type: "signup",
-      email: String(email || "").trim(),
-    });
-    if (error) throw fail(error, "Could not resend the code");
-    return { message: "OTP resent" };
+  async resendOtp({ email, purpose = "signup" }) {
+    await callOtp({ action: "request", email: String(email || "").trim(), purpose });
+    return { message: "Code resent" };
   },
 
   async login({ email, password }) {
     const addr = String(email || "").trim();
     const { data, error } = await supabase.auth.signInWithPassword({ email: addr, password });
-
-    if (error) {
-      // unconfirmed account -> LoginPage flips to the OTP screen
-      if (/confirm/i.test(error.message || "")) {
-        await supabase.auth.resend({ type: "signup", email: addr }).catch(() => {});
-        return {
-          otpRequired: true,
-          next: "otp",
-          message: "Please verify your email. We just sent you a new code.",
-        };
-      }
-      throw fail(error, "Invalid credentials");
-    }
+    if (error) throw fail(error, "Invalid email or password");
 
     const session = data?.session;
     setUserToken(session?.access_token || null);
 
     const profile = await currentProfile();
+
+    // Account exists but the address was never proved — send a fresh code and
+    // let the login page switch to its OTP step.
+    if (profile && profile.is_verified === false) {
+      try {
+        await callOtp({ action: "request", email: addr, purpose: "signup" });
+      } catch { /* the screen offers Resend code */ }
+      return {
+        otpRequired: true,
+        next: "otp",
+        message: "Please confirm your email. We just sent you a new code.",
+        token: session?.access_token || null,
+      };
+    }
+
     return {
       message: "Logged in",
       token: session?.access_token || null,
@@ -490,6 +537,16 @@ export const auth = {
         role: profile?.role || "user",
       },
     };
+  },
+
+  /** Password reset, also on our own codes. */
+  async requestPasswordReset({ email }) {
+    await callOtp({
+      action: "request",
+      email: String(email || "").trim(),
+      purpose: "password_reset",
+    });
+    return { message: "If that address has an account, a code is on its way." };
   },
 
   async me() {
