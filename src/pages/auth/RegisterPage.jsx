@@ -11,7 +11,12 @@ export default function RegisterPage() {
   const location = useLocation();
   const from = location.state?.from?.pathname || "/dashboard";
 
-  if (user) return <Navigate to="/dashboard" replace state={{ from: location }} />;
+  // NOTE: the redirect for an already-signed-in user lives BELOW the hooks.
+  // It used to sit here, above ~25 useState calls — so the moment signup set
+  // `user`, this render returned early with fewer hooks than the previous one
+  // and React bailed out with error #300 ("Rendered fewer hooks than
+  // expected"), blanking the page. Hooks must run unconditionally on every
+  // render; only the returned JSX may branch.
 
   // steps: "form" | "otp"
   const [step, setStep] = useState("form");
@@ -52,6 +57,17 @@ export default function RegisterPage() {
     email.trim() &&
     password.length >= 8 &&
     confirm === password;
+
+  // Every hook above has run, so bailing out here is safe.
+  //
+  // Not while the code screen is up, though: signup signs the person in
+  // immediately (that's how the session exists for the OTP call), so `user`
+  // is set the moment they submit the form. Redirecting on that would skip
+  // email verification entirely. handleVerifyOTP navigates once the code is
+  // accepted.
+  if (user && step !== "otp") {
+    return <Navigate to="/dashboard" replace state={{ from: location }} />;
+  }
 
   async function handleRegister(e) {
     e.preventDefault();

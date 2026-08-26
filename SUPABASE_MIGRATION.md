@@ -689,3 +689,29 @@ the codebase.
 a valid session, so they could reach `/dashboard` by URL — but RLS still limits
 them to their own rows, so there is nothing there to see. If you want the gate
 to be absolute, add an `is_verified` check to `ProtectedRoute`.
+
+---
+
+## Blank page after signup — React error #300
+
+`RegisterPage.jsx` had a redirect sitting *above* its hooks:
+
+    if (user) return <Navigate to="/dashboard" replace />;   // line 14
+    const [step, setStep] = useState("form");                // line 17, +25 more
+
+On the first render `user` is null, so all ~25 hooks run. The moment signup set
+`user`, the component returned early and rendered fewer hooks than the previous
+render — React error #300, and the tree unmounts to a blank page.
+
+It never surfaced before because signup never got far enough to set `user`.
+
+Two changes:
+
+1. The redirect moved below every hook. Hooks must run unconditionally on each
+   render; only the returned JSX may branch.
+2. It's now skipped while the code screen is up (`user && step !== "otp"`).
+   Signup signs the person in immediately — that's how there's a session for
+   the OTP call — so redirecting on `user` alone would skip email verification
+   entirely. `handleVerifyOTP` navigates once the code is accepted.
+
+`LoginPage.jsx` was checked and has no equivalent problem.

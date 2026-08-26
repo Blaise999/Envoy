@@ -1,5 +1,8 @@
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
+import { createRequire } from 'module';
+
+const require = createRequire(import.meta.url);
 
 // ---------------------------------------------------------------------------
 // Force the build process to exit once the bundle is fully written.
@@ -42,4 +45,4 @@ export default defineConfig({
       }
     }
   }
-})
+});
