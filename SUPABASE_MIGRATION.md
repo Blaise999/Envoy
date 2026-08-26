@@ -410,3 +410,42 @@ The site-wide `ChatWidget` is unchanged and still handles general enquiries.
 - General thread → assigned to valadmin
 - Blaise's inbox: 1 thread. Main admin's inbox: 2, or 1 filtered to `tracking`
 - Visitor can resume their own thread by id
+
+---
+
+## Exclusive admin inboxes
+
+`admin_scope = 'all'` originally acted as a super-admin bypass, so valadmin saw
+Blaise's shipments too. Visibility is now purely by assignment:
+
+| Admin | Sees |
+|---|---|
+| valadmin | bookings with no routing code, plus the `011205` pay-in-person ones |
+| Blaise | only bookings made with the `blaise` code |
+
+Neither can see or edit the other's. `admin_scope = 'all'` still governs
+ADMINISTRATION — managing discount codes, deleting users, editing roles — it
+just no longer grants shipment visibility.
+
+Applied by `20260826000300_exclusive_admin_inboxes.sql`, which also repairs any
+existing rows that were assigned to the wrong admin.
+
+Support threads follow the same rule: your shipments, your conversations.
+
+### Verified
+
+- valadmin: 3 shipments (2 uncoded + 1 `011205`), 1 support thread
+- Blaise: 1 shipment (`blaise`), 1 support thread
+- valadmin editing a Blaise shipment → `Forbidden`
+- Blaise editing a valadmin shipment → `Forbidden`
+- Blaise editing his own → works
+- Public tracking still works for anyone, for any shipment
+
+### To go back to a super-admin view
+
+In `20260826000300`, change the `shipments_select_own` policy back to:
+
+    using (
+      user_id = auth.uid()
+      or (public.is_admin() and (public.is_admin_all() or assigned_admin_id = auth.uid()))
+    )

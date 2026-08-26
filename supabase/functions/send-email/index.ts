@@ -291,7 +291,8 @@ Deno.serve(async (req) => {
 
       if (sErr || !s) return json({ error: "Shipment not found" }, 404);
 
-      if (profile.admin_scope !== "all" && s.assigned_admin_id !== profile.id) {
+      // inboxes are mutually exclusive: you can only notify your own shipments
+      if (s.assigned_admin_id !== profile.id) {
         return json({ error: "Forbidden: shipment is not assigned to you" }, 403);
       }
 

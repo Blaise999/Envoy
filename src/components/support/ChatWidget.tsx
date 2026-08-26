@@ -36,10 +36,29 @@ export function ChatWidget() {
   });
   const bottomRef = useRef<HTMLDivElement | null>(null);
 
-  // restore existing conversation if user has one
+  // Restore an existing conversation — but VERIFY it still exists first.
+  // A stale id (different Supabase project, or the table was reset) would
+  // otherwise make every message insert fail with a 409 foreign-key error.
   useEffect(() => {
     const saved = window.localStorage.getItem(STORAGE_KEY);
-    if (saved) setConversationId(saved);
+    if (!saved) return;
+    let cancelled = false;
+
+    (async () => {
+      const { data, error } = await supabase.rpc("get_support_conversation", {
+        p_id: saved,
+      });
+      if (cancelled) return;
+      if (error || !data) {
+        window.localStorage.removeItem(STORAGE_KEY);
+        window.localStorage.removeItem(SEEN_COUNT_KEY);
+        setConversationId(null);
+        return;
+      }
+      setConversationId(saved);
+    })();
+
+    return () => { cancelled = true; };
   }, []);
 
   // load + subscribe to messages
@@ -221,6 +240,27 @@ export function ChatWidget() {
       sender: "visitor",
       text,
     });
+
+    // 23503 = foreign key violation: the conversation vanished underneath us.
+    // Drop the stale id, open a fresh thread and resend once.
+    if (msgErr && (msgErr.code === "23503" || /foreign key/i.test(msgErr.message || ""))) {
+      window.localStorage.removeItem(STORAGE_KEY);
+      window.localStorage.removeItem(SEEN_COUNT_KEY);
+      setConversationId(null);
+
+      const freshId = await ensureConversation();
+      if (freshId) {
+        const retry = await supabase.from("ge_messages_raw").insert({
+          conversation_id: freshId,
+          sender: "visitor",
+          text,
+        });
+        if (!retry.error) {
+          setSending(false);
+          return;
+        }
+      }
+    }
 
     if (msgErr) {
       console.error("send message error", msgErr);
