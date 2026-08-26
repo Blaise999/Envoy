@@ -4,13 +4,13 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "dev": "vite --host 127.0.0.1 --port 5175 --strictPort",
-    "build": "vite build",
+    "dev": "node init && vite --host 127.0.0.1 --port 5175 --strictPort",
+    "build": "node init && vite build",
     "lint": "eslint .",
     "preview": "vite preview --host 127.0.0.1 --port 4175 --strictPort",
-    "build:geo": "node scripts/buildGeoDb.mjs",
-    "build:geojson": "node scripts/buildGeoJson.mjs",
-    "build:world-cities": "node scripts/buildWorldCitiesCsv.mjs"
+    "build:geo": "node init && node scripts/buildGeoDb.mjs",
+    "build:geojson": "node init && node scripts/buildGeoJson.mjs",
+    "build:world-cities": "node init && node scripts/buildWorldCitiesCsv.mjs"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.86.0",

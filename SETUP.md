@@ -37,9 +37,19 @@ Re-running any file is safe.
 
 ## 3. Deploy the functions
 
-    npx supabase functions deploy otp
-    npx supabase functions deploy send-email
-    npx supabase functions deploy geocode
+    npx supabase functions deploy otp --no-verify-jwt
+    npx supabase functions deploy send-email --no-verify-jwt
+    npx supabase functions deploy geocode --no-verify-jwt
+
+`--no-verify-jwt` is required, not optional. The gateway's JWT check runs
+before the function does, and browsers send no auth headers on a CORS
+preflight — leave it on and every OPTIONS request 401s, which the browser
+reports as "preflight does not have HTTP ok status".
+
+None of the three rely on the gateway for authorisation: `otp` must be
+callable by people who have no account yet (and has its own rate limits),
+`send-email` verifies the caller's JWT itself, `geocode` is a public lookup.
+`supabase/config.toml` pins this so future deploys keep it.
 
 ## 4. Set the secrets
 
