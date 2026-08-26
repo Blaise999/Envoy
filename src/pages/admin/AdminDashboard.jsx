@@ -164,13 +164,10 @@ export default function AdminDashboard() {
     setSupportLoading(true);
     setSupportErr("");
     try {
-      const { data, error } = await supabase
-        .from("ge_conversations")
-        .select(
-          "id, name, email, ip, city, region, country, country_code, last_message, first_page, created_at"
-        )
-        .order("created_at", { ascending: false })
-        .limit(50);
+      // admin_support_threads() returns shipment context (tracking number,
+      // route, status) alongside each thread, and is already scoped: a
+      // scope='assigned' admin only sees threads for their own shipments.
+      const { data, error } = await supabase.rpc("admin_support_threads");
 
       if (error) {
         console.error("Error loading conversations:", error);
@@ -179,7 +176,28 @@ export default function AdminDashboard() {
         );
         setSupportConvos([]);
       } else {
-        setSupportConvos(data || []);
+        // keep the shape the list already renders, plus the new fields
+        setSupportConvos(
+          (data || []).map((t) => ({
+            id: t.id,
+            name: t.name,
+            email: t.email,
+            city: t.city,
+            country: t.country,
+            last_message: t.lastMessage,
+            first_page: t.trackingNumber ? `/track?ref=${t.trackingNumber}` : "/",
+            created_at: t.createdAt,
+            // tracking context
+            kind: t.kind,
+            subject: t.subject,
+            trackingNumber: t.trackingNumber,
+            shipmentStatus: t.shipmentStatus,
+            shipmentFrom: t.shipmentFrom,
+            shipmentTo: t.shipmentTo,
+            messageCount: t.messageCount,
+            lastAt: t.lastAt,
+          }))
+        );
       }
     } catch (e) {
       console.error(e);
@@ -1098,6 +1116,25 @@ export default function AdminDashboard() {
                             {fmtDate(c.created_at)}
                           </div>
                         </div>
+                        {/* tracking-scoped threads show which shipment they
+                            are about, so you never have to ask */}
+                        {c.trackingNumber && (
+                          <div className="mt-1 flex items-center gap-1.5 flex-wrap">
+                            <span className="text-[10px] font-mono font-bold text-emerald-800 bg-emerald-50 border border-emerald-200 rounded px-1.5 py-0.5">
+                              {c.trackingNumber}
+                            </span>
+                            {c.shipmentStatus && (
+                              <span className="text-[10px] font-semibold text-slate-600 bg-slate-100 rounded px-1.5 py-0.5">
+                                {String(c.shipmentStatus).replace(/_/g, " ")}
+                              </span>
+                            )}
+                            {c.shipmentFrom && c.shipmentTo && (
+                              <span className="text-[10px] text-slate-500">
+                                {c.shipmentFrom} → {c.shipmentTo}
+                              </span>
+                            )}
+                          </div>
+                        )}
                         <div className="mt-0.5 text-[11px] text-slate-500">
                           {formatSupportLocation(c)}
                           {c.ip && (

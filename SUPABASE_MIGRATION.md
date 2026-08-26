@@ -292,3 +292,121 @@ Confirmed blocked:
 Two bugs were found by running it rather than reading it: `citext` not being on
 the search path, and the chat widget's `insert().select("id")` needing a SELECT
 privilege that RLS correctly denied. Both are fixed.
+
+---
+
+## Worldwide location coverage
+
+The browser-only geocoder could not cover the world. Three reasons:
+
+1. The bundled database is ~64,000 **city-level** entries keyed `"City, CC"`.
+   No streets, no small towns, and it needs a recognisable country.
+2. `splitCityCountry()` took the **first** comma segment as the city, so
+   `"12 Baker Street, London, UK"` looked up a city called "12 Baker Street"
+   and always missed.
+3. Nominatim was the only catch-all, and from a browser it cannot send an
+   identifying User-Agent (their usage policy requires one), is throttled to
+   ~1 request/sec, and **every visitor re-queried the same places** — nothing
+   was shared.
+
+### What replaced it
+
+`public.geocodes` is a shared cache. The first person to look up a place pays
+the network cost; everyone after gets a Postgres hit. The `geocode` Edge
+Function does the resolving with a proper User-Agent and writes results back.
+
+New resolution order in `src/utils/geoResolve.js`:
+
+| # | Source | Notes |
+|---|---|---|
+| 1 | localStorage | instant, per-browser |
+| 1b | server geocoder | **street addresses only** — skips the city DB so a door isn't downgraded to a city centre |
+| 2 | local city DB | ~64k cities, offline, instant |
+| 3 | `geocode_cached` RPC | shared cache, one cheap round-trip |
+| 4 | `geocode` Edge Function | multi-provider, street-level, writes to the cache |
+| 5 | Nominatim direct | only if the function isn't deployed |
+| 6 | country centroid | guaranteed, so a route always plots |
+
+### Deploy it
+
+    npx supabase functions deploy geocode
+
+Then run `supabase/migrations/20260826000100_geocode_cache.sql` in the SQL
+Editor.
+
+It works with no API keys at all — Nominatim is the floor. Adding any of these
+secrets improves street-level accuracy, and they are tried before Nominatim:
+
+    npx supabase secrets set GEOAPIFY_KEY=xxx      # 3,000/day free
+    npx supabase secrets set LOCATIONIQ_KEY=xxx    # 5,000/day free
+    npx supabase secrets set MAPBOX_TOKEN=xxx      # 100,000/month free
+    npx supabase secrets set GEOCODE_UA="Envoy/1.0 (ops@shipenvoy.com)"
+
+Set `GEOCODE_UA` even if you add no keys — Nominatim asks for a contact address
+and may block traffic without one.
+
+### Other behaviour worth knowing
+
+**Failures are cached too**, for 7 days, so a typo doesn't hammer the provider
+on every page view. Genuine new places get retried after that.
+
+**Addresses broaden on failure.** `"44 Ojukwu Road, Awka, Anambra, Nigeria"`
+that misses at street level retries as `"Awka, Anambra, Nigeria"`, then
+`"Anambra, Nigeria"`. You get the best available precision instead of nothing.
+
+**See what's failing** (admin only):
+
+    select public.geocode_stats();
+
+Returns totals plus the 20 most-requested queries that could not be resolved —
+the fastest way to find routes customers want but the map can't draw.
+
+---
+
+## Tracking-scoped support threads
+
+Support used to be one undifferentiated pile — a visitor typed "where is my
+parcel" and nobody could tell which parcel.
+
+A thread opened from the tracking page now carries its tracking number and
+shipment id, and **routes to the admin that owns the shipment**. A question
+about a `blaise`-coded booking lands in Blaise's inbox, exactly like the
+shipment itself. General enquiries still go to the main admin.
+
+### What changed
+
+`ge_conversations` gains `tracking_number`, `shipment_id`, `assigned_admin_id`,
+`kind` (`general` | `tracking`) and `subject`.
+
+- `start_support_conversation(payload)` — pass `trackingNumber` and it resolves
+  the shipment, routes the thread, and labels it `Shipment EV...`. An unknown
+  tracking number falls back to a general thread rather than failing.
+- `get_support_conversation(id)` — lets a visitor resume their thread after a
+  refresh. Deliberately narrow: no IP, no email, nothing about anyone else.
+- `admin_support_threads(kind)` — the admin inbox, already scoped, with
+  shipment context (route, status, message count) in one call.
+  Pass `'tracking'` to see only shipment-specific threads.
+
+RLS now scopes conversations *and* messages: a scope='assigned' admin can only
+read threads for shipments assigned to them.
+
+Existing threads are backfilled to the main admin, so nothing disappears.
+
+### Frontend
+
+- `src/components/support/TrackSupportThread.jsx` — collapsible thread on the
+  tracking page, realtime replies, conversation id remembered per tracking
+  number in localStorage.
+- `TrackPage.jsx` mounts it under Live Updates.
+- `AdminDashboard.jsx` reads `admin_support_threads()` and shows a tracking
+  badge, shipment status and route on each conversation.
+
+The site-wide `ChatWidget` is unchanged and still handles general enquiries.
+
+### Verified
+
+- Thread opened against a `blaise` shipment → assigned to Blaise, subject
+  `Shipment EV...`
+- General thread → assigned to valadmin
+- Blaise's inbox: 1 thread. Main admin's inbox: 2, or 1 filtered to `tracking`
+- Visitor can resume their own thread by id

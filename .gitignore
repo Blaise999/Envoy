@@ -8,8 +8,6 @@ dist-ssr/
 .DS_Store
 *.log
 .vercel
-
+RUN_ONCE_seed_admins.sql
 supabase/.secrets.env
 supabase/.temp/
-.branches/
-

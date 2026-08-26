@@ -9,6 +9,7 @@ import Logo from "../../assets/envoy.png";
 import { shipments as ShipAPI } from "../../utils/api";
 import { resolveCoordsSync, resolveCoords } from "../../utils/geoResolve";
 import { useAuth } from "../../auth/AuthContext";
+import TrackSupportThread from "../../components/support/TrackSupportThread";
 
 import { MapContainer, TileLayer, Marker, Popup, Polyline, useMap } from "react-leaflet";
 import L from "leaflet";
@@ -1047,6 +1048,14 @@ export default function TrackPage() {
                     ))}
                   </ul>
                 </div>
+
+                {/* Support thread scoped to THIS shipment — routes to whichever
+                    admin owns it, so the customer never repeats the tracking
+                    number and the team sees the shipment immediately. */}
+                <TrackSupportThread
+                  tracking={ship.trackingNumber}
+                  shipmentStatus={ship.status}
+                />
 
               {/* Goods Media - Photos + Videos */}
 {((Array.isArray(ship.goodsPhotos) && ship.goodsPhotos.length > 0) ||
